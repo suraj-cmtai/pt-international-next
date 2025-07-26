@@ -100,6 +100,44 @@ export const services: Service[] = [
     category: "Quality",
     price: "Custom pricing",
   },
+  {
+    id: "5",
+    slug: "method-development",
+    title: "Method Development",
+    description: "Custom analytical method development and validation services",
+    longDescription:
+      "Our method development services help you create robust, reliable analytical methods tailored to your specific needs. From initial feasibility studies to full method validation, our experienced team ensures your methods meet regulatory requirements and industry standards.",
+    features: [
+      "Analytical method design",
+      "Method optimization",
+      "Validation protocols",
+      "Regulatory compliance",
+      "Documentation support",
+      "Training programs",
+    ],
+    image: "/placeholder.svg?height=400&width=600",
+    category: "Development",
+    price: "Contact for pricing",
+  },
+  {
+    id: "6",
+    slug: "training-services",
+    title: "Training & Education",
+    description: "Professional training programs for laboratory personnel",
+    longDescription:
+      "Our comprehensive training programs are designed to enhance the skills and knowledge of laboratory professionals. We offer both on-site and virtual training sessions covering various aspects of laboratory operations, quality systems, and regulatory compliance.",
+    features: [
+      "GMP/GLP training",
+      "Instrument training",
+      "Quality systems",
+      "Regulatory updates",
+      "Custom curricula",
+      "Certification programs",
+    ],
+    image: "/placeholder.svg?height=400&width=600",
+    category: "Education",
+    price: "$150-300/hour",
+  },
 ]
 
 export const productCategories = [
@@ -157,7 +195,11 @@ export const products: Product[] = [
       "Ready-to-use master mix",
       "Compatible with most thermal cyclers",
     ],
-    images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    images: [
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+    ],
     category: "research-products",
     price: "$299.99",
     specifications: {
@@ -182,7 +224,11 @@ export const products: Product[] = [
       "Maintains protein activity",
       "Easy-to-follow protocol",
     ],
-    images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    images: [
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+    ],
     category: "research-products",
     price: "$189.99",
     specifications: {
@@ -208,7 +254,11 @@ export const products: Product[] = [
       "FDA Emergency Use Authorization",
       "Suitable for professional and home use",
     ],
-    images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    images: [
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+    ],
     category: "diagnostics-products",
     price: "$15.99",
     specifications: {
@@ -235,7 +285,11 @@ export const products: Product[] = [
       "Safety lid lock system",
       "Quiet operation",
     ],
-    images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    images: [
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+    ],
     category: "instruments-consumables",
     price: "$2,499.99",
     specifications: {
@@ -262,7 +316,11 @@ export const products: Product[] = [
       "Suitable for LC-MS",
       "Amber glass bottles",
     ],
-    images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+    images: [
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+      "/placeholder.svg?height=300&width=300",
+    ],
     category: "reagents-chemicals",
     price: "$89.99",
     specifications: {
@@ -289,4 +347,12 @@ export function getProductsByCategory(category: string): Product[] {
 
 export function getCategoryBySlug(slug: string) {
   return productCategories.find((cat) => cat.slug === slug)
+}
+
+export function getFeaturedServices(limit = 4): Service[] {
+  return services.slice(0, limit)
+}
+
+export function getFeaturedProducts(limit = 6): Product[] {
+  return products.slice(0, limit)
 }

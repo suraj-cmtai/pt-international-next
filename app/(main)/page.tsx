@@ -7,6 +7,12 @@ import { ArrowRight, Microscope, TestTube, Shield, Award, CheckCircle } from "lu
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { TestimonialsSection } from "@/components/testimonials-section"
+import { WhyChooseUsSection } from "@/components/why-choose-us-section"
+import { ServiceCard } from "@/components/service-card"
+import { ProductCard } from "@/components/product-card"
+import { getFeaturedTestimonials, whyChooseUsFeatures } from "@/lib/testimonials-data"
+import { getFeaturedServices, getFeaturedProducts } from "@/lib/data"
 
 const features = [
   {
@@ -46,6 +52,9 @@ const benefits = [
 ]
 
 export default function HomePage() {
+  const featuredServices = getFeaturedServices(4)
+  const featuredProducts = getFeaturedProducts(6)
+
   return (
     <div>
       {/* Hero Section */}
@@ -72,7 +81,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
-                <Link href="/products/research-products">
+                <Link href="/products">
                   Explore Products
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -111,6 +120,104 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <WhyChooseUsSection features={whyChooseUsFeatures} />
+
+      {/* Services Section */}
+      <section className="section-padding bg-gray-50">
+        <div className="max-w-7xl mx-auto container-padding">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Professional Services</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive scientific services designed to support your research, development, and quality assurance
+              needs.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {featuredServices.map((service, index) => (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <ServiceCard service={service} variant="default" />
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <Button size="lg" asChild>
+              <Link href="/services">
+                View All Services
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Products Section */}
+      <section className="section-padding">
+        <div className="max-w-7xl mx-auto container-padding">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Discover our most popular life science products designed to meet your research and diagnostic needs.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {featuredProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <ProductCard product={product} variant="default" />
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <Button size="lg" asChild>
+              <Link href="/products">
+                Browse All Products
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto container-padding">
@@ -121,7 +228,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose PT International?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Sets Us Apart</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               We combine scientific expertise with innovative solutions to deliver exceptional products and services.
             </p>
@@ -153,80 +260,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Products Preview */}
-      <section className="section-padding">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Product Categories</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive range of life science products designed to meet your research and diagnostic needs.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Research Products",
-                description: "Advanced tools and reagents for cutting-edge research",
-                image: "/placeholder.svg?height=200&width=300",
-                href: "/products/research-products",
-              },
-              {
-                title: "Diagnostic Solutions",
-                description: "Reliable diagnostic kits and testing solutions",
-                image: "/placeholder.svg?height=200&width=300",
-                href: "/products/diagnostics-products",
-              },
-              {
-                title: "Instruments & Consumables",
-                description: "High-quality instruments and laboratory consumables",
-                image: "/placeholder.svg?height=200&width=300",
-                href: "/products/instruments-consumables",
-              },
-            ].map((product, index) => (
-              <motion.div
-                key={product.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="overflow-hidden card-hover">
-                  <div className="aspect-video relative bg-gray-100">
-                    <Image
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl">{product.title}</CardTitle>
-                    <CardDescription>{product.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild className="w-full">
-                      <Link href={product.href}>
-                        Learn More
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Benefits Section */}
-      <section className="section-padding bg-gray-50">
+      <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -267,8 +302,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Testimonials Section */}
+      <TestimonialsSection testimonials={getFeaturedTestimonials()} />
+
+      {/* Industry Recognition Section */}
       <section className="section-padding">
+        <div className="max-w-7xl mx-auto container-padding">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Industry Recognition</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Our commitment to excellence has earned us recognition from leading industry organizations.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { name: "ISO 9001:2015", description: "Quality Management" },
+              { name: "FDA Registered", description: "Medical Devices" },
+              { name: "CE Marking", description: "European Conformity" },
+              { name: "GMP Certified", description: "Good Manufacturing" },
+            ].map((cert, index) => (
+              <motion.div
+                key={cert.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Award className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">{cert.name}</h3>
+                <p className="text-sm text-muted-foreground">{cert.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="section-padding bg-gradient-to-r from-primary/5 to-secondary/5">
         <div className="max-w-7xl mx-auto container-padding">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -15,13 +15,6 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-const services = [
-  { name: "Research Services", slug: "research-services", description: "Advanced research solutions" },
-  { name: "Diagnostic Services", slug: "diagnostic-services", description: "Comprehensive diagnostic tools" },
-  { name: "Consulting", slug: "consulting", description: "Expert scientific consulting" },
-  { name: "Quality Control", slug: "quality-control", description: "Rigorous quality assurance" },
-]
-
 const productCategories = [
   { name: "Research Products", slug: "research-products" },
   { name: "Diagnostics Products", slug: "diagnostics-products" },
@@ -67,25 +60,9 @@ export function Navigation() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="nav-link px-3 py-2 bg-transparent hover:bg-transparent data-[state=open]:bg-transparent">
-                  Services
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="w-80 p-4">
-                    <div className="grid gap-3">
-                      {services.map((service) => (
-                        <Link
-                          key={service.slug}
-                          href={`/services/${service.slug}`}
-                          className="block p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="font-medium text-sm">{service.name}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{service.description}</div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </NavigationMenuContent>
+                <Link href="/services" legacyBehavior passHref>
+                  <NavigationMenuLink className="nav-link px-3 py-2">Services</NavigationMenuLink>
+                </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
@@ -107,6 +84,12 @@ export function Navigation() {
                     </div>
                   </div>
                 </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <Link href="/testimonials" legacyBehavior passHref>
+                  <NavigationMenuLink className="nav-link px-3 py-2">Testimonials</NavigationMenuLink>
+                </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
@@ -152,21 +135,13 @@ export function Navigation() {
                     About
                   </Link>
 
-                  <div>
-                    <h3 className="text-lg font-medium mb-3">Services</h3>
-                    <div className="space-y-2 pl-4">
-                      {services.map((service) => (
-                        <Link
-                          key={service.slug}
-                          href={`/services/${service.slug}`}
-                          className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {service.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                  <Link
+                    href="/services"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Services
+                  </Link>
 
                   <div>
                     <h3 className="text-lg font-medium mb-3">Products</h3>
@@ -190,6 +165,14 @@ export function Navigation() {
                       </Link>
                     </div>
                   </div>
+
+                  <Link
+                    href="/testimonials"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Testimonials
+                  </Link>
 
                   <Link
                     href="/contact"

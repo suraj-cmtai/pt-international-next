@@ -11,6 +11,7 @@ const productLinks = [
 
 const companyLinks = [
   { name: "About Us", href: "/about-us" },
+  { name: "Testimonials", href: "/testimonials" },
   { name: "Contact", href: "/contact" },
   { name: "Careers", href: "/careers" },
   { name: "Support", href: "/support" },

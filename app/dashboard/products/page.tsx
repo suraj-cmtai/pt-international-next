@@ -1,8 +1,10 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Plus, Search, Edit, Trash2, Package } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Package, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 const productCategories = [
   "research-products",
@@ -64,13 +67,14 @@ export default function ProductsPage() {
   const [products, setProducts] = useState(initialProducts)
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [newProduct, setNewProduct] = useState({
     title: "",
     category: "",
     description: "",
     price: "",
     slug: "",
-    images: [],
+    images: [] as string[],
   })
   const { toast } = useToast()
 
@@ -79,6 +83,26 @@ export default function ProductsPage() {
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files) {
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string
+          setSelectedImages((prev) => [...prev, imageUrl])
+          setNewProduct((prev) => ({ ...prev, images: [...prev.images, imageUrl] }))
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index))
+    setNewProduct((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
+  }
 
   const handleAddProduct = () => {
     if (!newProduct.title || !newProduct.category || !newProduct.description) {
@@ -94,11 +118,15 @@ export default function ProductsPage() {
       ...newProduct,
       id: Date.now().toString(),
       slug: newProduct.title.toLowerCase().replace(/\s+/g, "-"),
-      images: ["/placeholder.svg?height=200&width=200&query=" + newProduct.title],
+      images:
+        selectedImages.length > 0
+          ? selectedImages
+          : ["/placeholder.svg?height=200&width=200&query=" + newProduct.title],
     }
 
     setProducts([...products, product])
     setNewProduct({ title: "", category: "", description: "", price: "", slug: "", images: [] })
+    setSelectedImages([])
     setIsAddDialogOpen(false)
 
     toast({
@@ -184,6 +212,55 @@ export default function ProductsPage() {
                     placeholder="$0.00"
                   />
                 </div>
+
+                {/* Multiple Image Upload */}
+                <div className="space-y-2">
+                  <Label>Product Images</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    {selectedImages.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        {selectedImages.map((image, index) => (
+                          <div key={index} className="relative">
+                            <Image
+                              src={image || "/placeholder.svg"}
+                              alt={`Product image ${index + 1}`}
+                              width={150}
+                              height={150}
+                              className="rounded-lg object-cover"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1"
+                              onClick={() => removeImage(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    <div className="text-center">
+                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <div className="text-sm text-gray-600 mb-2">
+                        <label htmlFor="images-upload" className="cursor-pointer text-primary hover:underline">
+                          Click to upload multiple images
+                        </label>{" "}
+                        or drag and drop
+                      </div>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
+                      <input
+                        id="images-upload"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                     Cancel
@@ -221,7 +298,17 @@ export default function ProductsPage() {
             <Card className="card-hover">
               <CardHeader>
                 <div className="aspect-square relative bg-muted rounded-lg mb-4">
-                  <Package className="absolute inset-0 m-auto h-12 w-12 text-muted-foreground" />
+                  {product.images && product.images.length > 0 ? (
+                    <Image
+                      src={product.images[0] || "/placeholder.svg"}
+                      alt={product.title}
+                      width={100}
+                      height={100}
+                      className="object-cover rounded-md"
+                    />
+                  ) : (
+                    <Package className="absolute inset-0 m-auto h-12 w-12 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

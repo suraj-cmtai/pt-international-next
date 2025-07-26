@@ -1,10 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import Image from "next/image"
-import { Users, Target, Eye, Award, Globe } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, Target, Award, Globe } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { AboutUsSection } from "@/components/about-us-section"
+import { TestimonialsSection } from "@/components/testimonials-section"
+import { WhyChooseUsSection } from "@/components/why-choose-us-section"
+import { aboutUsSections, getFeaturedTestimonials, whyChooseUsFeatures } from "@/lib/testimonials-data"
 
 const values = [
   {
@@ -61,146 +63,26 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="section-padding">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="space-y-8"
-            >
-              <div>
-                <div className="flex items-center mb-4">
-                  <Target className="h-6 w-6 text-primary mr-3" />
-                  <h2 className="text-2xl font-bold">Our Mission</h2>
-                </div>
-                <p className="text-muted-foreground">
-                  To empower scientific discovery and improve global health by providing high-quality, innovative life
-                  science products and exceptional customer service to researchers and healthcare professionals
-                  worldwide.
-                </p>
-              </div>
+      {/* About Us Sections */}
+      <AboutUsSection sections={aboutUsSections} />
 
-              <div>
-                <div className="flex items-center mb-4">
-                  <Eye className="h-6 w-6 text-secondary mr-3" />
-                  <h2 className="text-2xl font-bold">Our Vision</h2>
-                </div>
-                <p className="text-muted-foreground">
-                  To be the leading global provider of life science solutions, driving innovation and excellence in
-                  research, diagnostics, and healthcare through cutting-edge technology and unwavering commitment to
-                  quality.
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <Image
-                src="/placeholder.svg?height=400&width=500"
-                alt="Our Laboratory"
-                width={500}
-                height={400}
-                className="rounded-lg shadow-lg"
-              />
-            </motion.div>
-          </div>
-        </div>
+      {/* Why Choose Us */}
+      <section className="bg-gray-50">
+        <WhyChooseUsSection
+          features={whyChooseUsFeatures}
+          title="Our Competitive Advantages"
+          subtitle="What sets us apart in the life sciences industry"
+          variant="compact"
+        />
       </section>
 
-      {/* Values */}
-      <section className="section-padding bg-gray-50">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These values guide everything we do and shape our commitment to excellence in the life sciences industry.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <motion.div
-                key={value.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="h-full text-center card-hover">
-                  <CardHeader>
-                    <div className="mx-auto mb-4 p-3 rounded-full bg-primary/10">
-                      <value.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">{value.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{value.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Timeline */}
-      <section className="section-padding">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold mb-4">Our Journey</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Key milestones that have shaped PT International Lifesciences LLC into the company we are today.
-            </p>
-          </motion.div>
-
-          <div className="max-w-3xl mx-auto">
-            {milestones.map((milestone, index) => (
-              <motion.div
-                key={milestone.year}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="flex items-center mb-8 last:mb-0"
-              >
-                <div className="flex-1 pr-6">
-                  <Card className="card-hover">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{milestone.title}</CardTitle>
-                        <Badge variant="outline">{milestone.year}</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription>{milestone.description}</CardDescription>
-                    </CardContent>
-                  </Card>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Testimonials */}
+      <TestimonialsSection
+        testimonials={getFeaturedTestimonials()}
+        title="Trusted by Industry Leaders"
+        subtitle="See what our customers say about working with us"
+        variant="compact"
+      />
     </div>
   )
 }

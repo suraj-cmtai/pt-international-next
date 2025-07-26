@@ -1,6 +1,9 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, ShoppingCart } from "lucide-react"
+import { ArrowRight, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,16 +15,58 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "default" }: ProductCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % product.images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length)
+  }
+
   return (
     <Card className={`h-full card-hover ${variant === "featured" ? "border-primary" : ""}`}>
-      <div className="aspect-square relative overflow-hidden rounded-t-lg">
+      <div className="aspect-square relative overflow-hidden rounded-t-lg group">
         <Image
-          src={product.images[0] || "/placeholder.svg"}
+          src={product.images[currentImageIndex] || "/placeholder.svg"}
           alt={product.title}
           fill
           className="object-cover transition-transform duration-300 hover:scale-105"
         />
+
+        {/* Image Navigation */}
+        {product.images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
+              {product.images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentImageIndex ? "bg-white" : "bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
+
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
