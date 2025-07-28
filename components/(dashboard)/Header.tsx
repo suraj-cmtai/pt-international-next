@@ -60,6 +60,8 @@ const searchSuggestions = [
   { label: "Gallery", value: "gallery", href: "/dashboard/gallery" },
   { label: "Contact", value: "contact", href: "/dashboard/contact" },
   {label: "Test", value: "test", href: "/dashboard/test" },
+  { label: "Products", value: "products", href: "/dashboard/products" },
+  { label: "Services", value: "services", href: "/dashboard/services" },
 ];
 
 const notifications = [

@@ -196,7 +196,7 @@ export default function HomePage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <ProductCard product={product} variant="default" />
+                <ProductCard product={product} />
               </motion.div>
             ))}
           </div>

@@ -38,6 +38,8 @@ const links = [
   { name: "Gallery", href: "/dashboard/gallery", icon: GalleryVerticalEnd, badge: null },
   { name: "Contact", href: "/dashboard/contact", icon: MailCheck, badge: null },
   { name: "Test", href: "/dashboard/test", icon: FileText, badge: null },
+  { name: "Products", href: "/dashboard/products", icon: Package, badge: null },
+  { name: "Services", href: "/dashboard/services", icon: ContactRound, badge: null },
 ];
 
 interface SidebarProps {
