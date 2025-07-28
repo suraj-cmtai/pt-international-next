@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu } from "lucide-react"
+import { Menu, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -14,7 +14,12 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 const productCategories = [
   { name: "Research Products", slug: "research-products" },
@@ -67,8 +72,11 @@ export function Navigation() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="nav-link nav-trigger px-3 py-2">Products</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="nav-link px-3 py-2 bg-transparent hover:bg-transparent data-[state=open]:bg-transparent">
+                  Products
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
+                  
                   <div className="w-96 p-4">
                     <h3 className="text-lg font-medium mb-3 sr-only">Products</h3>
                     <div className="grid grid-cols-2 gap-2">
@@ -76,7 +84,7 @@ export function Navigation() {
                         <Link
                           key={category.slug}
                           href={`/products/${category.slug}`}
-                          className="nav-dropdown-link block p-2 rounded-md transition-colors"
+                          className="block p-2 rounded-md hover:bg-gray-50 transition-colors"
                         >
                           <div className="text-sm font-medium">{category.name}</div>
                         </Link>
@@ -115,7 +123,7 @@ export function Navigation() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 p-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 <div className="p-6 border-b">
                   <Image src="/logo-bg-2.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
@@ -123,14 +131,14 @@ export function Navigation() {
                 <nav className="flex-1 p-6 space-y-6">
                   <Link
                     href="/"
-                    className="mobile-nav-link block text-lg font-medium transition-colors"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     Home
                   </Link>
                   <Link
                     href="/about-us"
-                    className="mobile-nav-link block text-lg font-medium transition-colors"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     About
@@ -138,7 +146,7 @@ export function Navigation() {
 
                   <Link
                     href="/services"
-                    className="mobile-nav-link block text-lg font-medium transition-colors"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     Services
@@ -146,8 +154,8 @@ export function Navigation() {
 
                   {/* Mobile Products Dropdown using shadcn Accordion */}
                   <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="products" className="border-none">
-                      <AccordionTrigger className="mobile-nav-link text-lg font-medium transition-colors px-0 hover:no-underline">
+                    <AccordionItem value="products">
+                      <AccordionTrigger className="text-lg font-medium hover:text-primary transition-colors px-0">
                         Products
                       </AccordionTrigger>
                       <AccordionContent className="pl-4">
@@ -157,7 +165,7 @@ export function Navigation() {
                             <Link
                               key={category.slug}
                               href={`/products/${category.slug}`}
-                              className="mobile-dropdown-link block text-sm text-muted-foreground transition-colors"
+                              className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                               onClick={() => setIsOpen(false)}
                             >
                               {category.name}
@@ -165,7 +173,7 @@ export function Navigation() {
                           ))}
                           <Link
                             href="/products"
-                            className="mobile-dropdown-link block text-sm font-medium transition-colors"
+                            className="block text-sm text-primary font-medium"
                             onClick={() => setIsOpen(false)}
                           >
                             View All Products →
@@ -177,7 +185,7 @@ export function Navigation() {
 
                   <Link
                     href="/testimonials"
-                    className="mobile-nav-link block text-lg font-medium transition-colors"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     Testimonials
@@ -185,7 +193,7 @@ export function Navigation() {
 
                   <Link
                     href="/contact"
-                    className="mobile-nav-link block text-lg font-medium transition-colors"
+                    className="block text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     Contact

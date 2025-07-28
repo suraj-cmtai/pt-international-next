@@ -93,4 +93,4 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             errorMessage: error.message || "Internal Server Error",
         }, { status: 500 });
     }
-}
+}   
