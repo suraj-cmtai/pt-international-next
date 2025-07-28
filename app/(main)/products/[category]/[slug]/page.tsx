@@ -9,17 +9,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getProductBySlug, getCategoryBySlug } from "@/lib/data"
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     category: string
     slug: string
-  }
+  }>
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug)
-  const category = getCategoryBySlug(params.category)
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { category: categorySlug, slug } = await params
+  const product = getProductBySlug(slug)
+  const category = getCategoryBySlug(categorySlug)
 
-  if (!product || !category || product.category !== params.category) {
+  if (!product || !category || product.category !== categorySlug) {
     notFound()
   }
 
@@ -37,7 +38,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               Products
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href={`/products/${params.category}`} className="text-muted-foreground hover:text-primary">
+            <Link href={`/products/${categorySlug}`} className="text-muted-foreground hover:text-primary">
               {category.name}
             </Link>
             <span className="text-muted-foreground">/</span>
@@ -50,7 +51,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           <Button variant="ghost" asChild className="mb-6 -ml-4">
-            <Link href={`/products/${params.category}`}>
+            <Link href={`/products/${categorySlug}`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to {category.name}
             </Link>

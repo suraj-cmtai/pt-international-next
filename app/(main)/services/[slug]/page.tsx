@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { getServiceBySlug } from "@/lib/data"
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
-  const service = getServiceBySlug(params.slug)
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { slug } = await params
+  const service = getServiceBySlug(slug)
 
   if (!service) {
     notFound()
@@ -158,5 +159,7 @@ export async function generateStaticParams() {
     { slug: "diagnostic-services" },
     { slug: "consulting" },
     { slug: "quality-control" },
+    { slug: "method-development" },
+    { slug: "training-services" },
   ]
 }

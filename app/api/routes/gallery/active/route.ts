@@ -21,4 +21,4 @@ export async function GET() {
       errorMessage: error.message || "Internal Server Error",
     }, { status: 500 });
   }
-} 
+}
