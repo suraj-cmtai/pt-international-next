@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu } from "lucide-react"
+import { Menu, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -13,7 +13,13 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 const productCategories = [
   { name: "Research Products", slug: "research-products" },
@@ -35,10 +41,10 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo.png"
+              src="/logo-bg-2.png"
               alt="PT International Lifesciences LLC"
               width={140}
-              height={45}
+              height={140}
               className="h-10 w-auto"
               priority
             />
@@ -70,7 +76,9 @@ export function Navigation() {
                   Products
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
+                  
                   <div className="w-96 p-4">
+                    <h3 className="text-lg font-medium mb-3 sr-only">Products</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {productCategories.map((category) => (
                         <Link
@@ -115,9 +123,10 @@ export function Navigation() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 p-0">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 <div className="p-6 border-b">
-                  <Image src="/logo.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
+                  <Image src="/logo-bg-2.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
                 </div>
                 <nav className="flex-1 p-6 space-y-6">
                   <Link
@@ -143,28 +152,36 @@ export function Navigation() {
                     Services
                   </Link>
 
-                  <div>
-                    <h3 className="text-lg font-medium mb-3">Products</h3>
-                    <div className="space-y-2 pl-4">
-                      {productCategories.slice(0, 4).map((category) => (
-                        <Link
-                          key={category.slug}
-                          href={`/products/${category.slug}`}
-                          className="block text-sm text-muted-foreground hover:text-primary transition-colors"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {category.name}
-                        </Link>
-                      ))}
-                      <Link
-                        href="/products"
-                        className="block text-sm text-primary font-medium"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        View All Products →
-                      </Link>
-                    </div>
-                  </div>
+                  {/* Mobile Products Dropdown using shadcn Accordion */}
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="products">
+                      <AccordionTrigger className="text-lg font-medium hover:text-primary transition-colors px-0">
+                        Products
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <h3 className="text-base font-semibold px-1 py-2 sr-only">Products</h3>
+                        <div className="space-y-2">
+                          {productCategories.map((category) => (
+                            <Link
+                              key={category.slug}
+                              href={`/products/${category.slug}`}
+                              className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {category.name}
+                            </Link>
+                          ))}
+                          <Link
+                            href="/products"
+                            className="block text-sm text-primary font-medium"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            View All Products →
+                          </Link>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
 
                   <Link
                     href="/testimonials"
