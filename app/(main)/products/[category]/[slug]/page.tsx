@@ -68,7 +68,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                 />
               </div>
               {product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {product.images.slice(1).map((image, index) => (
                     <div key={index} className="aspect-square relative overflow-hidden rounded border">
                       <Image

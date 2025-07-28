@@ -69,7 +69,7 @@ export default function TestimonialsPage() {
       {/* Filters Section */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto container-padding">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
             <div className="flex items-center gap-4">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-48">
@@ -85,9 +85,9 @@ export default function TestimonialsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-muted-foreground">
+            {/* <div className="text-sm text-muted-foreground">
               {filteredTestimonials.length} testimonial{filteredTestimonials.length !== 1 ? "s" : ""} found
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

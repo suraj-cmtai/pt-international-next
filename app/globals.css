@@ -76,12 +76,17 @@
   }
 }
 
-.hero-gradient {
-  background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
+/* Custom Navigation Link Styles */
+.nav-link {
+  @apply relative text-sm font-medium text-foreground/80 transition-colors duration-200;
 }
 
-.nav-link {
-  @apply relative text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200;
+.nav-link:hover,
+.nav-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .nav-link::after {
@@ -95,12 +100,106 @@
   transition: width 0.3s ease;
 }
 
-.nav-link:hover::after {
+.nav-link:hover::after,
+.nav-link:focus::after {
   width: 100%;
+}
+
+/* Combined styles for active links and open triggers */
+.nav-link-active,
+.nav-trigger[data-state="open"] {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+.nav-link-active::after,
+.nav-trigger[data-state="open"]::after {
+  width: 100% !important;
+}
+
+.nav-trigger:hover > svg,
+.nav-trigger:focus > svg,
+.nav-trigger[data-state="open"] > svg,
+.nav-link-active.nav-trigger > svg {
+  color: var(--primary) !important;
+}
+
+/* Dropdown Link Styles */
+.nav-dropdown-link {
+  @apply text-foreground/80;
+}
+
+.nav-dropdown-link:hover,
+.nav-dropdown-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Dropdown Link Styles */
+.nav-dropdown-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* Mobile Navigation Styles */
+.mobile-nav-link {
+  @apply text-foreground/80;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Mobile Navigation Link Styles */
+.mobile-nav-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+.mobile-dropdown-link {
+  @apply text-muted-foreground;
+}
+
+.mobile-dropdown-link:hover,
+.mobile-dropdown-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Mobile Dropdown Link Styles */
+.mobile-dropdown-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* CORRECTED: Make this rule specific to the navigation menu */
+[data-radix-navigation-menu-viewport] [data-radix-collection-item]:hover {
+  background-color: transparent !important;
 }
 
 .card-hover {
   @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Other existing styles */
+.hero-gradient {
+  background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
 }
 
 .section-padding {

@@ -92,12 +92,13 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto container-padding">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Contact Form */}
+            <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="lg:col-span-2"
+              className="lg:col-span-2 lg:sticky lg:top-20"
             >
               <Card>
                 <CardHeader>
@@ -173,6 +174,8 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
             </motion.div>
+            </div>
+
 
             {/* Contact Information */}
             <motion.div
@@ -249,6 +252,30 @@ export default function ContactPage() {
               </div>
             </motion.div>
           </div>
+          {/* Map Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mt-12"
+        >
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative w-full h-64">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.62164634621!2d77.24580388885497!3d28.551090000000016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3bbb01984e1%3A0x9ec3ec938b4ba853!2sLeverage%20Edu%20-%20Study%20Abroad%20Consultant%20in%20Nehru%20Place%2C%20New%20Delhi!5e0!3m2!1sen!2sin!4v1750497828940!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="absolute top-0 left-0 w-full h-full"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
         </div>
       </section>
     </div>

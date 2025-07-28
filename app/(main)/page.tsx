@@ -80,7 +80,7 @@ export default function HomePage() {
               scientific instruments to laboratories worldwide.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild>
+              <Button size="lg" variant="default" asChild>
                 <Link href="/products">
                   Explore Products
                   <ArrowRight className="ml-2 h-4 w-4" />
