@@ -1,55 +1,131 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { products } from "@/lib/data"
+import { NextResponse } from "next/server"
+import ProductService from "../../../services/productServices"
+import consoleManager from "../../../utils/consoleManager"
 
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+// Get product by ID (GET)
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const product = products.find((p) => p.id === id)
+    const product = await ProductService.getProductById(id)
 
     if (!product) {
-      return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 })
+      return NextResponse.json(
+        {
+          statusCode: 404,
+          errorCode: "NOT_FOUND",
+          errorMessage: "Product not found",
+        },
+        { status: 404 },
+      )
     }
 
-    return NextResponse.json({
-      success: true,
-      data: product,
-      message: "Product retrieved successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to retrieve product" }, { status: 500 })
+    consoleManager.log("Product fetched successfully:", product)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Product fetched successfully",
+        data: product,
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in GET /api/products/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+// Update product (PUT)
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const body = await request.json()
+    const formData = await req.formData()
 
-    // In a real application, you would update in database
-    return NextResponse.json({
-      success: true,
-      data: { id, ...body },
-      message: "Product updated successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to update product" }, { status: 500 })
+    const updateData: any = {}
+
+    // Extract form data
+    const title = formData.get("title")
+    const description = formData.get("description")
+    const longDescription = formData.get("longDescription")
+    const category = formData.get("category")
+    const price = formData.get("price")
+    const slug = formData.get("slug")
+    const features = formData.get("features")
+    const specifications = formData.get("specifications")
+    const isActive = formData.get("isActive")
+
+    if (title) updateData.title = title.toString()
+    if (description) updateData.description = description.toString()
+    if (longDescription) updateData.longDescription = longDescription.toString()
+    if (category) updateData.category = category.toString()
+    if (price) updateData.price = price.toString()
+    if (slug) updateData.slug = slug.toString()
+    if (features) updateData.features = JSON.parse(features.toString())
+    if (specifications) updateData.specifications = JSON.parse(specifications.toString())
+    if (isActive !== null) updateData.isActive = isActive === "true"
+
+    const updatedProduct = await ProductService.updateProduct(id, updateData)
+
+    consoleManager.log("Product updated successfully:", updatedProduct)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Product updated successfully",
+        data: updatedProduct,
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in PUT /api/products/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+// Delete product (DELETE)
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    await ProductService.deleteProduct(id)
 
-    // In a real application, you would delete from database
-    return NextResponse.json({
-      success: true,
-      message: "Product deleted successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to delete product" }, { status: 500 })
+    consoleManager.log("Product deleted successfully:", id)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Product deleted successfully",
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in DELETE /api/products/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }

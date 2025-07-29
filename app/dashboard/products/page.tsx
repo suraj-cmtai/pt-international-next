@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Search, Filter, Eye, X } from "lucide-react"
+import { Plus, Edit, Trash2, Search, Filter, Eye, MoreHorizontal, Power, PowerOff, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +21,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,13 +39,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-import { type Product, productCategories } from "@/lib/data"
+import { Timestamp } from "firebase/firestore"
+import { productCategories } from "@/lib/data"
+
+interface Product {
+  id?: string
+  title: string
+  slug: string
+  description: string
+  longDescription: string
+  category: string
+  price?: string
+  features: string[]
+  images: string[]
+  specifications?: Record<string, string>
+  isActive: boolean
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
 
 export default function ProductsManagement() {
   const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
+  const [selectedStatus, setSelectedStatus] = useState("All")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [imageFiles, setImageFiles] = useState<File[]>([])
@@ -51,6 +79,7 @@ export default function ProductsManagement() {
     category: "",
     price: "",
     slug: "",
+    isActive: true,
   })
 
   const filteredProducts = products.filter((product) => {
@@ -58,7 +87,11 @@ export default function ProductsManagement() {
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === "All" || product.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const matchesStatus =
+      selectedStatus === "All" ||
+      (selectedStatus === "Active" && product.isActive) ||
+      (selectedStatus === "Inactive" && !product.isActive)
+    return matchesSearch && matchesCategory && matchesStatus
   })
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,6 +161,7 @@ export default function ProductsManagement() {
       category: "",
       price: "",
       slug: "",
+      isActive: true,
     })
     setFeatures([""])
     setSpecifications([{ key: "", value: "" }])
@@ -160,7 +194,14 @@ export default function ProductsManagement() {
     if (editingProduct) {
       // Update existing product
       const updatedProducts = products.map((product) =>
-        product.id === editingProduct.id ? { ...productData, id: editingProduct.id } : product,
+        product.id === editingProduct.id
+          ? {
+              ...productData,
+              id: editingProduct.id,
+              createdAt: editingProduct.createdAt,
+              updatedAt: Timestamp.now(),
+            }
+          : product,
       )
       setProducts(updatedProducts)
       toast({
@@ -169,11 +210,14 @@ export default function ProductsManagement() {
       })
     } else {
       // Add new product
+      const now = Timestamp.now()
       const newProduct: Product = {
         ...productData,
         id: Date.now().toString(),
+        createdAt: now,
+        updatedAt: now,
       }
-      setProducts([...products, newProduct])
+      setProducts([newProduct, ...products])
       toast({
         title: "Product Added",
         description: "New product has been added successfully.",
@@ -193,6 +237,7 @@ export default function ProductsManagement() {
       category: product.category,
       price: product.price || "",
       slug: product.slug,
+      isActive: product.isActive,
     })
     setFeatures(product.features.length > 0 ? product.features : [""])
     setImagePreviews(product.images)
@@ -216,37 +261,82 @@ export default function ProductsManagement() {
     })
   }
 
+  const handleToggleStatus = (productId: string, isActive: boolean) => {
+    setProducts(
+      products.map((product) =>
+        product.id === productId ? { ...product, isActive, updatedAt: Timestamp.now() } : product,
+      ),
+    )
+    toast({
+      title: isActive ? "Product Activated" : "Product Deactivated",
+      description: `Product has been ${isActive ? "activated" : "deactivated"} successfully.`,
+    })
+  }
+
   // Load initial data (in real app, this would be from API)
   useEffect(() => {
-    // Mock data - replace with actual API call
-    const mockProducts: Product[] = [
-      {
-        id: "1",
-        slug: "advanced-pcr-kit",
-        title: "Advanced PCR Kit",
-        description: "High-performance PCR amplification kit for research applications",
-        longDescription:
-          "Our Advanced PCR Kit provides superior amplification performance for a wide range of research applications.",
-        features: ["High-fidelity DNA polymerase", "Optimized buffer system", "Wide temperature range compatibility"],
-        images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
-        category: "research-products",
-        price: "$299.99",
-        specifications: {
-          "Kit Size": "100 reactions",
-          Storage: "-20°C",
-          "Shelf Life": "24 months",
-        },
-      },
-    ]
-    setProducts(mockProducts)
+    const loadProducts = async () => {
+      setLoading(true)
+      try {
+        // Mock data - replace with actual API call
+        const mockProducts: Product[] = [
+          {
+            id: "1",
+            slug: "advanced-pcr-kit",
+            title: "Advanced PCR Kit",
+            description: "High-performance PCR amplification kit for research applications",
+            longDescription:
+              "Our Advanced PCR Kit provides superior amplification performance for a wide range of research applications.",
+            features: [
+              "High-fidelity DNA polymerase",
+              "Optimized buffer system",
+              "Wide temperature range compatibility",
+            ],
+            images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
+            category: "research-products",
+            price: "$299.99",
+            specifications: {
+              "Kit Size": "100 reactions",
+              Storage: "-20°C",
+              "Shelf Life": "24 months",
+            },
+            isActive: true,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+          },
+        ]
+        setProducts(mockProducts)
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load products",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProducts()
   }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Products Management</h1>
-          <p className="text-muted-foreground">Manage your company products</p>
+          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground">Manage your company products and inventory</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -262,10 +352,10 @@ export default function ProductsManagement() {
                 {editingProduct ? "Update the product information" : "Fill in the details to create a new product"}
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="title">Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -274,7 +364,7 @@ export default function ProductsManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">Category *</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -294,22 +384,24 @@ export default function ProductsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Short Description</Label>
+                <Label htmlFor="description">Short Description *</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of the product"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="longDescription">Long Description</Label>
+                <Label htmlFor="longDescription">Detailed Description *</Label>
                 <Textarea
                   id="longDescription"
                   value={formData.longDescription}
                   onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
                   rows={4}
+                  placeholder="Detailed description of the product"
                   required
                 />
               </div>
@@ -325,7 +417,7 @@ export default function ProductsManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug</Label>
+                  <Label htmlFor="slug">URL Slug</Label>
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -336,7 +428,7 @@ export default function ProductsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="images">Product Images</Label>
+                <Label htmlFor="images">Product Images (Multiple)</Label>
                 <Input id="images" type="file" accept="image/*" multiple onChange={handleImageChange} />
                 {imagePreviews.length > 0 && (
                   <div className="grid grid-cols-4 gap-2 mt-2">
@@ -345,7 +437,7 @@ export default function ProductsManagement() {
                         <img
                           src={preview || "/placeholder.svg"}
                           alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded"
+                          className="w-full h-24 object-cover rounded-lg border"
                         />
                         <Button
                           type="button"
@@ -363,7 +455,7 @@ export default function ProductsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label>Features</Label>
+                <Label>Key Features</Label>
                 {features.map((feature, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
@@ -389,7 +481,7 @@ export default function ProductsManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label>Specifications</Label>
+                <Label>Technical Specifications</Label>
                 {specifications.map((spec, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
@@ -419,15 +511,60 @@ export default function ProductsManagement() {
                 </Button>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                />
+                <Label htmlFor="isActive">Active (visible to public)</Label>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">{editingProduct ? "Update Product" : "Add Product"}</Button>
+                <Button type="submit">{editingProduct ? "Update Product" : "Create Product"}</Button>
               </div>
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{products.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{products.filter((p) => p.isActive).length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Categories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{new Set(products.map((p) => p.category)).size}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Draft Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{products.filter((p) => !p.isActive).length}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -462,6 +599,16 @@ export default function ProductsManagement() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Status</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -470,44 +617,45 @@ export default function ProductsManagement() {
       <Card>
         <CardHeader>
           <CardTitle>Products ({filteredProducts.length})</CardTitle>
-          <CardDescription>Manage your company products</CardDescription>
+          <CardDescription>Manage your company products and their visibility</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Images</TableHead>
-                <TableHead>Title</TableHead>
+                <TableHead>Product</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Features</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Updated</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <div className="flex gap-1">
-                      {product.images.slice(0, 3).map((image, index) => (
-                        <img
-                          key={index}
-                          src={image || "/placeholder.svg"}
-                          alt={`${product.title} ${index + 1}`}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                      ))}
-                      {product.images.length > 3 && (
-                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-xs">
-                          +{product.images.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{product.title}</div>
-                      <div className="text-sm text-muted-foreground">{product.description}</div>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex -space-x-2">
+                        {product.images.slice(0, 3).map((image, index) => (
+                          <img
+                            key={index}
+                            src={image || "/placeholder.svg"}
+                            alt={`${product.title} ${index + 1}`}
+                            className="w-10 h-10 object-cover rounded-lg border-2 border-background"
+                          />
+                        ))}
+                        {product.images.length > 3 && (
+                          <div className="w-10 h-10 bg-muted rounded-lg border-2 border-background flex items-center justify-center text-xs font-medium">
+                            +{product.images.length - 3}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium">{product.title}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-1">{product.description}</div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -517,40 +665,81 @@ export default function ProductsManagement() {
                   </TableCell>
                   <TableCell>{product.price || "N/A"}</TableCell>
                   <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={product.isActive}
+                        onCheckedChange={(checked) => handleToggleStatus(product.id!, checked)}
+                        size="sm"
+                      />
+                      <Badge variant={product.isActive ? "default" : "secondary"}>
+                        {product.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <div className="text-sm">{product.features.length} features</div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(`/products/${product.category}/${product.slug}`, "_blank")}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(product)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Product</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{product.title}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(product.id)}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                    <div className="text-sm text-muted-foreground">
+                      {product.updatedAt?.toDate?.()?.toLocaleDateString() || "N/A"}
                     </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => window.open(`/products/${product.category}/${product.slug}`, "_blank")}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(product)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleStatus(product.id!, !product.isActive)}>
+                          {product.isActive ? (
+                            <>
+                              <PowerOff className="mr-2 h-4 w-4" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Power className="mr-2 h-4 w-4" />
+                              Activate
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{product.title}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(product.id!)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

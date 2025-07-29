@@ -1,55 +1,129 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { services } from "@/lib/data"
+import { NextResponse } from "next/server"
+import ServiceService from "../../../services/serviceServices"
+import consoleManager from "../../../utils/consoleManager"
 
-interface RouteParams {
-  params: Promise<{ id: string }>
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+// Get service by ID (GET)
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const service = services.find((s) => s.id === id)
+    const service = await ServiceService.getServiceById(id)
 
     if (!service) {
-      return NextResponse.json({ success: false, message: "Service not found" }, { status: 404 })
+      return NextResponse.json(
+        {
+          statusCode: 404,
+          errorCode: "NOT_FOUND",
+          errorMessage: "Service not found",
+        },
+        { status: 404 },
+      )
     }
 
-    return NextResponse.json({
-      success: true,
-      data: service,
-      message: "Service retrieved successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to retrieve service" }, { status: 500 })
+    consoleManager.log("Service fetched successfully:", service)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Service fetched successfully",
+        data: service,
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in GET /api/services/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+// Update service (PUT)
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const body = await request.json()
+    const formData = await req.formData()
 
-    // In a real application, you would update in database
-    return NextResponse.json({
-      success: true,
-      data: { id, ...body },
-      message: "Service updated successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to update service" }, { status: 500 })
+    const updateData: any = {}
+
+    // Extract form data
+    const title = formData.get("title")
+    const description = formData.get("description")
+    const longDescription = formData.get("longDescription")
+    const category = formData.get("category")
+    const price = formData.get("price")
+    const slug = formData.get("slug")
+    const features = formData.get("features")
+    const isActive = formData.get("isActive")
+
+    if (title) updateData.title = title.toString()
+    if (description) updateData.description = description.toString()
+    if (longDescription) updateData.longDescription = longDescription.toString()
+    if (category) updateData.category = category.toString()
+    if (price) updateData.price = price.toString()
+    if (slug) updateData.slug = slug.toString()
+    if (features) updateData.features = JSON.parse(features.toString())
+    if (isActive !== null) updateData.isActive = isActive === "true"
+
+    const updatedService = await ServiceService.updateService(id, updateData)
+
+    consoleManager.log("Service updated successfully:", updatedService)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Service updated successfully",
+        data: updatedService,
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in PUT /api/services/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+// Delete service (DELETE)
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    await ServiceService.deleteService(id)
 
-    // In a real application, you would delete from database
-    return NextResponse.json({
-      success: true,
-      message: "Service deleted successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to delete service" }, { status: 500 })
+    consoleManager.log("Service deleted successfully:", id)
+
+    return NextResponse.json(
+      {
+        statusCode: 200,
+        message: "Service deleted successfully",
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in DELETE /api/services/[id]:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }

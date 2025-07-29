@@ -1,43 +1,130 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { products } from "@/lib/data"
+import { NextResponse } from "next/server"
+import ProductService from "../../services/productServices"
+import consoleManager from "../../utils/consoleManager"
 
-export async function GET() {
+// Get all products (GET)
+export async function GET(req: Request) {
   try {
-    return NextResponse.json({
-      success: true,
-      data: products,
-      message: "Products retrieved successfully",
-    })
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to retrieve products" }, { status: 500 })
-  }
-}
+    const { searchParams } = new URL(req.url)
+    const page = Number.parseInt(searchParams.get("page") || "1")
+    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const category = searchParams.get("category")
+    const isActive = searchParams.get("isActive")
+    const searchTerm = searchParams.get("search")
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
+    const filters: any = {}
+    if (category) filters.category = category
+    if (isActive !== null) filters.isActive = isActive === "true"
+    if (searchTerm) filters.searchTerm = searchTerm
 
-    // In a real application, you would save to database
-    const newProduct = {
-      id: Date.now().toString(),
-      slug:
-        body.slug ||
-        body.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, ""),
-      ...body,
-    }
+    const result = await ProductService.getAllProducts(limit, undefined, filters)
+
+    consoleManager.log("Fetched products:", result.products.length)
 
     return NextResponse.json(
       {
-        success: true,
+        statusCode: 200,
+        message: "Products fetched successfully",
+        data: result.products,
+        pagination: {
+          hasMore: result.hasMore,
+          page,
+          limit,
+          total: result.products.length,
+        },
+        errorCode: "NO",
+        errorMessage: "",
+      },
+      { status: 200 },
+    )
+  } catch (error: any) {
+    consoleManager.error("Error in GET /api/products:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
+  }
+}
+
+// Add a new product (POST)
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData()
+    const title = formData.get("title")
+    const description = formData.get("description")
+    const longDescription = formData.get("longDescription")
+    const category = formData.get("category")
+    const price = formData.get("price")
+    const slug = formData.get("slug")
+    const features = formData.get("features")
+    const specifications = formData.get("specifications")
+    const isActive = formData.get("isActive") === "true"
+
+    // Validate required fields
+    if (!title || !description || !longDescription || !category) {
+      return NextResponse.json(
+        {
+          statusCode: 400,
+          errorCode: "BAD_REQUEST",
+          errorMessage: "Title, description, long description, and category are required",
+        },
+        { status: 400 },
+      )
+    }
+
+    // Parse features and specifications
+    const parsedFeatures = features ? JSON.parse(features.toString()) : []
+    const parsedSpecifications = specifications ? JSON.parse(specifications.toString()) : undefined
+
+    // Generate slug if not provided
+    const productSlug =
+      slug?.toString() ||
+      title
+        .toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+
+    const productData = {
+      title: title.toString(),
+      slug: productSlug,
+      description: description.toString(),
+      longDescription: longDescription.toString(),
+      category: category.toString(),
+      price: price?.toString(),
+      features: parsedFeatures,
+      specifications: parsedSpecifications,
+      images: ["/placeholder.svg?height=300&width=300"], // Default image
+      isActive,
+    }
+
+    const newProduct = await ProductService.addProduct(productData)
+
+    consoleManager.log("Product created successfully:", newProduct)
+
+    return NextResponse.json(
+      {
+        statusCode: 201,
+        message: "Product added successfully",
         data: newProduct,
-        message: "Product created successfully",
+        errorCode: "NO",
+        errorMessage: "",
       },
       { status: 201 },
     )
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to create product" }, { status: 500 })
+  } catch (error: any) {
+    consoleManager.error("Error in POST /api/products:", error)
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        errorCode: "INTERNAL_ERROR",
+        errorMessage: error.message || "Internal Server Error",
+      },
+      { status: 500 },
+    )
   }
 }
