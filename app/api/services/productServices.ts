@@ -1,315 +1,326 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  Timestamp,
-} from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
-import { db, storage } from "../config/firebase"
-import consoleManager from "../utils/consoleManager"
+import { db } from "../config/firebase";
+import consoleManager from "../utils/consoleManager";
+import admin from "firebase-admin";
 
 // Product type with meta fields
 export interface Product {
-  id?: string
-  title: string
-  slug: string
-  description: string
-  longDescription: string
-  category: string
-  price?: string
-  features: string[]
-  images: string[]
-  specifications?: Record<string, string>
-  isActive: boolean
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  longDescription: string;
+  category: string;
+  price?: string;
+  features: string[];
+  images: string[];
+  specifications?: Record<string, string>;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class ProductService {
-  private collectionName = "products"
+  static products: Product[] = [];
+  static isInitialized = false;
+  private static collectionName = "products";
 
-  // Upload multiple images to Firebase Storage
-  async uploadImages(files: File[], productId: string): Promise<string[]> {
-    try {
-      const uploadPromises = files.map(async (file, index) => {
-        const fileName = `${productId}_${index}_${Date.now()}_${file.name}`
-        const storageRef = ref(storage, `products/${fileName}`)
-        const snapshot = await uploadBytes(storageRef, file)
-        return await getDownloadURL(snapshot.ref)
-      })
-
-      return await Promise.all(uploadPromises)
-    } catch (error) {
-      consoleManager.error("Error uploading product images:", error)
-      throw error
+  // Helper method to convert Firestore timestamp to Date
+  private static convertTimestamp(timestamp: any): Date {
+    if (timestamp && timestamp._seconds) {
+      return new Date(timestamp._seconds * 1000);
     }
+    if (timestamp && typeof timestamp.toDate === "function") {
+      return timestamp.toDate();
+    }
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    if (typeof timestamp === "string") {
+      const date = new Date(timestamp);
+      return isNaN(date.getTime()) ? new Date() : date;
+    }
+    if (typeof timestamp === "number") {
+      return new Date(timestamp);
+    }
+    if (!timestamp || (typeof timestamp === "object" && Object.keys(timestamp).length === 0)) {
+      return new Date();
+    }
+    return new Date();
   }
 
-  // Delete images from Firebase Storage
-  async deleteImages(imageUrls: string[]): Promise<void> {
-    try {
-      const deletePromises = imageUrls.map(async (url) => {
-        const imageRef = ref(storage, url)
-        await deleteObject(imageRef)
-      })
+  // Helper method to convert document data to Product type
+  private static convertToType(id: string, data: any): Product {
+    return {
+      id,
+      title: data.title || "",
+      slug: data.slug || "",
+      description: data.description || "",
+      longDescription: data.longDescription || "",
+      category: data.category || "",
+      price: data.price || "",
+      features: data.features || [],
+      images: data.images || [],
+      specifications: data.specifications || {},
+      isActive: typeof data.isActive === "boolean" ? data.isActive : true,
+      createdAt: this.convertTimestamp(data.createdAt),
+      updatedAt: this.convertTimestamp(data.updatedAt),
+    };
+  }
 
-      await Promise.all(deletePromises)
+  // Initialize Firestore real-time listener
+  static initProducts() {
+    if (this.isInitialized) return;
+
+    consoleManager.log("Initializing Firestore listener for products...");
+    const productsCollection = db.collection(this.collectionName);
+
+    productsCollection.onSnapshot((snapshot: any) => {
+      this.products = snapshot.docs.map((doc: any) => {
+        return this.convertToType(doc.id, doc.data());
+      });
+      consoleManager.log(
+        "Firestore Read: Products updated, count:",
+        this.products.length
+      );
+    });
+
+    this.isInitialized = true;
+  }
+
+  // Get all products with optional pagination and filters
+  static async getAllProducts(
+    pageSize = 10,
+    lastDoc?: any,
+    filters?: {
+      category?: string;
+      isActive?: boolean;
+      searchTerm?: string;
+    }
+  ): Promise<{ products: Product[]; hasMore: boolean; lastDoc: any }> {
+    try {
+      let queryRef = db.collection(this.collectionName).orderBy("updatedAt", "desc");
+
+      if (filters?.category) {
+        queryRef = queryRef.where("category", "==", filters.category);
+      }
+      if (filters?.isActive !== undefined) {
+        queryRef = queryRef.where("isActive", "==", filters.isActive);
+      }
+      if (lastDoc) {
+        queryRef = queryRef.startAfter(lastDoc);
+      }
+      queryRef = queryRef.limit(pageSize + 1);
+
+      const snapshot = await queryRef.get();
+      const products: Product[] = [];
+      let newLastDoc = null;
+
+      snapshot.docs.forEach((doc: any, index: number) => {
+        if (index < pageSize) {
+          products.push(this.convertToType(doc.id, doc.data()));
+          newLastDoc = doc;
+        }
+      });
+
+      // Filter by search term if provided (client-side filtering for simplicity)
+      let filteredProducts = products;
+      if (filters?.searchTerm) {
+        const searchLower = filters.searchTerm.toLowerCase();
+        filteredProducts = products.filter(
+          (product) =>
+            product.title.toLowerCase().includes(searchLower) ||
+            product.description.toLowerCase().includes(searchLower)
+        );
+      }
+
+      const hasMore = snapshot.docs.length > pageSize;
+
+      consoleManager.log(`Fetched ${filteredProducts.length} products`);
+      return { products: filteredProducts, hasMore, lastDoc: newLastDoc };
     } catch (error) {
-      consoleManager.error("Error deleting product images:", error)
-      throw error
+      consoleManager.error("Error fetching products:", error);
+      throw error;
     }
   }
 
   // Add a new product
-  async addProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
+  static async addProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
     try {
-      const now = Timestamp.now()
-      const docData = {
+      const timestamp = admin.firestore.FieldValue.serverTimestamp();
+      const newProductRef = await db.collection(this.collectionName).add({
         ...productData,
-        createdAt: now,
-        updatedAt: now,
-      }
+        isActive: typeof productData.isActive === "boolean" ? productData.isActive : true,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
 
-      const docRef = await addDoc(collection(db, this.collectionName), docData)
-      const newProduct = { id: docRef.id, ...docData }
+      consoleManager.log("New product added with ID:", newProductRef.id);
 
-      consoleManager.log("Product added successfully:", newProduct)
-      return newProduct
-    } catch (error) {
-      consoleManager.error("Error adding product:", error)
-      throw error
-    }
-  }
+      // Wait a moment for the server timestamp to be resolved
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-  // Get all products with pagination and filters
-  async getAllProducts(
-    pageSize = 10,
-    lastDoc?: any,
-    filters?: {
-      category?: string
-      isActive?: boolean
-      searchTerm?: string
-    },
-  ): Promise<{ products: Product[]; hasMore: boolean; lastDoc: any }> {
-    try {
-      let q = query(collection(db, this.collectionName), orderBy("updatedAt", "desc"))
+      // Fetch the newly created product to get the resolved timestamps
+      const newProductDoc = await db.collection(this.collectionName).doc(newProductRef.id).get();
+      const newProduct = this.convertToType(newProductDoc.id, newProductDoc.data());
 
-      // Apply filters
-      if (filters?.category) {
-        q = query(q, where("category", "==", filters.category))
-      }
+      // Update the cache
+      await this.getAllProducts(10, undefined, undefined);
 
-      if (filters?.isActive !== undefined) {
-        q = query(q, where("isActive", "==", filters.isActive))
-      }
-
-      // Add pagination
-      q = query(q, limit(pageSize + 1))
-
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-
-      const querySnapshot = await getDocs(q)
-      const products: Product[] = []
-      let newLastDoc = null
-
-      querySnapshot.docs.forEach((doc, index) => {
-        if (index < pageSize) {
-          products.push({ id: doc.id, ...doc.data() } as Product)
-          newLastDoc = doc
-        }
-      })
-
-      // Filter by search term if provided (client-side filtering for simplicity)
-      let filteredProducts = products
-      if (filters?.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase()
-        filteredProducts = products.filter(
-          (product) =>
-            product.title.toLowerCase().includes(searchLower) ||
-            product.description.toLowerCase().includes(searchLower),
-        )
-      }
-
-      const hasMore = querySnapshot.docs.length > pageSize
-
-      consoleManager.log(`Fetched ${filteredProducts.length} products`)
-      return { products: filteredProducts, hasMore, lastDoc: newLastDoc }
-    } catch (error) {
-      consoleManager.error("Error fetching products:", error)
-      throw error
+      return newProduct;
+    } catch (error: any) {
+      consoleManager.error("Error adding new product:", error);
+      throw error;
     }
   }
 
   // Get active products only
-  async getActiveProducts(): Promise<Product[]> {
-    try {
-      const q = query(collection(db, this.collectionName), where("isActive", "==", true), orderBy("updatedAt", "desc"))
-
-      const querySnapshot = await getDocs(q)
-      const products: Product[] = []
-
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() } as Product)
-      })
-
-      consoleManager.log(`Fetched ${products.length} active products`)
-      return products
-    } catch (error) {
-      consoleManager.error("Error fetching active products:", error)
-      throw error
-    }
+  static async getActiveProducts(): Promise<Product[]> {
+    return this.products.filter(product => product.isActive);
   }
 
   // Get product by ID
-  async getProductById(id: string): Promise<Product | null> {
+  static async getProductById(id: string): Promise<Product | null> {
     try {
-      const docRef = doc(db, this.collectionName, id)
-      const docSnap = await getDoc(docRef)
-
-      if (docSnap.exists()) {
-        const product = { id: docSnap.id, ...docSnap.data() } as Product
-        consoleManager.log("Product fetched successfully:", product)
-        return product
-      } else {
-        consoleManager.log("Product not found")
-        return null
+      const product = this.products.find((product) => product.id === id);
+      if (product) {
+        consoleManager.log(`Product found in cache:`, id);
+        return product;
       }
+
+      const productDoc = await db.collection(this.collectionName).doc(id).get();
+
+      if (!productDoc.exists) {
+        consoleManager.error(`Product with ID ${id} not found in Firestore.`);
+        return null;
+      }
+
+      const productData = this.convertToType(productDoc.id, productDoc.data());
+      consoleManager.log(`Product fetched from Firestore:`, id);
+      return productData;
     } catch (error) {
-      consoleManager.error("Error fetching product:", error)
-      throw error
+      consoleManager.error(`Error fetching product ${id}:`, error);
+      throw error;
     }
   }
 
   // Get product by slug
-  async getProductBySlug(slug: string): Promise<Product | null> {
+  static async getProductBySlug(slug: string): Promise<Product | null> {
+    // Try to find in cache first
+    let product = this.products.find(product => product.slug === slug && product.isActive);
+    if (product) {
+      consoleManager.log(`Product found in cache by slug:`, slug);
+      return product;
+    }
+
+    // If not found in cache, query Firestore
     try {
-      const q = query(
-        collection(db, this.collectionName),
-        where("slug", "==", slug),
-        where("isActive", "==", true),
-        limit(1),
-      )
+      const querySnapshot = await db
+        .collection(this.collectionName)
+        .where("slug", "==", slug)
+        .where("isActive", "==", true)
+        .limit(1)
+        .get();
 
-      const querySnapshot = await getDocs(q)
-
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0]
-        const product = { id: doc.id, ...doc.data() } as Product
-        consoleManager.log("Product fetched by slug:", product)
-        return product
-      } else {
-        consoleManager.log("Product not found with slug:", slug)
-        return null
+      if (querySnapshot.empty) {
+        consoleManager.error(`Product with slug ${slug} not found in Firestore.`);
+        return null;
       }
+
+      const doc = querySnapshot.docs[0];
+      const productData = this.convertToType(doc.id, doc.data());
+      consoleManager.log(`Product fetched from Firestore by slug:`, slug);
+      return productData;
     } catch (error) {
-      consoleManager.error("Error fetching product by slug:", error)
-      throw error
+      consoleManager.error(`Error fetching product by slug ${slug}:`, error);
+      throw error;
     }
   }
 
   // Update product
-  async updateProduct(id: string, productData: Partial<Product>): Promise<Product> {
+  static async updateProduct(id: string, updateData: Partial<Product>): Promise<Product> {
     try {
-      const docRef = doc(db, this.collectionName, id)
-      const updateData = {
-        ...productData,
-        updatedAt: Timestamp.now(),
-      }
+      const timestamp = admin.firestore.FieldValue.serverTimestamp();
+      const productRef = db.collection(this.collectionName).doc(id);
+      await productRef.update({
+        ...updateData,
+        updatedAt: timestamp,
+      });
 
-      await updateDoc(docRef, updateData)
+      consoleManager.log("Product updated successfully:", id);
 
-      const updatedDoc = await getDoc(docRef)
-      const updatedProduct = { id: updatedDoc.id, ...updatedDoc.data() } as Product
+      // Wait a moment for the server timestamp to be resolved
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      consoleManager.log("Product updated successfully:", updatedProduct)
-      return updatedProduct
-    } catch (error) {
-      consoleManager.error("Error updating product:", error)
-      throw error
+      await this.getAllProducts(10, undefined, undefined);
+
+      const updatedProduct = await this.getProductById(id);
+      if (!updatedProduct) throw new Error("Product not found after update");
+      return updatedProduct;
+    } catch (error: any) {
+      consoleManager.error("Error updating product:", error);
+      throw error;
     }
   }
 
   // Toggle product status
-  async toggleProductStatus(id: string): Promise<Product> {
+  static async toggleProductStatus(id: string): Promise<Product> {
     try {
-      const docRef = doc(db, this.collectionName, id)
-      const docSnap = await getDoc(docRef)
-
-      if (!docSnap.exists()) {
-        throw new Error("Product not found")
+      const product = await this.getProductById(id);
+      if (!product) {
+        throw new Error("Product not found");
       }
+      const newStatus = !product.isActive;
 
-      const currentData = docSnap.data() as Product
-      const newStatus = !currentData.isActive
-
-      await updateDoc(docRef, {
+      const productRef = db.collection(this.collectionName).doc(id);
+      await productRef.update({
         isActive: newStatus,
-        updatedAt: Timestamp.now(),
-      })
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
 
-      const updatedProduct = { id, ...currentData, isActive: newStatus }
-      consoleManager.log(`Product ${newStatus ? "activated" : "deactivated"}:`, updatedProduct)
-      return updatedProduct
+      // Wait a moment for the server timestamp to be resolved
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      await this.getAllProducts(10, undefined, undefined);
+
+      const updatedProduct = await this.getProductById(id);
+      if (!updatedProduct) throw new Error("Product not found after status toggle");
+      consoleManager.log(`Product ${newStatus ? "activated" : "deactivated"}:`, updatedProduct);
+      return updatedProduct;
     } catch (error) {
-      consoleManager.error("Error toggling product status:", error)
-      throw error
+      consoleManager.error("Error toggling product status:", error);
+      throw error;
     }
   }
 
   // Delete product
-  async deleteProduct(id: string): Promise<void> {
+  static async deleteProduct(id: string): Promise<{ id: string }> {
     try {
-      // First get the product to delete associated images
-      const product = await this.getProductById(id)
-      if (product && product.images.length > 0) {
-        await this.deleteImages(product.images)
-      }
+      const productRef = db.collection(this.collectionName).doc(id);
+      await productRef.delete();
 
-      const docRef = doc(db, this.collectionName, id)
-      await deleteDoc(docRef)
-
-      consoleManager.log("Product deleted successfully:", id)
-    } catch (error) {
-      consoleManager.error("Error deleting product:", error)
-      throw error
+      consoleManager.log("Product deleted successfully:", id);
+      await this.getAllProducts(10, undefined, undefined);
+      return { id };
+    } catch (error: any) {
+      consoleManager.error("Error deleting product:", error);
+      throw error;
     }
   }
 
   // Get products by category
-  async getProductsByCategory(category: string): Promise<Product[]> {
-    try {
-      const q = query(
-        collection(db, this.collectionName),
-        where("category", "==", category),
-        where("isActive", "==", true),
-        orderBy("updatedAt", "desc"),
-      )
+  static async getProductsByCategory(category: string): Promise<Product[]> {
+    return this.products.filter(product => product.category === category && product.isActive);
+  }
 
-      const querySnapshot = await getDocs(q)
-      const products: Product[] = []
-
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() } as Product)
-      })
-
-      consoleManager.log(`Fetched ${products.length} products for category: ${category}`)
-      return products
-    } catch (error) {
-      consoleManager.error("Error fetching products by category:", error)
-      throw error
-    }
+  // Search products
+  static async searchProducts(query: string): Promise<Product[]> {
+    const searchTerm = query.toLowerCase();
+    return this.products.filter(product =>
+      product.title.toLowerCase().includes(searchTerm) ||
+      product.description.toLowerCase().includes(searchTerm) ||
+      product.category.toLowerCase().includes(searchTerm)
+    );
   }
 }
 
-export default new ProductService()
+export default ProductService;
