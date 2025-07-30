@@ -38,7 +38,7 @@ export async function GET(req: Request) {
       { status: 200 },
     )
   } catch (error: any) {
-    consoleManager.error("Error in GET /api/products:", error)
+    consoleManager.error("Error in GET /api/routes/products:", error)
     return NextResponse.json(
       {
         statusCode: 500,
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
       { status: 201 },
     )
   } catch (error: any) {
-    consoleManager.error("Error in POST /api/products:", error)
+    consoleManager.error("Error in POST /api/routes/products:", error)
     return NextResponse.json(
       {
         statusCode: 500,

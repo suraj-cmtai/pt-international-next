@@ -32,7 +32,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       { status: 200 },
     )
   } catch (error: any) {
-    consoleManager.error("Error in GET /api/products/[id]:", error)
+    consoleManager.error("Error in GET /api/routes/products/[id]:", error)
     return NextResponse.json(
       {
         statusCode: 500,
@@ -88,7 +88,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       { status: 200 },
     )
   } catch (error: any) {
-    consoleManager.error("Error in PUT /api/products/[id]:", error)
+    consoleManager.error("Error in PUT /api/routes/products/[id]:", error)
     return NextResponse.json(
       {
         statusCode: 500,
@@ -118,7 +118,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       { status: 200 },
     )
   } catch (error: any) {
-    consoleManager.error("Error in DELETE /api/products/[id]:", error)
+    consoleManager.error("Error in DELETE /api/routes/products/[id]:", error)
     return NextResponse.json(
       {
         statusCode: 500,

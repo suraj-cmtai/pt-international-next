@@ -1,6 +1,3 @@
-
-
-
 import { db } from "../config/firebase";
 import consoleManager from "../utils/consoleManager";
 import admin from "firebase-admin";

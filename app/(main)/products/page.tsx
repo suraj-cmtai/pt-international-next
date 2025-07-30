@@ -2,23 +2,72 @@
 
 import { motion } from "framer-motion"
 import { Search, Grid, List } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch } from "@/lib/redux/store"
+import {
+  fetchActiveProducts,
+  selectActiveProductList,
+  selectIsLoading,
+  selectHasFetched,
+  selectError,
+} from "@/lib/redux/features/productSlice"
 import { productCategories } from "@/lib/data"
 
 export default function ProductsPage() {
+  const dispatch = useDispatch<AppDispatch>()
+  const products = useSelector(selectActiveProductList)
+  const isLoading = useSelector(selectIsLoading)
+  const hasFetched = useSelector(selectHasFetched)
+  const error = useSelector(selectError)
+
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  const filteredCategories = productCategories.filter(
+  useEffect(() => {
+    if (!hasFetched) {
+      dispatch(fetchActiveProducts())
+    }
+  }, [dispatch, hasFetched])
+
+  // Group products by category
+  const productsByCategory = productCategories.map((category) => ({
+    ...category,
+    productCount: products.filter((product) => product.category === category.slug).length,
+  }))
+
+  const filteredCategories = productsByCategory.filter(
     (category) =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  if (isLoading && !hasFetched) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading products: {error}</p>
+          <Button onClick={() => dispatch(fetchActiveProducts())}>Try Again</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -102,6 +151,11 @@ export default function ProductsPage() {
                       className={`${viewMode === "list" ? "w-32 h-32 flex-shrink-0" : "aspect-video"} relative bg-gradient-to-br from-primary/10 to-secondary/10 ${viewMode === "grid" ? "rounded-t-lg" : "rounded-l-lg"} flex items-center justify-center`}
                     >
                       <div className="text-4xl font-bold text-primary/30">{category.name.charAt(0)}</div>
+                      {category.productCount > 0 && (
+                        <Badge className="absolute top-2 right-2" variant="secondary">
+                          {category.productCount}
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex-1">
                       <CardHeader>
@@ -109,8 +163,10 @@ export default function ProductsPage() {
                         <CardDescription>{category.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        <Button asChild className="w-full">
-                          <Link href={`/products/${category.slug}`}>Browse Products</Link>
+                        <Button asChild className="w-full" disabled={category.productCount === 0}>
+                          <Link href={`/products/${category.slug}`}>
+                            Browse Products {category.productCount > 0 && `(${category.productCount})`}
+                          </Link>
                         </Button>
                       </CardContent>
                     </div>

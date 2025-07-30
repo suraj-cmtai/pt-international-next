@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Search, Filter, Eye, MoreHorizontal, Power, PowerOff, X } from "lucide-react"
+import { Plus, Edit, Trash2, Search, Eye, MoreHorizontal, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,33 +41,31 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-// Remove Timestamp import, use Date instead
-// import { Timestamp } from "firebase/firestore"
+import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch } from "@/lib/redux/store"
+import {
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  selectProductList,
+  selectIsLoading,
+  selectHasFetched,
+  selectError,
+  clearError,
+  type Product,
+} from "@/lib/redux/features/productSlice"
 import { productCategories } from "@/lib/data"
 import { format } from "date-fns"
 
-interface Product {
-  id?: string
-  title: string
-  slug: string
-  description: string
-  longDescription: string
-  category: string
-  price?: string
-  features: string[]
-  images: string[]
-  specifications?: Record<string, string>
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
 export default function ProductsManagement() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const dispatch = useDispatch<AppDispatch>()
+  const products = useSelector(selectProductList)
+  const isLoading = useSelector(selectIsLoading)
+  const hasFetched = useSelector(selectHasFetched)
+  const error = useSelector(selectError)
+
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [selectedStatus, setSelectedStatus] = useState("All")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [imageFiles, setImageFiles] = useState<File[]>([])
@@ -84,17 +82,28 @@ export default function ProductsManagement() {
     isActive: true,
   })
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
+  const filteredProducts = products.filter(
+    (product) =>
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory
-    const matchesStatus =
-      selectedStatus === "All" ||
-      (selectedStatus === "Active" && product.isActive) ||
-      (selectedStatus === "Inactive" && !product.isActive)
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+      product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  useEffect(() => {
+    if (!hasFetched) {
+      dispatch(fetchProducts())
+    }
+  }, [dispatch, hasFetched])
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      })
+      dispatch(clearError())
+    }
+  }, [error, dispatch])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -185,49 +194,45 @@ export default function ProductsManagement() {
         {} as Record<string, string>,
       )
 
-    const productData = {
-      ...formData,
-      features: features.filter((f) => f.trim() !== ""),
-      specifications: Object.keys(specsObject).length > 0 ? specsObject : undefined,
-      slug: formData.slug || generateSlug(formData.title),
-      images: imagePreviews.length > 0 ? imagePreviews : ["/placeholder.svg?height=300&width=300"],
-    }
+    const productFormData = new FormData()
+    productFormData.append("title", formData.title)
+    productFormData.append("description", formData.description)
+    productFormData.append("longDescription", formData.longDescription)
+    productFormData.append("category", formData.category)
+    productFormData.append("price", formData.price)
+    productFormData.append("slug", formData.slug || generateSlug(formData.title))
+    productFormData.append("features", JSON.stringify(features.filter((f) => f.trim() !== "")))
+    productFormData.append("specifications", JSON.stringify(specsObject))
+    productFormData.append("isActive", formData.isActive.toString())
 
-    if (editingProduct) {
-      // Update existing product
-      const updatedProducts = products.map((product) =>
-        product.id === editingProduct.id
-          ? {
-              ...productData,
-              id: editingProduct.id,
-              createdAt: product.createdAt,
-              updatedAt: new Date(),
-            }
-          : product,
-      )
-      setProducts(updatedProducts)
-      toast({
-        title: "Product Updated",
-        description: "Product has been updated successfully.",
-      })
-    } else {
-      // Add new product
-      const now = new Date()
-      const newProduct: Product = {
-        ...productData,
-        id: Date.now().toString(),
-        createdAt: now,
-        updatedAt: now,
+    // Add image files
+    imageFiles.forEach((file, index) => {
+      productFormData.append(`image_${index}`, file)
+    })
+
+    try {
+      if (editingProduct) {
+        await dispatch(updateProduct({ id: editingProduct.id!, productData: productFormData })).unwrap()
+        toast({
+          title: "Product Updated",
+          description: "Product has been updated successfully.",
+        })
+      } else {
+        await dispatch(createProduct(productFormData)).unwrap()
+        toast({
+          title: "Product Created",
+          description: "New product has been created successfully.",
+        })
       }
-      setProducts([newProduct, ...products])
+      setIsDialogOpen(false)
+      resetForm()
+    } catch (error: any) {
       toast({
-        title: "Product Added",
-        description: "New product has been added successfully.",
+        title: "Error",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
       })
     }
-
-    setIsDialogOpen(false)
-    resetForm()
   }
 
   const handleEdit = (product: Product) => {
@@ -254,76 +259,23 @@ export default function ProductsManagement() {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (productId: string) => {
-    setProducts(products.filter((product) => product.id !== productId))
-    toast({
-      title: "Product Deleted",
-      description: "Product has been deleted successfully.",
-      variant: "destructive",
-    })
-  }
-
-  const handleToggleStatus = (productId: string, isActive: boolean) => {
-    setProducts(
-      products.map((product) =>
-        product.id === productId ? { ...product, isActive, updatedAt: new Date() } : product,
-      ),
-    )
-    toast({
-      title: isActive ? "Product Activated" : "Product Deactivated",
-      description: `Product has been ${isActive ? "activated" : "deactivated"} successfully.`,
-    })
-  }
-
-  // Load initial data (in real app, this would be from API)
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true)
-      try {
-        // Mock data - replace with actual API call
-        const now = new Date()
-        const mockProducts: Product[] = [
-          {
-            id: "1",
-            slug: "advanced-pcr-kit",
-            title: "Advanced PCR Kit",
-            description: "High-performance PCR amplification kit for research applications",
-            longDescription:
-              "Our Advanced PCR Kit provides superior amplification performance for a wide range of research applications.",
-            features: [
-              "High-fidelity DNA polymerase",
-              "Optimized buffer system",
-              "Wide temperature range compatibility",
-            ],
-            images: ["/placeholder.svg?height=300&width=300", "/placeholder.svg?height=300&width=300"],
-            category: "research-products",
-            price: "$299.99",
-            specifications: {
-              "Kit Size": "100 reactions",
-              Storage: "-20°C",
-              "Shelf Life": "24 months",
-            },
-            isActive: true,
-            createdAt: now,
-            updatedAt: now,
-          },
-        ]
-        setProducts(mockProducts)
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load products",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
+  const handleDelete = async (productId: string) => {
+    try {
+      await dispatch(deleteProduct(productId)).unwrap()
+      toast({
+        title: "Product Deleted",
+        description: "Product has been deleted successfully.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product",
+        variant: "destructive",
+      })
     }
+  }
 
-    loadProducts()
-  }, [])
-
-  if (loading) {
+  if (isLoading && !hasFetched) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -527,91 +479,29 @@ export default function ProductsManagement() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">{editingProduct ? "Update Product" : "Create Product"}</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {editingProduct ? "Update Product" : "Create Product"}
+                </Button>
               </div>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{products.filter((p) => p.isActive).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{new Set(products.map((p) => p.category)).size}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{products.filter((p) => !p.isActive).length}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
+      {/* Search */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>Search Products</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Categories</SelectItem>
-                {productCategories.map((category) => (
-                  <SelectItem key={category.slug} value={category.slug}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </CardContent>
       </Card>
@@ -630,7 +520,6 @@ export default function ProductsManagement() {
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Features</TableHead>
                 <TableHead>Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -668,23 +557,13 @@ export default function ProductsManagement() {
                   </TableCell>
                   <TableCell>{product.price || "N/A"}</TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={product.isActive}
-                        onCheckedChange={(checked) => handleToggleStatus(product.id!, checked)}
-                        // size="sm"
-                      />
-                      <Badge variant={product.isActive ? "default" : "secondary"}>
-                        {product.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">{product.features.length} features</div>
+                    <Badge variant={product.isActive ? "default" : "secondary"}>
+                      {product.isActive ? "Active" : "Inactive"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm text-muted-foreground">
-                      {product.updatedAt ? format(new Date(product.updatedAt), "MMM d, yyyy") : "N/A"}
+                      {product.updatedAt?.toDate?.() ? format(product.updatedAt.toDate(), "MMM d, yyyy") : "N/A"}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -706,19 +585,6 @@ export default function ProductsManagement() {
                         <DropdownMenuItem onClick={() => handleEdit(product)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleToggleStatus(product.id!, !product.isActive)}>
-                          {product.isActive ? (
-                            <>
-                              <PowerOff className="mr-2 h-4 w-4" />
-                              Deactivate
-                            </>
-                          ) : (
-                            <>
-                              <Power className="mr-2 h-4 w-4" />
-                              Activate
-                            </>
-                          )}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <AlertDialog>
