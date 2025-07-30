@@ -1,24 +1,66 @@
-import { notFound } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useDispatch, useSelector } from "react-redux"
+import { useRouter } from "next/navigation"
 import { ArrowLeft, CheckCircle, Mail, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { getServiceBySlug } from "@/lib/data"
+import { fetchServiceById } from "@/lib/redux/features/serviceSlice"
+import type { AppDispatch, RootState } from "@/lib/redux/store"
 
-interface ServicePageProps {
-  params: Promise<{
-    slug: string
-  }>
-}
+export default function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
+  const { currentService: service, loading, error } = useSelector((state: RootState) => state.services)
 
-export default async function ServicePage({ params }: ServicePageProps) {
-  const { slug } = await params
-  const service = getServiceBySlug(slug)
+  useEffect(() => {
+    let isMounted = true
+    const loadService = async () => {
+      const resolvedParams = await params
+      if (isMounted && resolvedParams?.slug) {
+        dispatch(fetchServiceById(resolvedParams.slug))
+      }
+    }
+    loadService()
+    return () => {
+      isMounted = false
+    }
+  }, [dispatch, params])
+
+  // Handle loading and error states
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh] text-muted-foreground text-lg">
+        Loading service details...
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] text-red-500">
+        <div className="mb-4">Error: {error}</div>
+        <Button variant="outline" onClick={() => router.push("/services")}>
+          Back to Services
+        </Button>
+      </div>
+    )
+  }
 
   if (!service) {
-    notFound()
+    // Not found fallback
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
+        <div className="mb-4">Service not found.</div>
+        <Button variant="outline" onClick={() => router.push("/services")}>
+          Back to Services
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -105,7 +147,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {service.features.map((feature, index) => (
+                    {service.features?.map((feature, index) => (
                       <li key={index} className="flex items-start">
                         <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />
                         <span className="text-sm">{feature}</span>
@@ -151,15 +193,4 @@ export default async function ServicePage({ params }: ServicePageProps) {
       </section>
     </div>
   )
-}
-
-export async function generateStaticParams() {
-  return [
-    { slug: "research-services" },
-    { slug: "diagnostic-services" },
-    { slug: "consulting" },
-    { slug: "quality-control" },
-    { slug: "method-development" },
-    { slug: "training-services" },
-  ]
 }

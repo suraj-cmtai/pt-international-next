@@ -1,7 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
-import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle, ShoppingCart, Download, Share } from "lucide-react"
@@ -9,35 +7,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useDispatch, useSelector } from "react-redux"
-import type { AppDispatch } from "@/lib/redux/store"
-import {
-  fetchProductBySlug,
-  selectCurrentProduct,
-  selectIsLoading,
-  selectError,
-} from "@/lib/redux/features/productSlice"
 import { productCategories } from "@/lib/data"
+import type { Product } from "@/lib/redux/features/productSlice"
 
 interface ProductPageProps {
   params: {
     category: string
     slug: string
   }
+  product: Product
 }
 
-export default function ProductPageClient({ params }: ProductPageProps) {
-  const dispatch = useDispatch<AppDispatch>()
-  const product = useSelector(selectCurrentProduct)
-  const isLoading = useSelector(selectIsLoading)
-  const error = useSelector(selectError)
-
-  useEffect(() => {
-    // params.slug is a string, not an object
-    dispatch(fetchProductBySlug(params.slug))
-  }, [params, dispatch])
-
-  if (isLoading) {
+export default function ProductPageClient({ params, product }: ProductPageProps) {
+  // Defensive: If product is not passed, show nothing (should not happen if server logic is correct)
+  if (!product) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -48,14 +31,16 @@ export default function ProductPageClient({ params }: ProductPageProps) {
     )
   }
 
-  if (error || !product) {
-    notFound()
-  }
-
   const category = productCategories.find((cat) => cat.slug === product.category)
 
   if (!category) {
-    notFound()
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Category not found.</div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -49,7 +49,7 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  // Protect API routes: only admin except for published/active and specific public POST routes
+  // Make parts of products and services public in API routes
   if (pathname.startsWith("/api/")) {
     // Determine if the current API route is for contact or subscribers
     const isContactOrSubscribers =
@@ -65,10 +65,26 @@ export default function middleware(request: NextRequest) {
 
     // Allow POST and OPTION PREFLIGHT to /api/routes/test as public, all other methods are admin
     const isTestRoute = pathname.startsWith("/api/routes/test");
-    const isTestPost = isTestRoute && request.method === "POST" || request.method === "OPTIONS";
+    const isTestPost = (isTestRoute && request.method === "POST") || request.method === "OPTIONS";
     // Allow GET/PUT/DELETE for /api/routes/test as admin
     const isTestOtherMethod =
       isTestRoute && (request.method === "GET" || request.method === "PUT" || request.method === "DELETE");
+
+    // Make products and services GET endpoints public
+    const isProductsGet =
+      (pathname.startsWith("/api/routes/products") ||
+        pathname.startsWith("/api/routes/product") ||
+        pathname.startsWith("/api/routes/services") ||
+        pathname.startsWith("/api/routes/service")) &&
+      request.method === "GET";
+
+    // Also allow GET for product categories, slugs, etc.
+    const isProductsCategoriesGet =
+      (pathname.startsWith("/api/routes/products/category") ||
+        pathname.startsWith("/api/routes/products/") ||
+        pathname.startsWith("/api/routes/services/") ||
+        pathname.startsWith("/api/routes/services/category")) &&
+      request.method === "GET";
 
     if (
       pathname.includes("/published") ||
@@ -80,7 +96,9 @@ export default function middleware(request: NextRequest) {
       pathname.includes("/auth") ||
       isBlogsSlug ||
       isCourseIdGet ||
-      isTestPost
+      isTestPost ||
+      isProductsGet ||
+      isProductsCategoriesGet
     ) {
       // Public, do nothing
     } else if (isContactOrSubscribers && request.method === "POST") {
