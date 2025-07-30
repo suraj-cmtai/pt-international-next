@@ -1,642 +1,711 @@
+
 "use client"
 
-import type React from "react"
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import { motion } from "framer-motion"
+import {
+  MoreHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Loader2,
+  Image as ImageIcon,
+} from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  fetchServices,
+  createService,
+  updateService,
+  deleteService,
+} from "@/lib/redux/features/serviceSlice"
+import type { Service } from "@/lib/data"
+import { AppDispatch } from "@/lib/redux/store"
+import Image from "next/image"
 
-import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Search, Filter, Eye, MoreHorizontal, Power, PowerOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "@/hooks/use-toast"
-import { Timestamp } from "firebase/firestore"
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 
-interface Service {
-  id?: string
+// Service form state
+interface ServiceFormState {
   title: string
   slug: string
   description: string
   longDescription: string
+  features: string
+  image: string | null
+  imageFile: File | null
+  removeImage: boolean
   category: string
-  price?: string
-  features: string[]
-  image: string
-  isActive: boolean
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  price: string
 }
 
-const categories = ["Research", "Diagnostics", "Consulting", "Quality", "Development", "Education"]
+const initialFormState: ServiceFormState = {
+  title: "",
+  slug: "",
+  description: "",
+  longDescription: "",
+  features: "",
+  image: null,
+  imageFile: null,
+  removeImage: false,
+  category: "",
+  price: "",
+}
 
-export default function ServicesManagement() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [selectedStatus, setSelectedStatus] = useState("All")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingService, setEditingService] = useState<Service | null>(null)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>("")
-  const [features, setFeatures] = useState<string[]>([""])
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    longDescription: "",
-    category: "",
-    price: "",
-    slug: "",
-    isActive: true,
-  })
+function getSlugFromTitle(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
 
-  const filteredServices = services.filter((service) => {
-    const matchesSearch =
-      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "All" || service.category === selectedCategory
-    const matchesStatus =
-      selectedStatus === "All" ||
-      (selectedStatus === "Active" && service.isActive) ||
-      (selectedStatus === "Inactive" && !service.isActive)
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+export default function ServicesPage() {
+  const dispatch = useDispatch<AppDispatch>()
+  const services = useSelector((state: any) => state.services.services)
+  const isLoading = useSelector((state: any) => state.services.loading)
+  const error = useSelector((state: any) => state.services.error)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [newServiceForm, setNewServiceForm] = useState<ServiceFormState>(initialFormState)
+  const [editServiceForm, setEditServiceForm] = useState<ServiceFormState | null>(null)
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    dispatch(fetchServices())
+  }, [dispatch])
+
+  // Clean up object URLs when component unmounts or form changes
+  useEffect(() => {
+    return () => {
+      if (newServiceForm.imageFile && newServiceForm.image) {
+        URL.revokeObjectURL(newServiceForm.image)
       }
-      reader.readAsDataURL(file)
     }
-  }
+  }, [newServiceForm.imageFile])
 
-  const addFeature = () => {
-    setFeatures([...features, ""])
-  }
-
-  const removeFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index))
-  }
-
-  const updateFeature = (index: number, value: string) => {
-    const newFeatures = [...features]
-    newFeatures[index] = value
-    setFeatures(newFeatures)
-  }
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-  }
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      longDescription: "",
-      category: "",
-      price: "",
-      slug: "",
-      isActive: true,
-    })
-    setFeatures([""])
-    setImageFile(null)
-    setImagePreview("")
-    setEditingService(null)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const serviceData = {
-      ...formData,
-      features: features.filter((f) => f.trim() !== ""),
-      slug: formData.slug || generateSlug(formData.title),
-      image: imagePreview || "/placeholder.svg?height=400&width=600",
-    }
-
-    if (editingService) {
-      // Update existing service
-      const updatedServices = services.map((service) =>
-        service.id === editingService.id
-          ? {
-              ...serviceData,
-              id: editingService.id,
-              createdAt: editingService.createdAt,
-              updatedAt: Timestamp.now(),
-            }
-          : service,
-      )
-      setServices(updatedServices)
-      toast({
-        title: "Service Updated",
-        description: "Service has been updated successfully.",
-      })
-    } else {
-      // Add new service
-      const now = Timestamp.now()
-      const newService: Service = {
-        ...serviceData,
-        id: Date.now().toString(),
-        createdAt: now,
-        updatedAt: now,
+  useEffect(() => {
+    return () => {
+      if (editServiceForm?.imageFile && editServiceForm.image) {
+        URL.revokeObjectURL(editServiceForm.image)
       }
-      setServices([newService, ...services])
-      toast({
-        title: "Service Added",
-        description: "New service has been added successfully.",
-      })
     }
+  }, [editServiceForm?.imageFile])
 
-    setIsDialogOpen(false)
-    resetForm()
+  const filteredServices = services.filter((service: Service) =>
+    service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const resetCreateForm = () => {
+    if (newServiceForm.imageFile && newServiceForm.image) {
+      URL.revokeObjectURL(newServiceForm.image)
+    }
+    setNewServiceForm(initialFormState)
   }
 
-  const handleEdit = (service: Service) => {
-    setEditingService(service)
-    setFormData({
+  const resetEditForm = () => {
+    if (editServiceForm?.imageFile && editServiceForm.image) {
+      URL.revokeObjectURL(editServiceForm.image)
+    }
+    setEditServiceForm(null)
+    setSelectedServiceId(null)
+  }
+
+  const handleCreate = async () => {
+    if (isSubmitting) return
+
+    // Validation
+    if (!newServiceForm.title.trim()) {
+      toast.error("Title is required")
+      return
+    }
+    if (!newServiceForm.description.trim()) {
+      toast.error("Description is required")
+      return
+    }
+    if (!newServiceForm.category.trim()) {
+      toast.error("Category is required")
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("title", newServiceForm.title.trim())
+      formData.append("slug", getSlugFromTitle(newServiceForm.title.trim()))
+      formData.append("description", newServiceForm.description.trim())
+      formData.append("longDescription", newServiceForm.longDescription.trim())
+      formData.append("features", newServiceForm.features.split('.').map(s => s.trim()).filter(Boolean).join('.'))
+      formData.append("category", newServiceForm.category.trim())
+      formData.append("price", newServiceForm.price.trim())
+      if (newServiceForm.imageFile) {
+        formData.append("image", newServiceForm.imageFile)
+      }
+
+      await dispatch(createService(formData)).unwrap()
+      resetCreateForm()
+      setIsCreateDialogOpen(false)
+      toast.success("Service created successfully!")
+    } catch (err: any) {
+      toast.error(err?.message || err || "Failed to create service")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const openEditDialog = (service: Service) => {
+    setSelectedServiceId(service.id)
+    setEditServiceForm({
       title: service.title,
+      slug: service.slug,
       description: service.description,
       longDescription: service.longDescription,
+      features: service.features?.join('.') || "",
+      image: service.image ?? null,
+      imageFile: null,
+      removeImage: false,
       category: service.category,
       price: service.price || "",
-      slug: service.slug,
-      isActive: service.isActive,
     })
-    setFeatures(service.features.length > 0 ? service.features : [""])
-    setImagePreview(service.image)
-    setIsDialogOpen(true)
+    setIsEditDialogOpen(true)
   }
 
-  const handleDelete = (serviceId: string) => {
-    setServices(services.filter((service) => service.id !== serviceId))
-    toast({
-      title: "Service Deleted",
-      description: "Service has been deleted successfully.",
-      variant: "destructive",
-    })
-  }
+  const handleEdit = async () => {
+    if (!editServiceForm || !selectedServiceId || isSubmitting) return
 
-  const handleToggleStatus = (serviceId: string, isActive: boolean) => {
-    setServices(
-      services.map((service) =>
-        service.id === serviceId ? { ...service, isActive, updatedAt: Timestamp.now() } : service,
-      ),
-    )
-    toast({
-      title: isActive ? "Service Activated" : "Service Deactivated",
-      description: `Service has been ${isActive ? "activated" : "deactivated"} successfully.`,
-    })
-  }
-
-  // Load initial data (in real app, this would be from API)
-  useEffect(() => {
-    const loadServices = async () => {
-      setLoading(true)
-      try {
-        // Mock data - replace with actual API call
-        const mockServices: Service[] = [
-          {
-            id: "1",
-            slug: "research-services",
-            title: "Research Services",
-            description: "Comprehensive research solutions for academic and commercial laboratories",
-            longDescription:
-              "Our research services provide comprehensive support for academic institutions, pharmaceutical companies, and biotechnology firms.",
-            features: [
-              "Custom research protocol development",
-              "Data analysis and interpretation",
-              "Regulatory compliance consulting",
-            ],
-            image: "/placeholder.svg?height=400&width=600",
-            category: "Research",
-            price: "Contact for pricing",
-            isActive: true,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-          },
-        ]
-        setServices(mockServices)
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load services",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
+    // Validation
+    if (!editServiceForm.title.trim()) {
+      toast.error("Title is required")
+      return
+    }
+    if (!editServiceForm.description.trim()) {
+      toast.error("Description is required")
+      return
+    }
+    if (!editServiceForm.category.trim()) {
+      toast.error("Category is required")
+      return
     }
 
-    loadServices()
-  }, [])
+    setIsSubmitting(true)
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading services...</p>
-        </div>
-      </div>
-    )
+    try {
+      const formData = new FormData()
+      formData.append("title", editServiceForm.title.trim())
+      formData.append("slug", getSlugFromTitle(editServiceForm.title.trim()))
+      formData.append("description", editServiceForm.description.trim())
+      formData.append("longDescription", editServiceForm.longDescription.trim())
+      formData.append("features", editServiceForm.features.split('.').map(s => s.trim()).filter(Boolean).join('.'))
+      formData.append("category", editServiceForm.category.trim())
+      formData.append("price", editServiceForm.price.trim())
+      if (editServiceForm.imageFile) {
+        formData.append("image", editServiceForm.imageFile)
+      }
+      if (editServiceForm.removeImage) {
+        formData.append("removeImage", "true")
+      }
+
+      await dispatch(updateService({ id: selectedServiceId, formData })).unwrap()
+      setIsEditDialogOpen(false)
+      resetEditForm()
+      toast.success("Service updated successfully!")
+    } catch (err: any) {
+      toast.error(err?.message || err || "Failed to update service")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Services</h1>
-          <p className="text-muted-foreground">Manage your company services and offerings</p>
+  const handleDelete = async () => {
+    if (!selectedServiceId || isSubmitting) return
+
+    setIsSubmitting(true)
+
+    try {
+      await dispatch(deleteService(selectedServiceId)).unwrap()
+      setIsDeleteDialogOpen(false)
+      setSelectedServiceId(null)
+      toast.success("Service deleted successfully!")
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to delete service")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    formState: ServiceFormState,
+    setFormState: React.Dispatch<React.SetStateAction<any>>
+  ) => {
+    const file = e.target.files?.[0] || null
+
+    // Clean up previous object URL
+    if (formState.imageFile && formState.image && formState.image.startsWith('blob:')) {
+      URL.revokeObjectURL(formState.image)
+    }
+
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file')
+        e.target.value = '' // Reset input
+        return
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB')
+        e.target.value = '' // Reset input
+        return
+      }
+
+      const objectUrl = URL.createObjectURL(file)
+      setFormState({
+        ...formState,
+        imageFile: file,
+        image: objectUrl,
+        removeImage: false,
+      })
+    } else {
+      setFormState({
+        ...formState,
+        imageFile: null,
+      })
+    }
+  }
+
+  // Add a wrapper with max-h and overflow for the form fields
+  const renderFormFields = (
+    formState: ServiceFormState,
+    setFormState: React.Dispatch<React.SetStateAction<any>>
+  ) => (
+    <div className="max-h-[60vh] overflow-y-auto pr-2">
+      <div className="space-y-4 py-2">
+        <div className="grid gap-2">
+          <Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
+          <Input
+            id="title"
+            value={formState.title}
+            onChange={e => setFormState({ ...formState, title: e.target.value, slug: getSlugFromTitle(e.target.value) })}
+            placeholder="Enter service title"
+          />
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Service
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="grid gap-2">
+          <Label htmlFor="slug">Slug</Label>
+          <Input
+            id="slug"
+            value={formState.slug}
+            onChange={e => setFormState({ ...formState, slug: e.target.value })}
+            placeholder="Auto-generated from title"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
+          <Input
+            id="category"
+            value={formState.category}
+            onChange={e => setFormState({ ...formState, category: e.target.value })}
+            placeholder="e.g., Consulting, Development"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="price">Price</Label>
+          <Input
+            id="price"
+            value={formState.price}
+            onChange={e => setFormState({ ...formState, price: e.target.value })}
+            placeholder="e.g., 1000, Free, Custom"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="description">Short Description <span className="text-red-500">*</span></Label>
+          <Textarea
+            id="description"
+            value={formState.description}
+            onChange={e => setFormState({ ...formState, description: e.target.value })}
+            rows={2}
+            placeholder="Enter a short description"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="longDescription">Long Description</Label>
+          <Textarea
+            id="longDescription"
+            value={formState.longDescription}
+            onChange={e => setFormState({ ...formState, longDescription: e.target.value })}
+            rows={4}
+            placeholder="Enter a detailed description"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="features">Features</Label>
+          <Textarea
+            id="features"
+            value={formState.features}
+            onChange={e => setFormState({ ...formState, features: e.target.value })}
+            rows={3}
+            placeholder="Enter features, separated by full stop (.)"
+          />
+          <span className="text-xs text-muted-foreground">Separate each feature with a full stop (.)</span>
+        </div>
+        <div className="grid gap-2">
+          <Label>Featured Image</Label>
+          {formState.image && !formState.removeImage && (
+            <div className="my-2 space-y-2">
+              <p className="text-sm text-muted-foreground">
+                {formState.imageFile ? 'New image preview:' : 'Current image:'}
+              </p>
+              <div
+                className="relative w-full h-40"
+                style={{
+                  backgroundImage: `url('/placeholder.svg')`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <Image
+                  src={formState.image}
+                  alt="Service preview"
+                  fill
+                  className="object-cover rounded-md border"
+                  onError={e => {
+                    e.currentTarget.style.display = 'none'
+                    e.currentTarget.parentElement?.nextElementSibling?.classList.remove('hidden')
+                  }}
+                />
+              </div>
+              {!formState.imageFile && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="removeImage"
+                    checked={formState.removeImage}
+                    onChange={e => setFormState({ ...formState, removeImage: e.target.checked })}
+                  />
+                  <Label htmlFor="removeImage" className="text-sm font-medium">
+                    Remove this image on save
+                  </Label>
+                </div>
+              )}
+            </div>
+          )}
+          <Input
+            id="imageFile"
+            type="file"
+            accept="image/*"
+            onChange={e => handleImageChange(e, formState, setFormState)}
+            className="file:text-foreground"
+          />
+          {formState.imageFile && (
+            <p className="text-sm text-muted-foreground mt-1">
+              New image selected: {formState.imageFile.name}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Supported formats: JPG, PNG, GIF. Max size: 5MB.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-6 space-y-6"
+    >
+      <div className="flex justify-between items-center sm:flex-row flex-col gap-4">
+        <h1 className="text-2xl font-bold">Service Management</h1>
+        <Dialog open={isCreateDialogOpen} onOpenChange={open => {
+          setIsCreateDialogOpen(open)
+          if (!open) {
+            resetCreateForm()
+          }
+        }}>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />Create Service
+          </Button>
+          <DialogContent className="sm:max-w-[625px]">
             <DialogHeader>
-              <DialogTitle>{editingService ? "Edit Service" : "Add New Service"}</DialogTitle>
+              <DialogTitle>Create New Service</DialogTitle>
               <DialogDescription>
-                {editingService ? "Update the service information" : "Fill in the details to create a new service"}
+                Fill in the details for your new service. Click create when you're done.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Short Description *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of the service"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="longDescription">Detailed Description *</Label>
-                <Textarea
-                  id="longDescription"
-                  value={formData.longDescription}
-                  onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                  rows={4}
-                  placeholder="Detailed description of the service"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input
-                    id="price"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="e.g., $200-500/hour or Contact for pricing"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    placeholder="Auto-generated from title"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">Service Image</Label>
-                <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />
-                {imagePreview && (
-                  <div className="mt-2">
-                    <img
-                      src={imagePreview || "/placeholder.svg"}
-                      alt="Preview"
-                      className="w-32 h-32 object-cover rounded-lg border"
-                    />
-                  </div>
+            {/* Limit form height and make it scrollable */}
+            <div className="max-h-[60vh] overflow-y-auto pr-2">
+              {renderFormFields(newServiceForm, setNewServiceForm)}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsCreateDialogOpen(false)
+                resetCreateForm()
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreate}
+                disabled={
+                  isLoading || isSubmitting ||
+                  !newServiceForm.title.trim() ||
+                  !newServiceForm.description.trim() ||
+                  !newServiceForm.category.trim()
+                }
+              >
+                {isLoading || isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create'
                 )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Key Features</Label>
-                {features.map((feature, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={feature}
-                      onChange={(e) => updateFeature(index, e.target.value)}
-                      placeholder="Enter feature"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeFeature(index)}
-                      disabled={features.length === 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button type="button" variant="outline" onClick={addFeature}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Feature
-                </Button>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
-                <Label htmlFor="isActive">Active (visible to public)</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">{editingService ? "Update Service" : "Create Service"}</Button>
-              </div>
-            </form>
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Services</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{services.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Services</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{services.filter((s) => s.isActive).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{new Set(services.map((s) => s.category)).size}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft Services</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{services.filter((s) => !s.isActive).length}</div>
-          </CardContent>
-        </Card>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search services..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search services..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Services Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Services ({filteredServices.length})</CardTitle>
-          <CardDescription>Manage your company services and their visibility</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
+      <motion.div layout className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Image</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Features</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && services.length === 0 ? (
               <TableRow>
-                <TableHead>Service</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Features</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableCell colSpan={8} className="text-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredServices.map((service) => (
-                <TableRow key={service.id}>
+            ) : filteredServices.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">
+                  {searchQuery ? 'No services found matching your search' : 'No services found'}
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredServices.map((service: Service) => (
+                <motion.tr
+                  key={service.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  layout
+                  className="group"
+                >
                   <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={service.image || "/placeholder.svg"}
-                        alt={service.title}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                      <div>
-                        <div className="font-medium">{service.title}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-1">{service.description}</div>
+                    <div
+                      className="relative w-16 h-12"
+                      style={{
+                        backgroundImage: `url('/placeholder.svg')`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      {service.image ? (
+                        <Image
+                          src={service.image}
+                          alt={service.title}
+                          fill
+                          className="object-cover rounded"
+                          onError={e => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.parentElement?.nextElementSibling?.classList.remove('hidden')
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-full h-full bg-muted rounded flex items-center justify-center ${service.image ? 'hidden' : ''}`}>
+                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{service.category}</Badge>
+                  <TableCell className="font-medium max-w-[200px] truncate" title={service.title}>
+                    {service.title}
                   </TableCell>
-                  <TableCell>{service.price || "N/A"}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={service.isActive}
-                        onCheckedChange={(checked) => handleToggleStatus(service.id!, checked)}
-                        size="sm"
-                      />
-                      <Badge variant={service.isActive ? "default" : "secondary"}>
-                        {service.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
+                  <TableCell>{service.category}</TableCell>
+                  <TableCell>{service.slug}</TableCell>
+                  <TableCell>{service.price || "—"}</TableCell>
+                  <TableCell className="max-w-[200px] truncate" title={service.description}>
+                    {service.description}
                   </TableCell>
-                  <TableCell>
-                    <div className="text-sm">{service.features.length} features</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-muted-foreground">
-                      {service.updatedAt?.toDate?.()?.toLocaleDateString() || "N/A"}
-                    </div>
+                  <TableCell className="max-w-[200px] truncate" title={service.features?.join(", ")}>
+                    {service.features?.length
+                      ? service.features.slice(0, 3).join(", ") + (service.features.length > 3 ? "..." : "")
+                      : "—"}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => window.open(`/services/${service.slug}`, "_blank")}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(service)}>
-                          <Edit className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem onClick={() => openEditDialog(service)}>
+                          <Pencil className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleToggleStatus(service.id!, !service.isActive)}>
-                          {service.isActive ? (
-                            <>
-                              <PowerOff className="mr-2 h-4 w-4" />
-                              Deactivate
-                            </>
-                          ) : (
-                            <>
-                              <Power className="mr-2 h-4 w-4" />
-                              Activate
-                            </>
-                          )}
+                        <DropdownMenuItem
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                          onClick={() => {
+                            setSelectedServiceId(service.id)
+                            setIsDeleteDialogOpen(true)
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Service</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{service.title}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(service.id!)}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+                </motion.tr>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </motion.div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={open => {
+        setIsEditDialogOpen(open)
+        if (!open) {
+          resetEditForm()
+        }
+      }}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Edit Service</DialogTitle>
+            <DialogDescription>
+              Make changes to your service. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          {/* Limit form height and make it scrollable */}
+          <div className="max-h-[60vh] overflow-y-auto pr-2">
+            {editServiceForm && renderFormFields(editServiceForm, setEditServiceForm)}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsEditDialogOpen(false)
+              resetEditForm()
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEdit}
+              disabled={
+                isLoading || isSubmitting ||
+                !editServiceForm?.title?.trim() ||
+                !editServiceForm?.description?.trim() ||
+                !editServiceForm?.category?.trim()
+              }
+            >
+              {isLoading || isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Service</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this service? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsDeleteDialogOpen(false)
+              setSelectedServiceId(null)
+            }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isLoading || isSubmitting}>
+              {isLoading || isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   )
 }

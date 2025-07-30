@@ -41,8 +41,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-import { Timestamp } from "firebase/firestore"
+// Remove Timestamp import, use Date instead
+// import { Timestamp } from "firebase/firestore"
 import { productCategories } from "@/lib/data"
+import { format } from "date-fns"
 
 interface Product {
   id?: string
@@ -56,8 +58,8 @@ interface Product {
   images: string[]
   specifications?: Record<string, string>
   isActive: boolean
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: Date
+  updatedAt: Date
 }
 
 export default function ProductsManagement() {
@@ -198,8 +200,8 @@ export default function ProductsManagement() {
           ? {
               ...productData,
               id: editingProduct.id,
-              createdAt: editingProduct.createdAt,
-              updatedAt: Timestamp.now(),
+              createdAt: product.createdAt,
+              updatedAt: new Date(),
             }
           : product,
       )
@@ -210,7 +212,7 @@ export default function ProductsManagement() {
       })
     } else {
       // Add new product
-      const now = Timestamp.now()
+      const now = new Date()
       const newProduct: Product = {
         ...productData,
         id: Date.now().toString(),
@@ -264,7 +266,7 @@ export default function ProductsManagement() {
   const handleToggleStatus = (productId: string, isActive: boolean) => {
     setProducts(
       products.map((product) =>
-        product.id === productId ? { ...product, isActive, updatedAt: Timestamp.now() } : product,
+        product.id === productId ? { ...product, isActive, updatedAt: new Date() } : product,
       ),
     )
     toast({
@@ -279,6 +281,7 @@ export default function ProductsManagement() {
       setLoading(true)
       try {
         // Mock data - replace with actual API call
+        const now = new Date()
         const mockProducts: Product[] = [
           {
             id: "1",
@@ -301,8 +304,8 @@ export default function ProductsManagement() {
               "Shelf Life": "24 months",
             },
             isActive: true,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
+            createdAt: now,
+            updatedAt: now,
           },
         ]
         setProducts(mockProducts)
@@ -669,7 +672,7 @@ export default function ProductsManagement() {
                       <Switch
                         checked={product.isActive}
                         onCheckedChange={(checked) => handleToggleStatus(product.id!, checked)}
-                        size="sm"
+                        // size="sm"
                       />
                       <Badge variant={product.isActive ? "default" : "secondary"}>
                         {product.isActive ? "Active" : "Inactive"}
@@ -681,7 +684,7 @@ export default function ProductsManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm text-muted-foreground">
-                      {product.updatedAt?.toDate?.()?.toLocaleDateString() || "N/A"}
+                      {product.updatedAt ? format(new Date(product.updatedAt), "MMM d, yyyy") : "N/A"}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">

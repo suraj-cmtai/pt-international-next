@@ -54,12 +54,12 @@ interface HeaderProps {
 }
 
 const searchSuggestions = [
-  { label: "Courses", value: "courses", href: "/dashboard/courses" },
-  { label: "Blogs", value: "blogs", href: "/dashboard/blogs" },
-  { label: "Subscribers", value: "leads", href: "/dashboard/subscribers" },
+  // { label: "Courses", value: "courses", href: "/dashboard/courses" },
+  // { label: "Blogs", value: "blogs", href: "/dashboard/blogs" },
+  // { label: "Subscribers", value: "leads", href: "/dashboard/subscribers" },
   { label: "Gallery", value: "gallery", href: "/dashboard/gallery" },
-  { label: "Contact", value: "contact", href: "/dashboard/contact" },
-  {label: "Test", value: "test", href: "/dashboard/test" },
+  // { label: "Contact", value: "contact", href: "/dashboard/contact" },
+  // {label: "Test", value: "test", href: "/dashboard/test" },
   { label: "Products", value: "products", href: "/dashboard/products" },
   { label: "Services", value: "services", href: "/dashboard/services" },
 ];
@@ -270,7 +270,7 @@ const Header = ({ title, onMenuClick, className }: HeaderProps) => {
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="/avatar.png" alt="User" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-                    SA
+                    PT
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -278,7 +278,7 @@ const Header = ({ title, onMenuClick, className }: HeaderProps) => {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Study Abroad Admin</p>
+                  <p className="text-sm font-medium leading-none">PT Admin</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

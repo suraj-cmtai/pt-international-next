@@ -1,102 +1,83 @@
-import { NextResponse } from "next/server";
-import ContactService, { ContactPriority, ContactStatus } from "../../services/contactServices";
-import consoleManager from "../../utils/consoleManager";
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
-// Get all contacts (GET)
-export async function GET(req: Request) {
-    try {
-        const { searchParams } = new URL(req.url);
-        const status = searchParams.get("status");
-        const priority = searchParams.get("priority");
+export async function POST(req: NextRequest) {
+  try {
+    // The frontend sends: name, email, phone, subject, message
+    // See: app/(main)/contact/page.tsx
+    const data = await req.formData();
+    const name = data.get("name")?.toString().trim() || "";
+    const email = data.get("email")?.toString().trim() || "";
+    const phone = data.get("phone")?.toString().trim() || "";
+    const subject = data.get("subject")?.toString().trim() || "";
+    const message = data.get("message")?.toString().trim() || "";
 
-        let contacts = await ContactService.getAllContacts();
-
-        // Apply filters if provided
-        if (status) {
-            contacts = contacts.filter((contact) => contact.status === status);
-        }
-        if (priority) {
-            contacts = contacts.filter((contact) => contact.priority === priority);
-        }
-
-        consoleManager.log("Fetched contacts with filters:", contacts.length);
-
-        return NextResponse.json({
-            statusCode: 200,
-            message: "Contacts fetched successfully",
-            data: contacts,
-            errorCode: "NO",
-            errorMessage: "",
-        }, { status: 200 });
-    } catch (error: any) {
-        consoleManager.error("Error in GET /api/contacts:", error);
-        return NextResponse.json({
-            statusCode: 500,
-            errorCode: "INTERNAL_ERROR",
-            errorMessage: error.message || "Internal Server Error",
-        }, { status: 500 });
+    // Validate required fields
+    if (!name || !email || !phone || !subject || !message) {
+      return NextResponse.json(
+        { error: "Missing required fields." },
+        { status: 400 }
+      );
     }
-}
 
-// Add a new contact (POST)
-export async function POST(req: Request) {
-    try {
-        const formData = await req.formData();
-        const name = formData.get("name");
-        const email = formData.get("email");
-        const phone = formData.get("phone");
-        const subject = formData.get("subject");
-        const message = formData.get("message");
-        const priority = formData.get("priority") || ContactPriority.LOW;
+    // Compose admin email
+    const adminTo = process.env.CONTACT_RECEIVER || process.env.SMTP_USER;
+    const adminSubject = `New Contact Form Submission: ${subject}`;
+    const adminText = `
+      Name: ${name}
+      Email: ${email}
+      Phone: ${phone}
+      Subject: ${subject}
+      Message: ${message}
+    `;
+    const adminHtml = `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong> ${message}</p>
+    `;
 
-        // Validate required fields
-        if (!name || !email || !phone || !subject || !message) {
-            return NextResponse.json({
-                statusCode: 400,
-                errorCode: "BAD_REQUEST",
-                errorMessage: "All fields are required",
-            }, { status: 400 });
-        }
+    // Compose user confirmation email
+    const userTo = email;
+    const userSubject = "Thank you for contacting PT International!";
+    const userText = `Dear ${name},\n\nThank you for reaching out to PT International. We have received your message and will get back to you soon.\n\nYour message:\n${message}\n\nBest regards,\nPT International Team`;
+    const userHtml = `<p>Dear ${name},</p><p>Thank you for reaching out to PT International. We have received your message and will get back to you soon.</p><p><strong>Your message:</strong><br/>${message}</p><p>Best regards,<br/>PT International Team</p>`;
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.toString())) {
-            return NextResponse.json({
-                statusCode: 400,
-                errorCode: "BAD_REQUEST",
-                errorMessage: "Invalid email format",
-            }, { status: 400 });
-        }
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: Number(process.env.SMTP_PORT) === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD,
+      },
+    });
 
+    // Send to admin
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: adminTo,
+      subject: adminSubject,
+      text: adminText,
+      html: adminHtml,
+    });
 
-        const contactData = {
-            name: name.toString(),
-            email: email.toString(),
-            phone: phone.toString(),
-            subject: subject.toString(),
-            message: message.toString(),
-            status: ContactStatus.NEW,
-            priority: priority.toString() as ContactPriority,
-        };
+    // Send confirmation to user
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: userTo,
+      subject: userSubject,
+      text: userText,
+      html: userHtml,
+    });
 
-        const newContact = await ContactService.addContact(contactData);
-
-        consoleManager.log("Contact created successfully:", newContact);
-
-        return NextResponse.json({
-            statusCode: 201,
-            message: "Contact added successfully",
-            data: newContact,
-            errorCode: "NO",
-            errorMessage: "",
-        }, { status: 201 });
-
-    } catch (error: any) {
-        consoleManager.error("Error in POST /api/contacts:", error);
-        return NextResponse.json({
-            statusCode: 500,
-            errorCode: "INTERNAL_ERROR",
-            errorMessage: error.message || "Internal Server Error",
-        }, { status: 500 });
-    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
 }

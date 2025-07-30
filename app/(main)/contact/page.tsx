@@ -38,6 +38,7 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
+      // Prepare FormData as required by the API route
       const formDataToSend = new FormData()
       formDataToSend.append("name", formData.name)
       formDataToSend.append("email", formData.email)
@@ -52,14 +53,15 @@ export default function ContactPage() {
 
       const result = await response.json()
 
-      if (response.ok) {
+      if (response.ok && result.success) {
         toast({
           title: "Message Sent Successfully!",
           description: "Thank you for contacting us. We'll get back to you within 24 hours.",
         })
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
       } else {
-        throw new Error(result.errorMessage || "Failed to send message")
+        // The API returns { error: ... } on error
+        throw new Error(result.error || "Failed to send message")
       }
     } catch (error) {
       toast({
@@ -123,7 +125,7 @@ export default function ContactPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="name">Full Name *</Label>
@@ -134,6 +136,7 @@ export default function ContactPage() {
                             onChange={handleChange}
                             required
                             placeholder="Your full name"
+                            autoComplete="name"
                           />
                         </div>
                         <div className="space-y-2">
@@ -146,6 +149,7 @@ export default function ContactPage() {
                             onChange={handleChange}
                             required
                             placeholder="your.email@example.com"
+                            autoComplete="email"
                           />
                         </div>
                       </div>
@@ -160,6 +164,7 @@ export default function ContactPage() {
                           onChange={handleChange}
                           required
                           placeholder="+1 (555) 123-4567"
+                          autoComplete="tel"
                         />
                       </div>
 

@@ -32,12 +32,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: null },
-  { name: "Courses", href: "/dashboard/courses", icon: BookOpenText, badge: null },
-  { name: "Blogs", href: "/dashboard/blogs", icon: Newspaper, badge: null },
-  { name: "Subscribers", href: "/dashboard/subscribers", icon: Users2, badge: null },
+  // { name: "Courses", href: "/dashboard/courses", icon: BookOpenText, badge: null },
+  // { name: "Blogs", href: "/dashboard/blogs", icon: Newspaper, badge: null },
+  // { name: "Subscribers", href: "/dashboard/subscribers", icon: Users2, badge: null },
   { name: "Gallery", href: "/dashboard/gallery", icon: GalleryVerticalEnd, badge: null },
-  { name: "Contact", href: "/dashboard/contact", icon: MailCheck, badge: null },
-  { name: "Test", href: "/dashboard/test", icon: FileText, badge: null },
+  // { name: "Contact", href: "/dashboard/contact", icon: MailCheck, badge: null },
+  // { name: "Test", href: "/dashboard/test", icon: FileText, badge: null },
   { name: "Products", href: "/dashboard/products", icon: Package, badge: null },
   { name: "Services", href: "/dashboard/services", icon: ContactRound, badge: null },
 ];
@@ -114,14 +114,14 @@ const Sidebar = ({ onClose, isMobile = false }: SidebarProps) => {
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="/avatar.png" alt="User" />
                   <AvatarFallback className="bg-gradient-to-br from-orange-600 to-navy-600 text-white">
-                    SA
+                    PT
                   </AvatarFallback>
                 </Avatar>
               </Button>
               </Link>
               <div>
                 <Link href="/" target="_blank" className="text-lg font-bold text-primary">
-                  <span className="text-navy">Study</span> <span className="text-orange">Abroad</span>
+                  <span className="text-navy">PT</span> <span className="text-orange">International</span>
                 </Link>
               </div>
             </motion.div>

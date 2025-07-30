@@ -1,20 +1,33 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { motion } from "framer-motion"
 import { Search, Filter } from "lucide-react"
-import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ServiceCard } from "@/components/service-card"
-import { services } from "@/lib/data"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { fetchServices } from "@/lib/redux/features/serviceSlice"
+import type { AppDispatch } from "@/lib/redux/store"
+import type { RootState } from "@/lib/redux/store"
 
-const categories = ["All", "Research", "Diagnostics", "Consulting", "Quality"]
+
 
 export default function ServicesPage() {
+  const dispatch = useDispatch<AppDispatch>()
+  const { services, loading, error } = useSelector((state: RootState) => state.services)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
+
+  useEffect(() => {
+    dispatch(fetchServices())
+  }, [dispatch])
+
+  // Optionally, dynamically build categories from services
+  const categories = [...new Set(services.map((course) => course.category))]
+
 
   const filteredServices = services.filter((service) => {
     const matchesSearch =
@@ -48,7 +61,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Filters Section */}
-      <section className="py-8 bg-white border-b">
+      <section className="py-8 bg-white border-b flex justify-center items-center">
         <div className="max-w-7xl mx-auto container-padding">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-4 w-full md:w-auto">
@@ -59,6 +72,7 @@ export default function ServicesPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  disabled={loading}
                 />
               </div>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -76,7 +90,9 @@ export default function ServicesPage() {
               </Select>
             </div>
             <div className="text-sm text-muted-foreground">
-              {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
+              {loading
+                ? "Loading services..."
+                : `${filteredServices.length} service${filteredServices.length !== 1 ? "s" : ""} found`}
             </div>
           </div>
         </div>
@@ -85,7 +101,11 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
-          {filteredServices.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading services...</div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500">Error: {error}</div>
+          ) : filteredServices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredServices.map((service, index) => (
                 <motion.div
