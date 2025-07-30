@@ -1,7 +1,21 @@
 import CategoryPageClient from "./CategoryPageClient"
+import ProductService from "@/app/api/services/productServices"
 
-export default async function CategoryPage({ params }: any) {
-  return <CategoryPageClient params={params} />
+export const metadata = {
+  title: "Product Category",
+}
+
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>
+}) {
+  const resolvedParams = await params
+
+  // Fetch products by category using ProductService (server-side)
+  const products = await ProductService.getProductsByCategory(resolvedParams.category)
+
+  return <CategoryPageClient category={resolvedParams.category} initialProducts={products} />
 }
 
 export async function generateStaticParams() {

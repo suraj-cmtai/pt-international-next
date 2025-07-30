@@ -7,41 +7,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { productCategories } from "@/lib/data"
-import type { Product } from "@/lib/redux/features/productSlice"
+import type { Product } from "@/app/api/services/productServices"
 
-interface ProductPageProps {
-  params: {
-    category: string
-    slug: string
-  }
+// Static category data for display purposes
+const categoryInfo: Record<string, { name: string }> = {
+  "research-products": { name: "Research Products" },
+  "diagnostics-products": { name: "Diagnostics Products" },
+  "instruments-consumables": { name: "Instruments & Consumables" },
+  "reagents-chemicals": { name: "Reagents & Chemicals" },
+  plasticwaresfiltrationunits: { name: "Plasticwares & Filtration Units" },
+  "food-testing-kits": { name: "Food Testing Kits" },
+  "disinfectant-and-sanitizers": { name: "Disinfectant & Sanitizers" },
+}
+
+interface ProductPageClientProps {
+  category: string
   product: Product
 }
 
-export default function ProductPageClient({ params, product }: ProductPageProps) {
-  // Defensive: If product is not passed, show nothing (should not happen if server logic is correct)
-  if (!product) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading product...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const category = productCategories.find((cat) => cat.slug === product.category)
-
-  if (!category) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="text-lg text-muted-foreground">Category not found.</div>
-        </div>
-      </div>
-    )
-  }
+export default function ProductPageClient({ category, product }: ProductPageClientProps) {
+  const categoryData = categoryInfo[category] || { name: "Products" }
 
   return (
     <div>
@@ -57,8 +42,8 @@ export default function ProductPageClient({ params, product }: ProductPageProps)
               Products
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href={`/products/${product.category}`} className="text-muted-foreground hover:text-primary">
-              {category.name}
+            <Link href={`/products/${category}`} className="text-muted-foreground hover:text-primary">
+              {categoryData.name}
             </Link>
             <span className="text-muted-foreground">/</span>
             <span className="text-foreground">{product.title}</span>
@@ -70,9 +55,9 @@ export default function ProductPageClient({ params, product }: ProductPageProps)
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           <Button variant="ghost" asChild className="mb-6 -ml-4">
-            <Link href={`/products/${product.category}`}>
+            <Link href={`/products/${category}`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to {category.name}
+              Back to {categoryData.name}
             </Link>
           </Button>
 
@@ -107,7 +92,7 @@ export default function ProductPageClient({ params, product }: ProductPageProps)
             <div className="space-y-6">
               <div>
                 <Badge variant="secondary" className="mb-3">
-                  {category.name}
+                  {categoryData.name}
                 </Badge>
                 <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.title}</h1>
                 <p className="text-lg text-muted-foreground">{product.description}</p>
@@ -185,7 +170,7 @@ export default function ProductPageClient({ params, product }: ProductPageProps)
                   <CardTitle>Technical Specifications</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {product.specifications ? (
+                  {product.specifications && Object.keys(product.specifications).length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(product.specifications).map(([key, value]) => (
                         <div key={key} className="flex justify-between py-2 border-b">

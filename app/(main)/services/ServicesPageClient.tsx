@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Search, Grid, List, ArrowLeft } from "lucide-react"
+import { Search, Grid, List } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,96 +9,42 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Product } from "@/app/api/services/productServices"
+import type { ServiceWithMeta } from "@/app/api/services/serviceServices"
 
-// Static category data for display purposes
-const categoryInfo: Record<string, { name: string; description: string }> = {
-  "research-products": {
-    name: "Research Products",
-    description: "Advanced tools and kits for cutting-edge research applications",
-  },
-  "diagnostics-products": {
-    name: "Diagnostics Products",
-    description: "Reliable diagnostic solutions for clinical and laboratory use",
-  },
-  "instruments-consumables": {
-    name: "Instruments & Consumables",
-    description: "High-quality laboratory instruments and consumable supplies",
-  },
-  "reagents-chemicals": {
-    name: "Reagents & Chemicals",
-    description: "Pure reagents and chemicals for various applications",
-  },
-  plasticwaresfiltrationunits: {
-    name: "Plasticwares & Filtration Units",
-    description: "Laboratory plasticware and filtration solutions",
-  },
-  "food-testing-kits": {
-    name: "Food Testing Kits",
-    description: "Comprehensive kits for food safety and quality testing",
-  },
-  "disinfectant-and-sanitizers": {
-    name: "Disinfectant & Sanitizers",
-    description: "Professional-grade disinfection and sanitization products",
-  },
+interface ServicesPageClientProps {
+  initialServices: ServiceWithMeta[]
 }
 
-interface CategoryPageClientProps {
-  category: string
-  initialProducts: Product[]
-}
-
-export default function CategoryPageClient({ category, initialProducts }: CategoryPageClientProps) {
+export default function ServicesPageClient({ initialServices }: ServicesPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  const categoryData = categoryInfo[category] || { name: "Products", description: "Product category" }
-
-  const filteredProducts = initialProducts.filter(
-    (product) =>
-      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredServices = initialServices.filter(
+    (service) =>
+      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.category.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <section className="py-4 bg-gray-50 border-b">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="flex items-center space-x-2 text-sm">
-            <Link href="/" className="text-muted-foreground hover:text-primary">
-              Home
-            </Link>
-            <span className="text-muted-foreground">/</span>
-            <Link href="/products" className="text-muted-foreground hover:text-primary">
-              Products
-            </Link>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-foreground">{categoryData.name}</span>
-          </div>
-        </div>
-      </section>
-
       {/* Hero Section */}
       <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="max-w-7xl mx-auto container-padding">
-          <Button variant="ghost" asChild className="mb-6 -ml-4">
-            <Link href="/products">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Products
-            </Link>
-          </Button>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-3xl"
+            className="max-w-3xl mx-auto text-center"
           >
             <Badge variant="secondary" className="mb-4">
-              {categoryData.name}
+              Our Services
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{categoryData.name}</h1>
-            <p className="text-lg text-muted-foreground">{categoryData.description}</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Professional Life Science Services</h1>
+            <p className="text-lg text-muted-foreground">
+              Comprehensive solutions for your research, diagnostic, and analytical needs with expert consultation and
+              support.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -111,7 +57,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
               <div className="relative flex-1 md:w-80">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products..."
+                  placeholder="Search services..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -120,7 +66,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             </div>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""} found
+                {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
               </div>
               <div className="flex border rounded-md">
                 <Button
@@ -145,14 +91,14 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
         </div>
       </section>
 
-      {/* Products Grid/List */}
+      {/* Services Grid/List */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
-          {filteredProducts.length > 0 ? (
+          {filteredServices.length > 0 ? (
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "space-y-6"}>
-              {filteredProducts.map((product, index) => (
+              {filteredServices.map((service, index) => (
                 <motion.div
-                  key={product.id}
+                  key={service.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -163,37 +109,29 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
                       className={`${viewMode === "list" ? "w-48 h-32 flex-shrink-0" : "aspect-video"} relative overflow-hidden ${viewMode === "grid" ? "rounded-t-lg" : "rounded-l-lg"}`}
                     >
                       <Image
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.title}
+                        src={service.image || "/placeholder.svg"}
+                        alt={service.title}
                         fill
                         className="object-cover"
                       />
+                      <Badge className="absolute top-2 right-2" variant="secondary">
+                        {service.category}
+                      </Badge>
                     </div>
                     <div className="flex-1">
                       <CardHeader>
-                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{product.title}</CardTitle>
-                        <CardDescription>{product.description}</CardDescription>
+                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{service.title}</CardTitle>
+                        <CardDescription>{service.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        {product.price && (
+                        {service.price && (
                           <div className="mb-4">
-                            <div className="text-lg font-bold text-primary">{product.price}</div>
+                            <div className="text-sm text-muted-foreground">Starting at</div>
+                            <div className="text-lg font-bold text-primary">{service.price}</div>
                           </div>
                         )}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {product.features.slice(0, 2).map((feature, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {feature}
-                            </Badge>
-                          ))}
-                          {product.features.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{product.features.length - 2} more
-                            </Badge>
-                          )}
-                        </div>
                         <Button asChild className="w-full">
-                          <Link href={`/products/${category}/${product.slug}`}>View Details</Link>
+                          <Link href={`/services/${service.slug}`}>Learn More</Link>
                         </Button>
                       </CardContent>
                     </div>
@@ -203,7 +141,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No products found in this category</div>
+              <div className="text-muted-foreground mb-4">No services found matching your search</div>
               <Button variant="outline" onClick={() => setSearchTerm("")}>
                 Clear Search
               </Button>
@@ -222,17 +160,17 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl font-bold mb-4">Need Help Choosing?</h2>
+            <h2 className="text-3xl font-bold mb-4">Need Custom Solutions?</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Our experts can help you select the right products for your specific needs. Contact us for personalized
-              recommendations.
+              Our team of experts can develop tailored solutions to meet your specific requirements. Contact us to
+              discuss your project.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
-                <Link href="/contact?message=Product Selection Help">Get Expert Advice</Link>
+                <Link href="/contact?message=Custom Service Inquiry">Request Consultation</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/services">View Services</Link>
+                <Link href="/products">View Products</Link>
               </Button>
             </div>
           </motion.div>
