@@ -4,8 +4,14 @@ export const metadata = {
   title: "Product Details",
 }
 
-export default async function ProductPage({ params }: { params: { category: string; slug: string } }) {
-  return <ProductPageClient params={params} />
+// Next.js 15: params is a Promise
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ category: string; slug: string }>
+}) {
+  const resolvedParams = await params
+  return <ProductPageClient params={resolvedParams} />
 }
 
 export async function generateStaticParams() {

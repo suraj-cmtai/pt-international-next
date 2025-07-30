@@ -33,11 +33,8 @@ export default function ProductPageClient({ params }: ProductPageProps) {
   const error = useSelector(selectError)
 
   useEffect(() => {
-    const getParams = async () => {
-      const { slug } = params.slug
-      dispatch(fetchProductBySlug(params.slug))
-    }
-    getParams()
+    // params.slug is a string, not an object
+    dispatch(fetchProductBySlug(params.slug))
   }, [params, dispatch])
 
   if (isLoading) {

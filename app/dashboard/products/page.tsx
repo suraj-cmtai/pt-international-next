@@ -1,46 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Search, Eye, MoreHorizontal, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "@/hooks/use-toast"
+import { useState, useEffect, useRef } from "react"
+import { Plus, Edit, Trash2, Search, Eye, X } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch } from "@/lib/redux/store"
 import {
@@ -57,6 +19,7 @@ import {
 } from "@/lib/redux/features/productSlice"
 import { productCategories } from "@/lib/data"
 import { format } from "date-fns"
+import { toast } from "@/hooks/use-toast"
 
 export default function ProductsManagement() {
   const dispatch = useDispatch<AppDispatch>()
@@ -82,6 +45,8 @@ export default function ProductsManagement() {
     isActive: true,
   })
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const filteredProducts = products.filter(
     (product) =>
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,11 +70,21 @@ export default function ProductsManagement() {
     }
   }, [error, dispatch])
 
+  useEffect(() => {
+    if (imageFiles.length === 0 && fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }, [imageFiles.length])
+
+  // --- Image Handling ---
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     setImageFiles(files)
-
     const previews: string[] = []
+    if (files.length === 0) {
+      setImagePreviews([])
+      return
+    }
     files.forEach((file) => {
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -127,30 +102,21 @@ export default function ProductsManagement() {
     const newPreviews = imagePreviews.filter((_, i) => i !== index)
     setImageFiles(newFiles)
     setImagePreviews(newPreviews)
+    if (newFiles.length === 0) {
+      setImagePreviews([])
+    }
   }
 
-  const addFeature = () => {
-    setFeatures([...features, ""])
-  }
-
-  const removeFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index))
-  }
-
+  const addFeature = () => setFeatures([...features, ""])
+  const removeFeature = (index: number) => setFeatures(features.filter((_, i) => i !== index))
   const updateFeature = (index: number, value: string) => {
     const newFeatures = [...features]
     newFeatures[index] = value
     setFeatures(newFeatures)
   }
 
-  const addSpecification = () => {
-    setSpecifications([...specifications, { key: "", value: "" }])
-  }
-
-  const removeSpecification = (index: number) => {
-    setSpecifications(specifications.filter((_, i) => i !== index))
-  }
-
+  const addSpecification = () => setSpecifications([...specifications, { key: "", value: "" }])
+  const removeSpecification = (index: number) => setSpecifications(specifications.filter((_, i) => i !== index))
   const updateSpecification = (index: number, field: "key" | "value", value: string) => {
     const newSpecs = [...specifications]
     newSpecs[index][field] = value
@@ -183,7 +149,6 @@ export default function ProductsManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     const specsObject = specifications
       .filter((spec) => spec.key.trim() !== "" && spec.value.trim() !== "")
       .reduce(
@@ -204,8 +169,6 @@ export default function ProductsManagement() {
     productFormData.append("features", JSON.stringify(features.filter((f) => f.trim() !== "")))
     productFormData.append("specifications", JSON.stringify(specsObject))
     productFormData.append("isActive", formData.isActive.toString())
-
-    // Add image files
     imageFiles.forEach((file, index) => {
       productFormData.append(`image_${index}`, file)
     })
@@ -248,6 +211,7 @@ export default function ProductsManagement() {
     })
     setFeatures(product.features.length > 0 ? product.features : [""])
     setImagePreviews(product.images)
+    setImageFiles([])
 
     if (product.specifications) {
       const specs = Object.entries(product.specifications).map(([key, value]) => ({ key, value }))
@@ -275,347 +239,428 @@ export default function ProductsManagement() {
     }
   }
 
+  // --- Loading style exactly like services page ---
   if (isLoading && !hasFetched) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading products...</p>
+      <div className="flex items-center justify-center min-h-[300px] w-full">
+        <div className="flex flex-col items-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-primary" />
+          <span className="text-muted-foreground text-sm mt-2">Loading products...</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">Manage your company products and inventory</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
-              <DialogDescription>
-                {editingProduct ? "Update the product information" : "Fill in the details to create a new product"}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
+    <div className="w-full max-w-6xl mx-auto px-2 md:px-6 py-8">
+      {/* Header and Create Button */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
+        <button
+          type="button"
+          onClick={() => {
+            resetForm()
+            setIsDialogOpen(true)
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition text-sm font-medium"
+        >
+          <Plus className="h-4 w-4" />
+          Add Product
+        </button>
+      </div>
+
+      {/* Dialog for Add/Edit Product */}
+      {isDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg mx-2 p-0 relative">
+            <div className="flex flex-col h-full">
+              <button
+                type="button"
+                className="absolute top-3 right-3 text-muted-foreground hover:text-black"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="px-6 pt-6 pb-2">
+                <h2 className="text-xl font-semibold mb-1">
+                  {editingProduct ? "Edit Product" : "Add Product"}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {editingProduct
+                    ? "Update the product information below."
+                    : "Fill in the details to create a new product."}
+                </p>
+              </div>
+              <form onSubmit={handleSubmit} className="overflow-y-auto px-6 pb-6 pt-0 max-h-[80vh]">
+                <div className="mb-4">
+                  <label htmlFor="title" className="block text-sm font-medium mb-1">
+                    Title *
+                  </label>
+                  <input
                     id="title"
+                    className="w-full border rounded px-3 py-2 text-sm"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
+                <div className="mb-4">
+                  <label htmlFor="category" className="block text-sm font-medium mb-1">
+                    Category *
+                  </label>
+                  <select
+                    id="category"
+                    className="w-full border rounded px-3 py-2 text-sm"
                     value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {productCategories.map((category) => (
-                        <SelectItem key={category.slug} value={category.slug}>
-                          {category.name}
-                        </SelectItem>
+                    <option value="">Select category</option>
+                    {productCategories.map((category) => (
+                      <option key={category.slug} value={category.slug}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="description" className="block text-sm font-medium mb-1">
+                    Short Description *
+                  </label>
+                  <textarea
+                    id="description"
+                    className="w-full border rounded px-3 py-2 text-sm resize-none"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    required
+                    rows={2}
+                    placeholder="Brief description of the product"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="longDescription" className="block text-sm font-medium mb-1">
+                    Detailed Description *
+                  </label>
+                  <textarea
+                    id="longDescription"
+                    className="w-full border rounded px-3 py-2 text-sm resize-none"
+                    value={formData.longDescription}
+                    onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
+                    required
+                    rows={4}
+                    placeholder="Detailed description of the product"
+                  />
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <div className="flex-1">
+                    <label htmlFor="price" className="block text-sm font-medium mb-1">
+                      Price
+                    </label>
+                    <input
+                      id="price"
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="e.g., $299.99"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label htmlFor="slug" className="block text-sm font-medium mb-1">
+                      URL Slug
+                    </label>
+                    <input
+                      id="slug"
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={formData.slug}
+                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      placeholder="Auto-generated from title"
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="images" className="block text-sm font-medium mb-1">
+                    Product Images
+                  </label>
+                  <input
+                    id="images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    ref={fileInputRef}
+                    className="block w-full text-sm"
+                    onChange={handleImageChange}
+                  />
+                  {(imagePreviews.length > 0) && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative w-16 h-16">
+                          <img
+                            src={preview || "/placeholder.svg"}
+                            alt={`Preview ${index + 1}`}
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow"
+                            onClick={() => removeImage(index)}
+                            tabIndex={-1}
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </button>
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Short Description *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of the product"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="longDescription">Detailed Description *</Label>
-                <Textarea
-                  id="longDescription"
-                  value={formData.longDescription}
-                  onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                  rows={4}
-                  placeholder="Detailed description of the product"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input
-                    id="price"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="e.g., $299.99"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    placeholder="Auto-generated from title"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="images">Product Images (Multiple)</Label>
-                <Input id="images" type="file" accept="image/*" multiple onChange={handleImageChange} />
-                {imagePreviews.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2 mt-2">
-                    {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={preview || "/placeholder.svg"}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border"
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Key Features</label>
+                  <div className="flex flex-col gap-2">
+                    {features.map((feature, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          className="flex-1 border rounded px-3 py-2 text-sm"
+                          value={feature}
+                          onChange={(e) => updateFeature(index, e.target.value)}
+                          placeholder="Enter feature"
                         />
-                        <Button
+                        <button
                           type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0"
-                          onClick={() => removeImage(index)}
+                          className="text-red-500 hover:text-red-700 px-2"
+                          onClick={() => removeFeature(index)}
+                          disabled={features.length === 1}
+                          tabIndex={-1}
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Key Features</Label>
-                {features.map((feature, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={feature}
-                      onChange={(e) => updateFeature(index, e.target.value)}
-                      placeholder="Enter feature"
-                    />
-                    <Button
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeFeature(index)}
-                      disabled={features.length === 1}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                      onClick={addFeature}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Plus className="h-4 w-4" />
+                      Add Feature
+                    </button>
                   </div>
-                ))}
-                <Button type="button" variant="outline" onClick={addFeature}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Feature
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Technical Specifications</Label>
-                {specifications.map((spec, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={spec.key}
-                      onChange={(e) => updateSpecification(index, "key", e.target.value)}
-                      placeholder="Specification name"
-                    />
-                    <Input
-                      value={spec.value}
-                      onChange={(e) => updateSpecification(index, "value", e.target.value)}
-                      placeholder="Specification value"
-                    />
-                    <Button
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Technical Specifications</label>
+                  <div className="flex flex-col gap-2">
+                    {specifications.map((spec, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          className="flex-1 border rounded px-3 py-2 text-sm"
+                          value={spec.key}
+                          onChange={(e) => updateSpecification(index, "key", e.target.value)}
+                          placeholder="Specification name"
+                        />
+                        <input
+                          className="flex-1 border rounded px-3 py-2 text-sm"
+                          value={spec.value}
+                          onChange={(e) => updateSpecification(index, "value", e.target.value)}
+                          placeholder="Specification value"
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 hover:text-red-700 px-2"
+                          onClick={() => removeSpecification(index)}
+                          disabled={specifications.length === 1}
+                          tabIndex={-1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeSpecification(index)}
-                      disabled={specifications.length === 1}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                      onClick={addSpecification}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Plus className="h-4 w-4" />
+                      Add Specification
+                    </button>
                   </div>
-                ))}
-                <Button type="button" variant="outline" onClick={addSpecification}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Specification
-                </Button>
-              </div>
+                </div>
+                <div className="mb-6 flex items-center gap-2">
+                  <input
+                    id="isActive"
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                  <label htmlFor="isActive" className="text-sm">
+                    Active (visible to public)
+                  </label>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border text-sm"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded bg-primary text-white text-sm font-medium"
+                    disabled={isLoading}
+                  >
+                    {editingProduct ? "Update Product" : "Create Product"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
-                <Label htmlFor="isActive">Active (visible to public)</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {editingProduct ? "Update Product" : "Create Product"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+      {/* Search Bar */}
+      <div className="flex items-center mb-6">
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <input
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-3 py-2 w-full border rounded text-sm"
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Search Products</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Products ({filteredProducts.length})</CardTitle>
-          <CardDescription>Manage your company products and their visibility</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex -space-x-2">
-                        {product.images.slice(0, 3).map((image, index) => (
-                          <img
-                            key={index}
-                            src={image || "/placeholder.svg"}
-                            alt={`${product.title} ${index + 1}`}
-                            className="w-10 h-10 object-cover rounded-lg border-2 border-background"
-                          />
-                        ))}
-                        {product.images.length > 3 && (
-                          <div className="w-10 h-10 bg-muted rounded-lg border-2 border-background flex items-center justify-center text-xs font-medium">
-                            +{product.images.length - 3}
-                          </div>
-                        )}
-                      </div>
+      <div className="overflow-x-auto border rounded-lg bg-white">
+        <table className="min-w-full">
+          <thead>
+            <tr className="bg-muted/50 border-b">
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Product</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Category</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Price</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Status</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Updated</th>
+              <th className="text-left px-4 py-3 text-sm font-semibold whitespace-nowrap">Images</th>
+              <th className="text-right px-4 py-3 text-sm font-semibold whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center text-muted-foreground py-12">
+                  No products found.
+                </td>
+              </tr>
+            ) : (
+              filteredProducts.map((product, idx) => (
+                <tr
+                  key={product.id}
+                  className={
+                    "hover:bg-muted/30 transition-colors " +
+                    (idx === filteredProducts.length - 1 ? "" : "border-b")
+                  }
+                >
+                  <td className="px-4 py-4 align-middle min-w-[180px]">
+                    <div className="flex items-center gap-3">
                       <div>
                         <div className="font-medium">{product.title}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-1">{product.description}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{product.description}</div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
+                  </td>
+                  <td className="px-4 py-4 align-middle min-w-[120px]">
+                    <span className="inline-block px-2 py-1 rounded bg-muted text-xs">
                       {productCategories.find((cat) => cat.slug === product.category)?.name || product.category}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{product.price || "N/A"}</TableCell>
-                  <TableCell>
-                    <Badge variant={product.isActive ? "default" : "secondary"}>
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 align-middle min-w-[80px]">{product.price || "N/A"}</td>
+                  <td className="px-4 py-4 align-middle min-w-[90px]">
+                    <span
+                      className={
+                        "inline-block px-2 py-1 rounded text-xs " +
+                        (product.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-600")
+                      }
+                    >
                       {product.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-muted-foreground">
-                      {product.updatedAt?.toDate?.() ? format(product.updatedAt.toDate(), "MMM d, yyyy") : "N/A"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 align-middle min-w-[110px]">
+                    <span className="text-xs text-muted-foreground">
+                      {product.updatedAt?.toDate?.()
+                        ? format(product.updatedAt.toDate(), "MMM d, yyyy")
+                        : "N/A"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 align-middle min-w-[90px]">
+                    <div className="flex -space-x-2">
+                      {product.images && product.images.length > 0 ? (
+                        product.images.slice(0, 3).map((img, i) => (
+                          <img
+                            key={i}
+                            src={img || "/placeholder.svg"}
+                            alt={`Product image ${i + 1}`}
+                            className="w-8 h-8 object-cover rounded border bg-background"
+                          />
+                        ))
+                      ) : (
+                        <img
+                          src="/placeholder.svg"
+                          alt="No image"
+                          className="w-8 h-8 object-cover rounded border bg-background"
+                        />
+                      )}
+                      {product.images && product.images.length > 3 && (
+                        <div className="w-8 h-8 bg-muted rounded border flex items-center justify-center text-xs font-medium">
+                          +{product.images.length - 3}
+                        </div>
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => window.open(`/products/${product.category}/${product.slug}`, "_blank")}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(product)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{product.title}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(product.id!)}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </td>
+                  <td className="px-4 py-4 align-middle text-right min-w-[120px]">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        className="p-2 rounded hover:bg-muted"
+                        title="View"
+                        onClick={() =>
+                          window.open(`/products/${product.category}/${product.slug}`, "_blank")
+                        }
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="p-2 rounded hover:bg-muted"
+                        title="Edit"
+                        onClick={() => handleEdit(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="p-2 rounded hover:bg-muted"
+                        title="Delete"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Are you sure you want to delete "${product.title}"? This action cannot be undone.`
+                            )
+                          ) {
+                            handleDelete(product.id!)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

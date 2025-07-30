@@ -7,7 +7,6 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch } from "@/lib/redux/store"
 import {
@@ -17,6 +16,7 @@ import {
   selectError,
 } from "@/lib/redux/features/productSlice"
 import { productCategories } from "@/lib/data"
+import { ProductCard } from "@/components/product-card"
 
 interface CategoryPageClientProps {
   params: Promise<{ category: string }>
@@ -43,11 +43,14 @@ export default function CategoryPageClient({ params }: CategoryPageClientProps) 
 
   const category = productCategories.find((cat) => cat.slug === categorySlug)
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  // Ensure all products have a string id for ProductCard compatibility
+  const filteredProducts = products
+    .filter(
+      (product) =>
+        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .filter((product) => typeof product.id === "string" && !!product.id)
 
   if (isLoading) {
     return (
@@ -182,47 +185,8 @@ export default function CategoryPageClient({ params }: CategoryPageClientProps) 
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <Card className={`h-full card-hover ${viewMode === "list" ? "flex" : ""}`}>
-                    <div
-                      className={`${viewMode === "list" ? "w-48 h-32 flex-shrink-0" : "aspect-video"} relative overflow-hidden ${viewMode === "grid" ? "rounded-t-lg" : "rounded-l-lg"}`}
-                    >
-                      <img
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                      />
-                      {product.price && (
-                        <Badge className="absolute top-2 right-2" variant="secondary">
-                          {product.price}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex-1 flex flex-col">
-                      <CardHeader className="flex-1">
-                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{product.title}</CardTitle>
-                        <CardDescription className="line-clamp-2">{product.description}</CardDescription>
-                        {product.features.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {product.features.slice(0, 3).map((feature, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {feature}
-                              </Badge>
-                            ))}
-                            {product.features.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{product.features.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <Button asChild className="w-full">
-                          <Link href={`/products/${categorySlug}/${product.slug}`}>View Details</Link>
-                        </Button>
-                      </CardContent>
-                    </div>
-                  </Card>
+                  {/* Use the ProductCard component for each product, ensuring id is string */}
+                  <ProductCard product={{ ...product, id: product.id as string }} />
                 </motion.div>
               ))}
             </div>

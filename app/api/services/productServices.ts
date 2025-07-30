@@ -20,8 +20,14 @@ export interface Product {
 }
 
 class ProductService {
+  // The cache is always ignored, so products and isInitialized are not used for caching
   static products: Product[] = [];
-  static isInitialized = false;
+  static get isInitialized() {
+    return false;
+  }
+  static set isInitialized(_: boolean) {
+    // do nothing, always false
+  }
   private static collectionName = "products";
 
   // Helper method to convert Firestore timestamp to Date
@@ -67,24 +73,11 @@ class ProductService {
     };
   }
 
-  // Initialize Firestore real-time listener
+  // Initialize Firestore real-time listener (no-op, always disables cache)
   static initProducts() {
-    if (this.isInitialized) return;
-
-    consoleManager.log("Initializing Firestore listener for products...");
-    const productsCollection = db.collection(this.collectionName);
-
-    productsCollection.onSnapshot((snapshot: any) => {
-      this.products = snapshot.docs.map((doc: any) => {
-        return this.convertToType(doc.id, doc.data());
-      });
-      consoleManager.log(
-        "Firestore Read: Products updated, count:",
-        this.products.length
-      );
-    });
-
-    this.isInitialized = true;
+    // Always disables cache, so do nothing
+    consoleManager.log("initProducts called, but cache is always disabled.");
+    // isInitialized is always false
   }
 
   // Get all products with optional pagination and filters
@@ -163,9 +156,6 @@ class ProductService {
       const newProductDoc = await db.collection(this.collectionName).doc(newProductRef.id).get();
       const newProduct = this.convertToType(newProductDoc.id, newProductDoc.data());
 
-      // Update the cache
-      await this.getAllProducts(10, undefined, undefined);
-
       return newProduct;
     } catch (error: any) {
       consoleManager.error("Error adding new product:", error);
@@ -173,20 +163,27 @@ class ProductService {
     }
   }
 
-  // Get active products only
+  // Get active products only (always fetches from Firestore)
   static async getActiveProducts(): Promise<Product[]> {
-    return this.products.filter(product => product.isActive);
+    try {
+      const querySnapshot = await db
+        .collection(this.collectionName)
+        .where("isActive", "==", true)
+        .get();
+      const products: Product[] = [];
+      querySnapshot.docs.forEach((doc: any) => {
+        products.push(this.convertToType(doc.id, doc.data()));
+      });
+      return products;
+    } catch (error) {
+      consoleManager.error("Error fetching active products:", error);
+      throw error;
+    }
   }
 
-  // Get product by ID
+  // Get product by ID (always fetches from Firestore)
   static async getProductById(id: string): Promise<Product | null> {
     try {
-      const product = this.products.find((product) => product.id === id);
-      if (product) {
-        consoleManager.log(`Product found in cache:`, id);
-        return product;
-      }
-
       const productDoc = await db.collection(this.collectionName).doc(id).get();
 
       if (!productDoc.exists) {
@@ -203,16 +200,8 @@ class ProductService {
     }
   }
 
-  // Get product by slug
+  // Get product by slug (always fetches from Firestore)
   static async getProductBySlug(slug: string): Promise<Product | null> {
-    // Try to find in cache first
-    let product = this.products.find(product => product.slug === slug && product.isActive);
-    if (product) {
-      consoleManager.log(`Product found in cache by slug:`, slug);
-      return product;
-    }
-
-    // If not found in cache, query Firestore
     try {
       const querySnapshot = await db
         .collection(this.collectionName)
@@ -251,8 +240,6 @@ class ProductService {
       // Wait a moment for the server timestamp to be resolved
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await this.getAllProducts(10, undefined, undefined);
-
       const updatedProduct = await this.getProductById(id);
       if (!updatedProduct) throw new Error("Product not found after update");
       return updatedProduct;
@@ -280,8 +267,6 @@ class ProductService {
       // Wait a moment for the server timestamp to be resolved
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await this.getAllProducts(10, undefined, undefined);
-
       const updatedProduct = await this.getProductById(id);
       if (!updatedProduct) throw new Error("Product not found after status toggle");
       consoleManager.log(`Product ${newStatus ? "activated" : "deactivated"}:`, updatedProduct);
@@ -299,7 +284,6 @@ class ProductService {
       await productRef.delete();
 
       consoleManager.log("Product deleted successfully:", id);
-      await this.getAllProducts(10, undefined, undefined);
       return { id };
     } catch (error: any) {
       consoleManager.error("Error deleting product:", error);
@@ -307,19 +291,50 @@ class ProductService {
     }
   }
 
-  // Get products by category
+  // Get products by category (always fetches from Firestore)
   static async getProductsByCategory(category: string): Promise<Product[]> {
-    return this.products.filter(product => product.category === category && product.isActive);
+    try {
+      const querySnapshot = await db
+        .collection(this.collectionName)
+        .where("category", "==", category)
+        .where("isActive", "==", true)
+        .get();
+      const products: Product[] = [];
+      querySnapshot.docs.forEach((doc: any) => {
+        products.push(this.convertToType(doc.id, doc.data()));
+      });
+      return products;
+    } catch (error) {
+      consoleManager.error("Error fetching products by category:", error);
+      throw error;
+    }
   }
 
-  // Search products
+  // Search products (always fetches from Firestore, searches title, description, category)
   static async searchProducts(query: string): Promise<Product[]> {
-    const searchTerm = query.toLowerCase();
-    return this.products.filter(product =>
-      product.title.toLowerCase().includes(searchTerm) ||
-      product.description.toLowerCase().includes(searchTerm) ||
-      product.category.toLowerCase().includes(searchTerm)
-    );
+    try {
+      // Firestore does not support OR queries natively, so we fetch all active products and filter in memory
+      const querySnapshot = await db
+        .collection(this.collectionName)
+        .where("isActive", "==", true)
+        .get();
+      const searchTerm = query.toLowerCase();
+      const products: Product[] = [];
+      querySnapshot.docs.forEach((doc: any) => {
+        const product = this.convertToType(doc.id, doc.data());
+        if (
+          product.title.toLowerCase().includes(searchTerm) ||
+          product.description.toLowerCase().includes(searchTerm) ||
+          product.category.toLowerCase().includes(searchTerm)
+        ) {
+          products.push(product);
+        }
+      });
+      return products;
+    } catch (error) {
+      consoleManager.error("Error searching products:", error);
+      throw error;
+    }
   }
 }
 
