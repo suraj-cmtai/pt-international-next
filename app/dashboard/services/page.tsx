@@ -51,7 +51,7 @@ interface ServiceFormState {
   removeImage: boolean
   category: string
   price: string
-  active: boolean
+  isActive: boolean
 }
 
 const initialFormState: ServiceFormState = {
@@ -65,7 +65,7 @@ const initialFormState: ServiceFormState = {
   removeImage: false,
   category: "",
   price: "",
-  active: true,
+  isActive: true,
 }
 
 function getSlugFromTitle(title: string) {
@@ -123,8 +123,8 @@ export default function ServicesPage() {
 
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "active" && service.active) ||
-      (statusFilter === "inactive" && !service.active)
+      (statusFilter === "isActive" && service.isActive) ||
+      (statusFilter === "inactive" && !service.isActive)
 
     const matchesCategory = categoryFilter === "all" || service.category === categoryFilter
 
@@ -132,13 +132,13 @@ export default function ServicesPage() {
   })
 
   // Get unique categories
-  const categories = Array.from(new Set(services.map((service: Service) => service.category)))
+  const categories: string[] = Array.from(new Set(services.map((service: Service) => service.category)))
 
   // Stats
   const stats = {
     total: services.length,
-    active: services.filter((s: Service) => s.active).length,
-    inactive: services.filter((s: Service) => !s.active).length,
+    isActive: services.filter((s: Service) => s.isActive).length,
+    inactive: services.filter((s: Service) => !s.isActive).length,
     categories: categories.length,
   }
 
@@ -192,7 +192,7 @@ export default function ServicesPage() {
       )
       formData.append("category", newServiceForm.category.trim())
       formData.append("price", newServiceForm.price.trim())
-      formData.append("active", newServiceForm.active.toString())
+      formData.append("isActive", newServiceForm.isActive.toString())
       if (newServiceForm.imageFile) {
         formData.append("image", newServiceForm.imageFile)
       }
@@ -221,7 +221,7 @@ export default function ServicesPage() {
       removeImage: false,
       category: service.category,
       price: service.price || "",
-      active: service.active ?? true,
+      isActive: service.isActive ?? true,
     })
     setIsEditDialogOpen(true)
   }
@@ -261,7 +261,7 @@ export default function ServicesPage() {
       )
       formData.append("category", editServiceForm.category.trim())
       formData.append("price", editServiceForm.price.trim())
-      formData.append("active", editServiceForm.active.toString())
+      formData.append("isActive", editServiceForm.isActive.toString())
       if (editServiceForm.imageFile) {
         formData.append("image", editServiceForm.imageFile)
       }
@@ -300,7 +300,7 @@ export default function ServicesPage() {
   const toggleServiceStatus = async (serviceId: string, currentStatus: boolean) => {
     try {
       const formData = new FormData()
-      formData.append("active", (!currentStatus).toString())
+      formData.append("isActive", (!currentStatus).toString())
 
       await dispatch(updateService({ id: serviceId, formData })).unwrap()
       toast.success(`Service ${!currentStatus ? "activated" : "deactivated"} successfully!`)
@@ -399,11 +399,11 @@ export default function ServicesPage() {
         </div>
         <div className="flex items-center space-x-2">
           <Switch
-            id="active"
-            checked={formState.active}
-            onCheckedChange={(checked) => setFormState({ ...formState, active: checked })}
+            id="isActive"
+            checked={formState.isActive}
+            onCheckedChange={(checked) => setFormState({ ...formState, isActive: checked })}
           />
-          <Label htmlFor="active">Active</Label>
+          <Label htmlFor="isActive">Active</Label>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="description">
@@ -516,7 +516,7 @@ export default function ServicesPage() {
             <CardTitle className="text-sm font-medium">Active Services</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+            <div className="text-2xl font-bold text-green-600">{stats.isActive}</div>
           </CardContent>
         </Card>
         <Card>
@@ -554,8 +554,8 @@ export default function ServicesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="isActive">Active</SelectItem>
+            <SelectItem value="inActive">Inactive</SelectItem>
           </SelectContent>
         </Select>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -646,16 +646,16 @@ export default function ServicesPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Badge variant={service.active ? "default" : "secondary"}>
-                        {service.active ? "Active" : "Inactive"}
+                      <Badge variant={service.isActive ? "default" : "secondary"}>
+                        {service.isActive ? "Active" : "Inactive"}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleServiceStatus(service.id, service.active)}
+                        onClick={() => toggleServiceStatus(service.id, !!service.isActive)}
                         className="h-6 w-6 p-0"
                       >
-                        {service.active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        {service.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </Button>
                     </div>
                   </TableCell>
@@ -679,8 +679,8 @@ export default function ServicesPage() {
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toggleServiceStatus(service.id, service.active)}>
-                          {service.active ? (
+                        <DropdownMenuItem onClick={() => toggleServiceStatus(service.id, !!service.isActive)}>
+                          {service.isActive ? (
                             <>
                               <EyeOff className="mr-2 h-4 w-4" />
                               Deactivate

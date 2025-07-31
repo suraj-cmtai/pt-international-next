@@ -8,6 +8,10 @@ export interface Service {
   image: string
   category: string
   price?: string
+  isActive?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+
 }
 
 export interface Product {
