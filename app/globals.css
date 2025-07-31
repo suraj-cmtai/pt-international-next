@@ -113,6 +113,10 @@
   background-clip: text !important;
   -webkit-background-clip: text !important;
 }
+/* Remove default background from shadcn/ui NavigationMenuTrigger when used as nav-trigger, but only in default state */
+.nav-trigger:not(:hover):not(:focus):not([data-state="open"]) {
+  background: transparent !important;
+}
 
 .nav-link-active::after,
 .nav-trigger[data-state="open"]::after {

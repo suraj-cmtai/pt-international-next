@@ -119,9 +119,9 @@ export function Navigation() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/testimonials" legacyBehavior passHref>
+                <Link href="/gallery" legacyBehavior passHref>
                   <NavigationMenuLink className={`nav-link px-3 py-2 ${isActive("/testimonials") ? "nav-link-active" : ""}`}>
-                    Testimonials
+                    Gallery
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
