@@ -1,14 +1,18 @@
-import ProductService from "@/app/api/services/productServices"
+"use client"
+
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "@/lib/redux/store"
+import { fetchActiveProducts } from "@/lib/redux/features/productSlice"
 import ProductsPageClient from "./ProductsPageClient"
 
-export const metadata = {
-  title: "Our Products",
-  description: "Comprehensive life science products for research and diagnostics",
-}
+export default function ProductsPage() {
+  const dispatch = useDispatch<AppDispatch>()
+  const { activeProductList, isLoading, error } = useSelector((state: RootState) => state.products)
 
-export default async function ProductsPage() {
-  // Fetch active products on the server
-  const activeProducts = await ProductService.getActiveProducts()
+  useEffect(() => {
+    dispatch(fetchActiveProducts())
+  }, [dispatch])
 
-  return <ProductsPageClient initialProducts={activeProducts} />
+  return <ProductsPageClient initialProducts={activeProductList} loading={isLoading} error={error} />
 }

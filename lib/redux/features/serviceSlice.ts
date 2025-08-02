@@ -114,6 +114,25 @@ export const fetchServiceById = createAsyncThunk<Service, string, { rejectValue:
   }
 )
 
+// Fetch active services only
+export const fetchActiveServices = createAsyncThunk<Service[], void, { rejectValue: string }>(
+  "services/fetchActiveServices",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/routes/services?isActive=true", {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch active services")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch active services")
+    }
+  }
+)
+
 const serviceSlice = createSlice({
   name: "services",
   initialState,
@@ -202,6 +221,19 @@ const serviceSlice = createSlice({
       .addCase(fetchServiceById.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload || action.error.message || "Failed to fetch service"
+      })
+      // Fetch active services
+      .addCase(fetchActiveServices.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchActiveServices.fulfilled, (state, action) => {
+        state.loading = false
+        state.services = action.payload
+      })
+      .addCase(fetchActiveServices.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || action.error.message || "Failed to fetch active services"
       })
   },
 })

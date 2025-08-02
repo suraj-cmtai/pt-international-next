@@ -1,14 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Search, Grid, List } from "lucide-react"
+import { Search, Grid, List, AlertCircle, RefreshCw } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Product } from "@/app/api/services/productServices"
+import type { Product } from "@/lib/redux/features/productSlice"
 
 // Static category data for display purposes
 const productCategories = [
@@ -51,9 +51,11 @@ const productCategories = [
 
 interface ProductsPageClientProps {
   initialProducts: Product[]
+  loading?: boolean
+  error?: string | null
 }
 
-export default function ProductsPageClient({ initialProducts }: ProductsPageClientProps) {
+export default function ProductsPageClient({ initialProducts, loading = false, error = null }: ProductsPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
@@ -68,6 +70,75 @@ export default function ProductsPageClient({ initialProducts }: ProductsPageClie
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section Skeleton */}
+        <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
+          <div className="max-w-7xl mx-auto container-padding">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="h-6 w-32 bg-gray-200 rounded mx-auto mb-4 animate-pulse" />
+              <div className="h-12 w-96 bg-gray-200 rounded mx-auto mb-6 animate-pulse" />
+              <div className="h-6 w-80 bg-gray-200 rounded mx-auto animate-pulse" />
+            </div>
+          </div>
+        </section>
+
+        {/* Categories Grid Skeleton */}
+        <section className="section-padding">
+          <div className="max-w-7xl mx-auto container-padding">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="space-y-3">
+                  <div className="h-48 bg-gray-200 rounded-lg animate-pulse" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-lg shadow-lg p-8 text-center"
+          >
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-6">We couldn't load the products. Please try again.</p>
+            <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-3 mb-6">
+              <strong>Error:</strong> {error}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+                className="border-primary text-primary hover:bg-primary hover:text-white"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh Page
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
