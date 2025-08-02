@@ -21,6 +21,73 @@ import {
 } from "@/lib/redux/features/gallerySlice"
 import Loading from "./loading"
 
+const DUMMY_GALLERY = [
+  {
+    id: "1",
+    title: "Laboratory Instruments",
+    description: "High-precision laboratory instruments for research and diagnostics at PT International Lifesciences.",
+    category: "Instruments",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    title: "Research Products",
+    description: "Innovative research products supporting scientific discovery.",
+    category: "Research",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    title: "Diagnostics Solutions",
+    description: "Reliable diagnostics products for accurate results.",
+    category: "Diagnostics",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    title: "Consumables & Reagents",
+    description: "Quality consumables and reagents for laboratory workflows.",
+    category: "Consumables",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    title: "Events & Exhibitions",
+    description: "PT International Lifesciences at industry events and exhibitions.",
+    category: "Events",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "6",
+    title: "Best Life Sciences Supplier Award 2023",
+    description: "PT International Lifesciences received the Best Life Sciences Supplier Award in 2023 for outstanding service and product quality.",
+    category: "Awards",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "7",
+    title: "Excellence in Diagnostics Innovation 2022",
+    description: "Recognized for excellence in diagnostics innovation at the National Science Expo 2022.",
+    category: "Awards",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+  {
+    id: "8",
+    title: "ISO 9001:2015 Certification",
+    description: "PT International Lifesciences is proud to be ISO 9001:2015 certified for quality management systems.",
+    category: "Awards",
+    image: "/placeholder.svg",
+    createdOn: new Date().toISOString(),
+  },
+]
+
 export default function GalleryPage() {
   const dispatch = useDispatch<AppDispatch>()
   const galleryItems = useSelector(selectActiveGalleryList)
@@ -32,16 +99,20 @@ export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedImage, setSelectedImage] = useState<any>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [useDummy, setUseDummy] = useState(false)
 
   useEffect(() => {
-    if (!hasFetched) {
+    if (!hasFetched && !error) {
       dispatch(fetchActiveGallery())
     }
-  }, [dispatch, hasFetched])
+  }, [dispatch, hasFetched, error])
 
-  const categories = [...new Set(galleryItems.map((item) => item.category))]
+  // If error, use dummy data
+  const items = error ? DUMMY_GALLERY : galleryItems
 
-  const filteredItems = galleryItems.filter((item) => {
+  const categories = [...new Set(items.map((item) => item.category))]
+
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -65,34 +136,56 @@ export default function GalleryPage() {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      "Campus Life": "bg-blue-100 text-blue-800",
-      Graduation: "bg-purple-100 text-purple-800",
-      Events: "bg-green-100 text-green-800",
-      Academic: "bg-orange-100 text-orange-800",
-      Sports: "bg-red-100 text-red-800",
+      "Instruments": "bg-blue-100 text-blue-800",
+      "Research": "bg-purple-100 text-purple-800",
+      "Diagnostics": "bg-green-100 text-green-800",
+      "Consumables": "bg-orange-100 text-orange-800",
+      "Events": "bg-teal-100 text-teal-800",
+      "Awards": "bg-yellow-100 text-yellow-800",
     }
     return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
   }
 
-  if (!hasFetched || isLoading) {
+  if (!hasFetched && !error || isLoading) {
     return <Loading />
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - matches About Us style */}
+      <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="max-w-7xl mx-auto container-padding">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <Badge variant="secondary" className="mb-4">
+              Gallery
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Memorable Moments</h1>
+            <p className="text-lg text-muted-foreground">
+              Explore our collection of achievements, highlights, and memorable moments from PT International Lifesciences.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* If error, show error message above the gallery */}
+      {/* {error && (
+        <div className="w-full flex justify-center mt-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-lg shadow-lg p-8 text-center"
+            className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md w-full"
           >
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-6">We couldn't load the gallery images. Please try again.</p>
+            <p className="text-gray-600 mb-6">We couldn't load the gallery images. Showing sample gallery below.</p>
             <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-3 mb-6">
               <strong>Error:</strong> {error}
             </div>
@@ -108,31 +201,7 @@ export default function GalleryPage() {
             </div>
           </motion.div>
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-primary text-white py-20">
-        <div className="w-full max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Gallery <span className="text-secondary">Showcase</span>
-            </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Explore our collection of memorable moments, achievements, and highlights from PT International
-              Lifesciences
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      )} */}
 
       {/* Filters Section */}
       <section className="py-8 bg-white border-b">
@@ -162,7 +231,7 @@ export default function GalleryPage() {
                 </SelectContent>
               </Select>
               <div className="text-sm text-gray-600">
-                {filteredItems.length} of {galleryItems.length} images
+                {filteredItems.length} of {items.length} images
               </div>
             </div>
           </div>
@@ -192,7 +261,7 @@ export default function GalleryPage() {
                     }}
                   >
                     <Image
-                      src={item.image || "/placeholder.svg"}
+                      src={"/placeholder.svg"}
                       alt={item.title}
                       fill
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -283,7 +352,7 @@ export default function GalleryPage() {
                   }}
                 >
                   <Image
-                    src={selectedImage.image || "/placeholder.svg"}
+                    src={"/placeholder.svg"}
                     alt={selectedImage.title}
                     fill
                     className="object-contain"
