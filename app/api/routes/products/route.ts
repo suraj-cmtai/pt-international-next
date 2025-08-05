@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import ProductService from "../../services/productServices"
 import consoleManager from "../../utils/consoleManager"
+import { UploadImage } from "../../controller/imageController"
 
 // Get all products (GET)
 export async function GET(req: Request) {
@@ -89,6 +90,35 @@ export async function POST(req: Request) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")
 
+    // Handle images: dashboard sends images as FormData "images" (can be File or string URL)
+    // We'll collect all images, upload new files, and keep URLs for existing
+    const images: string[] = []
+    const imageFields = formData.getAll("images")
+    for (const img of imageFields) {
+      // If it's a File (Blob), upload it
+      if (typeof img === "object" && "arrayBuffer" in img && "type" in img) {
+        // Use default size for now, or you can parse from query/fields if needed
+        // You may want to allow custom size in the future
+        try {
+          const url = await UploadImage(img, 300, 300)
+          if (typeof url === "string") {
+            images.push(url)
+          }
+        } catch (err: any) {
+          consoleManager.error("Image upload failed:", err)
+          // Optionally, you can return error here or skip this image
+        }
+      } else if (typeof img === "string" && img.trim() !== "") {
+        // Already a URL (existing image)
+        images.push(img)
+      }
+    }
+
+    // If no images, use placeholder
+    if (images.length === 0) {
+      images.push("/placeholder.svg?height=300&width=300")
+    }
+
     const productData = {
       title: title.toString(),
       slug: productSlug,
@@ -98,7 +128,7 @@ export async function POST(req: Request) {
       price: price?.toString(),
       features: parsedFeatures,
       specifications: parsedSpecifications,
-      images: ["/placeholder.svg?height=300&width=300"], // Default image
+      images,
       isActive,
     }
 

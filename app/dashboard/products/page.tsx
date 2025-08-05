@@ -21,6 +21,8 @@ import { productCategories } from "@/lib/data"
 import { format } from "date-fns"
 import { toast } from "@/hooks/use-toast"
 
+type ImageItem = { file?: File; url?: string; previewUrl: string }
+
 export default function ProductsManagement() {
   const dispatch = useDispatch<AppDispatch>()
   const products = useSelector(selectProductList)
@@ -31,8 +33,8 @@ export default function ProductsManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  // imagesState: array of { file?: File, url?: string, previewUrl: string }
+  const [imagesState, setImagesState] = useState<ImageItem[]>([])
   const [features, setFeatures] = useState<string[]>([""])
   const [specifications, setSpecifications] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }])
   const [formData, setFormData] = useState({
@@ -44,6 +46,7 @@ export default function ProductsManagement() {
     slug: "",
     isActive: true,
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -71,26 +74,30 @@ export default function ProductsManagement() {
   }, [error, dispatch])
 
   useEffect(() => {
-    if (imageFiles.length === 0 && fileInputRef.current) {
+    // If all images are removed, reset file input
+    if (imagesState.filter(img => img.file).length === 0 && fileInputRef.current) {
       fileInputRef.current.value = ""
     }
-  }, [imageFiles.length])
+  }, [imagesState])
 
   // --- Image Handling ---
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    setImageFiles(files)
-    const previews: string[] = []
-    if (files.length === 0) {
-      setImagePreviews([])
-      return
-    }
+    if (files.length === 0) return
+
+    // Read all files and add to imagesState
+    const newImageItems: ImageItem[] = []
+    let loaded = 0
     files.forEach((file) => {
       const reader = new FileReader()
       reader.onloadend = () => {
-        previews.push(reader.result as string)
-        if (previews.length === files.length) {
-          setImagePreviews(previews)
+        newImageItems.push({
+          file,
+          previewUrl: reader.result as string,
+        })
+        loaded++
+        if (loaded === files.length) {
+          setImagesState((prev) => [...prev, ...newImageItems])
         }
       }
       reader.readAsDataURL(file)
@@ -98,13 +105,20 @@ export default function ProductsManagement() {
   }
 
   const removeImage = (index: number) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index)
-    const newPreviews = imagePreviews.filter((_, i) => i !== index)
-    setImageFiles(newFiles)
-    setImagePreviews(newPreviews)
-    if (newFiles.length === 0) {
-      setImagePreviews([])
-    }
+    setImagesState((prev) => {
+      const newArr = [...prev]
+      newArr.splice(index, 1)
+      return newArr
+    })
+    // Reset file input if all files are removed
+    setTimeout(() => {
+      if (
+        imagesState.filter((img, i) => i !== index && img.file).length === 0 &&
+        fileInputRef.current
+      ) {
+        fileInputRef.current.value = ""
+      }
+    }, 0)
   }
 
   const addFeature = () => setFeatures([...features, ""])
@@ -142,13 +156,14 @@ export default function ProductsManagement() {
     })
     setFeatures([""])
     setSpecifications([{ key: "", value: "" }])
-    setImageFiles([])
-    setImagePreviews([])
+    setImagesState([])
     setEditingProduct(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     const specsObject = specifications
       .filter((spec) => spec.key.trim() !== "" && spec.value.trim() !== "")
       .reduce(
@@ -158,6 +173,10 @@ export default function ProductsManagement() {
         },
         {} as Record<string, string>,
       )
+
+    // Prepare images array: [File, File, string, ...]
+    // For new images, send the File; for existing, send the url string
+    const imagesPayload = imagesState.map((img) => img.file ?? img.url ?? "")
 
     const productFormData = new FormData()
     productFormData.append("title", formData.title)
@@ -169,8 +188,15 @@ export default function ProductsManagement() {
     productFormData.append("features", JSON.stringify(features.filter((f) => f.trim() !== "")))
     productFormData.append("specifications", JSON.stringify(specsObject))
     productFormData.append("isActive", formData.isActive.toString())
-    imageFiles.forEach((file, index) => {
-      productFormData.append(`image_${index}`, file)
+
+    // Append images as an array (field name: images)
+    // For files, append as File; for strings, append as string
+    imagesPayload.forEach((img, idx) => {
+      if (img instanceof File) {
+        productFormData.append("images", img)
+      } else if (typeof img === "string" && img) {
+        productFormData.append("images", img)
+      }
     })
 
     try {
@@ -195,6 +221,8 @@ export default function ProductsManagement() {
         description: error.message || "Something went wrong",
         variant: "destructive",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -210,8 +238,13 @@ export default function ProductsManagement() {
       isActive: product.isActive,
     })
     setFeatures(product.features.length > 0 ? product.features : [""])
-    setImagePreviews(product.images)
-    setImageFiles([])
+    // Set imagesState to existing images as { url, previewUrl }
+    setImagesState(
+      (product.images || []).map((img) => ({
+        url: img,
+        previewUrl: img,
+      }))
+    )
 
     if (product.specifications) {
       const specs = Object.entries(product.specifications).map(([key, value]) => ({ key, value }))
@@ -220,6 +253,7 @@ export default function ProductsManagement() {
       setSpecifications([{ key: "", value: "" }])
     }
 
+    if (fileInputRef.current) fileInputRef.current.value = ""
     setIsDialogOpen(true)
   }
 
@@ -390,12 +424,12 @@ export default function ProductsManagement() {
                     className="block w-full text-sm"
                     onChange={handleImageChange}
                   />
-                  {(imagePreviews.length > 0) && (
+                  {(imagesState.length > 0) && (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {imagePreviews.map((preview, index) => (
+                      {imagesState.map((img, index) => (
                         <div key={index} className="relative w-16 h-16">
                           <img
-                            src={preview || "/placeholder.svg"}
+                            src={img.previewUrl || "/placeholder.svg"}
                             alt={`Preview ${index + 1}`}
                             className="w-16 h-16 object-cover rounded border"
                           />
@@ -504,10 +538,17 @@ export default function ProductsManagement() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded bg-primary text-white text-sm font-medium"
-                    disabled={isLoading}
+                    className="px-4 py-2 rounded bg-primary text-white text-sm font-medium flex items-center justify-center"
+                    disabled={isLoading || isSubmitting}
                   >
-                    {editingProduct ? "Update Product" : "Create Product"}
+                    {isSubmitting ? (
+                      <>
+                        <span className="inline-block h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        {editingProduct ? "Updating..." : "Creating..."}
+                      </>
+                    ) : (
+                      editingProduct ? "Update Product" : "Create Product"
+                    )}
                   </button>
                 </div>
               </form>

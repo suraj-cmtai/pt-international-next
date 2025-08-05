@@ -36,91 +36,160 @@ const initialState: ProductState = {
 }
 
 // Async thunks
-export const fetchProducts = createAsyncThunk("products/fetchProducts", async () => {
-  const response = await fetch("/api/routes/products")
-  const data = await response.json()
-  if (data.statusCode !== 200) {
-    throw new Error(data.errorMessage || "Failed to fetch products")
-  }
-  return data.data
-})
 
-export const fetchActiveProducts = createAsyncThunk("products/fetchActiveProducts", async () => {
-  const response = await fetch("/api/routes/products/active")
-  const data = await response.json()
-  if (data.statusCode !== 200) {
-    throw new Error(data.errorMessage || "Failed to fetch active products")
+// Fetch all products
+export const fetchProducts = createAsyncThunk<Product[], void, { rejectValue: string }>(
+  "products/fetchProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/routes/products", {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch products")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch products")
+    }
   }
-  return data.data
-})
+)
 
-export const fetchProductById = createAsyncThunk("products/fetchProductById", async (id: string) => {
-  const response = await fetch(`/api/routes/products/${id}`)
-  const data = await response.json()
-  if (data.statusCode !== 200) {
-    throw new Error(data.errorMessage || "Failed to fetch product")
+// Fetch active products
+export const fetchActiveProducts = createAsyncThunk<Product[], void, { rejectValue: string }>(
+  "products/fetchActiveProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/routes/products/active", {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch active products")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch active products")
+    }
   }
-  return data.data
-})
+)
 
-export const fetchProductBySlug = createAsyncThunk("products/fetchProductBySlug", async (slug: string) => {
-  const response = await fetch(`/api/routes/products/slug/${slug}`)
-  const data = await response.json()
-  if (data.statusCode !== 200) {
-    throw new Error(data.errorMessage || "Failed to fetch product")
+// Fetch product by ID
+export const fetchProductById = createAsyncThunk<Product, string, { rejectValue: string }>(
+  "products/fetchProductById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/routes/products/${id}`, {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch product")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch product")
+    }
   }
-  return data.data
-})
+)
 
-export const fetchProductsByCategory = createAsyncThunk(
+// Fetch product by slug
+export const fetchProductBySlug = createAsyncThunk<Product, string, { rejectValue: string }>(
+  "products/fetchProductBySlug",
+  async (slug, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/routes/products/slug/${slug}`, {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch product")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch product")
+    }
+  }
+)
+
+// Fetch products by category
+export const fetchProductsByCategory = createAsyncThunk<Product[], string, { rejectValue: string }>(
   "products/fetchProductsByCategory",
-  async (category: string) => {
-    const response = await fetch(`/api/routes/products/category/${category}`)
-    const data = await response.json()
-    if (data.statusCode !== 200) {
-      throw new Error(data.errorMessage || "Failed to fetch products by category")
+  async (category, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/routes/products/category/${category}`, {
+        method: "GET",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to fetch products by category")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch products by category")
     }
-    return data.data
-  },
+  }
 )
 
-export const createProduct = createAsyncThunk("products/createProduct", async (productData: FormData) => {
-  const response = await fetch("/api/routes/products", {
-    method: "POST",
-    body: productData,
-  })
-  const data = await response.json()
-  if (data.statusCode !== 201) {
-    throw new Error(data.errorMessage || "Failed to create product")
+// Create a new product (expects FormData for file upload)
+export const createProduct = createAsyncThunk<Product, FormData, { rejectValue: string }>(
+  "products/createProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/routes/products", {
+        method: "POST",
+        body: productData,
+      })
+      const data = await response.json()
+      if (data.statusCode !== 201) {
+        return rejectWithValue(data.errorMessage || "Failed to create product")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to create product")
+    }
   }
-  return data.data
-})
+)
 
-export const updateProduct = createAsyncThunk(
+// Update a product (expects FormData for file upload)
+export const updateProduct = createAsyncThunk<Product, { id: string; productData: FormData }, { rejectValue: string }>(
   "products/updateProduct",
-  async ({ id, productData }: { id: string; productData: FormData }) => {
-    const response = await fetch(`/api/routes/products/${id}`, {
-      method: "PUT",
-      body: productData,
-    })
-    const data = await response.json()
-    if (data.statusCode !== 200) {
-      throw new Error(data.errorMessage || "Failed to update product")
+  async ({ id, productData }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/routes/products/${id}`, {
+        method: "PUT",
+        body: productData,
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to update product")
+      }
+      return data.data
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to update product")
     }
-    return data.data
-  },
+  }
 )
 
-export const deleteProduct = createAsyncThunk("products/deleteProduct", async (id: string) => {
-  const response = await fetch(`/api/routes/products/${id}`, {
-    method: "DELETE",
-  })
-  const data = await response.json()
-  if (data.statusCode !== 200) {
-    throw new Error(data.errorMessage || "Failed to delete product")
+// Delete a product
+export const deleteProduct = createAsyncThunk<string, string, { rejectValue: string }>(
+  "products/deleteProduct",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/routes/products/${id}`, {
+        method: "DELETE",
+      })
+      const data = await response.json()
+      if (data.statusCode !== 200) {
+        return rejectWithValue(data.errorMessage || "Failed to delete product")
+      }
+      return id
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to delete product")
+    }
   }
-  return id
-})
+)
 
 const productSlice = createSlice({
   name: "products",
@@ -154,7 +223,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to fetch products"
+        state.error = action.payload || action.error.message || "Failed to fetch products"
       })
       // Fetch active products
       .addCase(fetchActiveProducts.pending, (state) => {
@@ -168,7 +237,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchActiveProducts.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to fetch active products"
+        state.error = action.payload || action.error.message || "Failed to fetch active products"
       })
       // Fetch product by ID
       .addCase(fetchProductById.pending, (state) => {
@@ -181,7 +250,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to fetch product"
+        state.error = action.payload || action.error.message || "Failed to fetch product"
       })
       // Fetch product by slug
       .addCase(fetchProductBySlug.pending, (state) => {
@@ -194,7 +263,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductBySlug.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to fetch product"
+        state.error = action.payload || action.error.message || "Failed to fetch product"
       })
       // Fetch products by category
       .addCase(fetchProductsByCategory.pending, (state) => {
@@ -207,7 +276,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to fetch products by category"
+        state.error = action.payload || action.error.message || "Failed to fetch products by category"
       })
       // Create product
       .addCase(createProduct.pending, (state) => {
@@ -223,7 +292,7 @@ const productSlice = createSlice({
       })
       .addCase(createProduct.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to create product"
+        state.error = action.payload || action.error.message || "Failed to create product"
       })
       // Update product
       .addCase(updateProduct.pending, (state) => {
@@ -252,7 +321,7 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to update product"
+        state.error = action.payload || action.error.message || "Failed to update product"
       })
       // Delete product
       .addCase(deleteProduct.pending, (state) => {
@@ -269,7 +338,7 @@ const productSlice = createSlice({
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || "Failed to delete product"
+        state.error = action.payload || action.error.message || "Failed to delete product"
       })
   },
 })

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import ProductService from "../../../services/productServices"
 import consoleManager from "../../../utils/consoleManager"
+import { UploadImage, ReplaceImage } from "../../../controller/imageController"
 
 // Get product by ID (GET)
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -72,6 +73,72 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (features) updateData.features = JSON.parse(features.toString())
     if (specifications) updateData.specifications = JSON.parse(specifications.toString())
     if (isActive !== null) updateData.isActive = isActive === "true"
+
+    // --- Image Handling Logic ---
+    // The dashboard sends images as an array of File and/or string (URL) under the "images" field.
+    // For new images: File, for existing: string (URL)
+    // We'll process all images, upload new ones, keep URLs for existing, and remove any images not present anymore.
+
+    // Get the product's current images from DB
+    const existingProduct = await ProductService.getProductById(id)
+    const existingImages: string[] = existingProduct?.images || []
+
+    // Get all images from formData (can be File or string)
+    const imagesFromForm: (File | string)[] = []
+    // formData.getAll returns File or string
+    for (const img of formData.getAll("images")) {
+      if (typeof img === "string") {
+        if (img.trim() !== "") imagesFromForm.push(img)
+      } else if (img && typeof img === "object" && "arrayBuffer" in img) {
+        // File
+        imagesFromForm.push(img)
+      }
+    }
+
+    // Prepare new images array for DB
+    const finalImageUrls: string[] = []
+
+    // For each image in imagesFromForm:
+    // - If it's a string and exists in existingImages, keep it.
+    // - If it's a File, upload it and get the URL.
+    // - If it's a string but not in existingImages, treat as new (shouldn't happen, but skip).
+    // - Any image in existingImages not in imagesFromForm should be deleted (handled by not including in finalImageUrls).
+
+    // For image upload, use a default size (e.g., 800x800)
+    const IMAGE_WIDTH = 800
+    const IMAGE_HEIGHT = 800
+
+    // Track which existing images are still used
+    const usedExistingImages = new Set<string>()
+
+    for (const img of imagesFromForm) {
+      if (typeof img === "string") {
+        // If the string is an existing image URL, keep it
+        if (existingImages.includes(img)) {
+          finalImageUrls.push(img)
+          usedExistingImages.add(img)
+        }
+        // else: skip (should not happen)
+      } else if (img && typeof img === "object" && "arrayBuffer" in img) {
+        // New file, upload
+        try {
+          const url = await UploadImage(img, IMAGE_WIDTH, IMAGE_HEIGHT)
+          if (typeof url === "string") {
+            finalImageUrls.push(url)
+          }
+        } catch (uploadErr: any) {
+          consoleManager.error("Failed to upload image:", uploadErr)
+        }
+      }
+    }
+
+    // Optionally, delete images that are no longer used (not in usedExistingImages)
+    // This is not strictly required if you want to keep old images in storage, but for cleanup:
+    const imagesToDelete = existingImages.filter((img) => !usedExistingImages.has(img))
+    // You could call ReplaceImage for each removed image with file = null, but imageController expects a file to replace.
+    // Instead, you may want to delete directly via Firebase if needed.
+
+    updateData.images = finalImageUrls
 
     const updatedProduct = await ProductService.updateProduct(id, updateData)
 
