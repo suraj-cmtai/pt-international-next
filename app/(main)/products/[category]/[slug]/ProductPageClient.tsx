@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
+import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle, ShoppingCart, Download, Share } from "lucide-react"
+import { ArrowLeft, CheckCircle, ShoppingCart, Download, Share, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,15 +12,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Product } from "@/app/api/services/productServices"
 
 // Static category data for display purposes
-const categoryInfo: Record<string, { name: string }> = {
-  "research-products": { name: "Research Products" },
-  "diagnostics-products": { name: "Diagnostics Products" },
-  "instruments-consumables": { name: "Instruments & Consumables" },
-  "reagents-chemicals": { name: "Reagents & Chemicals" },
-  plasticwaresfiltrationunits: { name: "Plasticwares & Filtration Units" },
-  "food-testing-kits": { name: "Food Testing Kits" },
-  "disinfectant-and-sanitizers": { name: "Disinfectant & Sanitizers" },
-}
+const productCategories = [
+  {
+    slug: "research-products",
+    name: "Research Products",
+    description: "Advanced tools and kits for cutting-edge research applications",
+  },
+  {
+    slug: "diagnostics-products",
+    name: "Diagnostics Products",
+    description: "Reliable diagnostic solutions for clinical and laboratory use",
+  },
+  {
+    slug: "instruments-consumables",
+    name: "Instruments & Consumables",
+    description: "High-quality laboratory instruments and consumable supplies",
+  },
+  {
+    slug: "reagents-chemicals",
+    name: "Reagents & Chemicals",
+    description: "Pure reagents and chemicals for various applications",
+  },
+  {
+    slug: "plasticwaresfiltrationunits",
+    name: "Plasticwares & Filtration Units",
+    description: "Laboratory plasticware and filtration solutions",
+  },
+  {
+    slug: "food-testing-kits",
+    name: "Food Testing Kits",
+    description: "Comprehensive kits for food safety and quality testing",
+  },
+  {
+    slug: "disinfectant-and-sanitizers",
+    name: "Disinfectant & Sanitizers",
+    description: "Professional-grade disinfection and sanitization products",
+  },
+]
 
 interface ProductPageClientProps {
   category: string
@@ -26,7 +56,27 @@ interface ProductPageClientProps {
 }
 
 export default function ProductPageClient({ category, product }: ProductPageClientProps) {
-  const categoryData = categoryInfo[category] || { name: "Products" }
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const categoryData = productCategories.find((cat) => cat.slug === category)
+
+  if (!product || !categoryData || product.category !== category) {
+    notFound()
+  }
+
+  const images = product.images || ["/placeholder.svg"]
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  const selectImage = (index: number) => {
+    setCurrentImageIndex(index)
+  }
 
   return (
     <div>
@@ -64,21 +114,55 @@ export default function ProductPageClient({ category, product }: ProductPageClie
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="aspect-square relative overflow-hidden rounded-lg border">
+              {/* Main Image Display */}
+              <div className="aspect-square relative overflow-hidden rounded-lg border group">
                 <Image
-                  src={product.images[0] || "/placeholder.svg"}
+                  src={images[currentImageIndex] || "/placeholder.svg"}
                   alt={product.title}
                   fill
-                  className="object-cover"
+                  className="object-cover cursor-pointer"
+                  onClick={() => {
+                    // Optional: Add lightbox functionality here
+                  }}
                 />
+
+                {/* Navigation arrows - only show if multiple images */}
+                {images.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white/90"
+                      onClick={prevImage}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white/90"
+                      onClick={nextImage}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </div>
-              {product.images.length > 1 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {product.images.slice(1).map((image, index) => (
-                    <div key={index} className="aspect-square relative overflow-hidden rounded border">
+
+              {/* Thumbnail Images */}
+              {images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className={`aspect-square relative overflow-hidden rounded border cursor-pointer transition-all ${
+                        index === currentImageIndex ? "ring-2 ring-primary border-primary" : "hover:border-primary/50"
+                      }`}
+                      onClick={() => selectImage(index)}
+                    >
                       <Image
                         src={image || "/placeholder.svg"}
-                        alt={`${product.title} ${index + 2}`}
+                        alt={`${product.title} ${index + 1}`}
                         fill
                         className="object-cover"
                       />
@@ -121,21 +205,23 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                 </Button>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Key Features</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="h-4 w-4 text-primary mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              {product.features && product.features.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Key Features</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {product.features.map((feature, index) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="h-4 w-4 text-primary mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
@@ -170,7 +256,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                   <CardTitle>Technical Specifications</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                  {product.specifications ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(product.specifications).map(([key, value]) => (
                         <div key={key} className="flex justify-between py-2 border-b">
