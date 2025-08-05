@@ -59,7 +59,7 @@ export default function ServicePageClient({ service }: ServicePageClientProps) {
                   <Link href={`/contact?message=Service: ${service.title}`}>Get Quote</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <a href="tel:+15551234567">
+                  <a href="tel:+971562647649">
                     <Phone className="h-4 w-4 mr-2" />
                     Call Us
                   </a>
@@ -130,7 +130,7 @@ export default function ServicePageClient({ service }: ServicePageClientProps) {
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <a href="tel:+15551234567">
+                    <a href="tel:+971562647649">
                       <Phone className="h-4 w-4 mr-2" />
                       Call Now
                     </a>

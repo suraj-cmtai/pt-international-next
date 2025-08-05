@@ -232,7 +232,7 @@ export default function ContactPage() {
                       <Mail className="h-5 w-5 text-primary mt-0.5" />
                       <div>
                         <h3 className="font-medium mb-1">Email Us</h3>
-                        <p className="text-sm text-muted-foreground">info@ptinternational.com</p>
+                        <p className="text-sm text-muted-foreground">ptinternationallifescience@gmail.com</p>
                       </div>
                     </div>
                   </CardContent>
@@ -244,7 +244,7 @@ export default function ContactPage() {
                       <Phone className="h-5 w-5 text-primary mt-0.5" />
                       <div>
                         <h3 className="font-medium mb-1">Call Us</h3>
-                        <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
+                        <p className="text-sm text-muted-foreground">+971562647649</p>
                       </div>
                     </div>
                   </CardContent>
@@ -257,9 +257,11 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-medium mb-1">Visit Us</h3>
                         <p className="text-sm text-muted-foreground">
-                          123 Science Park Drive
+                          PT INTERNATIONAL LIFESCIENCES LLC
                           <br />
-                          Research City, RC 12345
+                          Sharjah Media City, Sharjah, UAE
+                          <br />
+                          P.O Box 839- Sharjah
                         </p>
                       </div>
                     </div>

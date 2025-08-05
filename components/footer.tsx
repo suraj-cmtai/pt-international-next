@@ -40,15 +40,15 @@ export function Footer() {
               <div className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 mr-2 text-primary" />
-                  123 Science Park Drive, Research City, RC 12345
+                  PT INTERNATIONAL LIFESCIENCES LLC <br /> Sharjah Media City, Sharjah,<br /> UAE P.O Box 839- Sharjah
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Phone className="h-4 w-4 mr-2 text-primary" />
-                  +1 (555) 123-4567
+                  +971562647649
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 mr-2 text-primary" />
-                  info@ptinternational.com
+                  ptinternationallifescience@gmail.com
                 </div>
               </div>
             </div>

@@ -52,8 +52,9 @@ const benefits = [
 ]
 
 export default function HomePage() {
-  const featuredServices = getFeaturedServices(3)
-  const featuredProducts = getFeaturedProducts(6)
+  // Use dynamic data, only 3 products and 3 services
+  const featuredServices = getFeaturedServices().slice(0, 3)
+  const featuredProducts = getFeaturedProducts().slice(0, 3)
 
   return (
     <div>

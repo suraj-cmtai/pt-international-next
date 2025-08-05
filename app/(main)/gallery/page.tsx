@@ -261,7 +261,7 @@ export default function GalleryPage() {
                     }}
                   >
                     <Image
-                      src={"/placeholder.svg"}
+                      src={item.image ||"/placeholder.svg"}
                       alt={item.title}
                       fill
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -352,7 +352,7 @@ export default function GalleryPage() {
                   }}
                 >
                   <Image
-                    src={"/placeholder.svg"}
+                    src={selectedImage.image || "/placeholder.svg"}
                     alt={selectedImage.title}
                     fill
                     className="object-contain"

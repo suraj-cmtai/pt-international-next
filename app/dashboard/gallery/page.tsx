@@ -238,7 +238,7 @@ export default function GalleryPage() {
       {/* Header Section */}
       <motion.div
         layout
-        className="relative rounded-xl bg-gradient-to-r from-black/10 to-transparent p-6 border shadow-sm"
+        className="relative rounded-xl bg-gradient-to-r from-primary to-transparent p-6 border shadow-sm"
       >
         <motion.div
           className="flex flex-col sm:flex-row items-center justify-between gap-4"
@@ -275,7 +275,7 @@ export default function GalleryPage() {
               <Button
                 onClick={openAddModal}
                 size="lg"
-                className="gap-2 bg-black/90 hover:bg-black text-white shadow-sm transition-all duration-200 hover:shadow-md w-full sm:w-auto"
+                className="gap-2 shadow-sm transition-all duration-200 hover:shadow-md w-full sm:w-auto"
                 disabled={isLoading}
               >
                 <Plus className="w-4 h-4" /> Add Image

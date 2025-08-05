@@ -16,7 +16,7 @@ export default function MainLayout({
 
       {/* WhatsApp Contact Button */}
       <a
-        href="https://wa.me/987654321"
+        href="https://wa.me/+971562647649"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 left-6 z-50 bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
