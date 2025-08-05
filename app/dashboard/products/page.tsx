@@ -20,6 +20,7 @@ import {
 import { productCategories } from "@/lib/data"
 import { format } from "date-fns"
 import { toast } from "@/hooks/use-toast"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 type ImageItem = { file?: File; url?: string; previewUrl: string }
 
@@ -56,6 +57,17 @@ export default function ProductsManagement() {
       product.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
+  // Get unique categories
+  const categories: string[] = Array.from(new Set(products.map((product: Product) => product.category)))
+
+  // Stats
+  const stats = {
+    total: products.length,
+    active: products.filter((p: Product) => p.isActive).length,
+    inactive: products.filter((p: Product) => !p.isActive).length,
+    categories: categories.length,
+  }
+
   useEffect(() => {
     if (!hasFetched) {
       dispatch(fetchProducts())
@@ -75,7 +87,7 @@ export default function ProductsManagement() {
 
   useEffect(() => {
     // If all images are removed, reset file input
-    if (imagesState.filter(img => img.file).length === 0 && fileInputRef.current) {
+    if (imagesState.filter((img) => img.file).length === 0 && fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }, [imagesState])
@@ -112,10 +124,7 @@ export default function ProductsManagement() {
     })
     // Reset file input if all files are removed
     setTimeout(() => {
-      if (
-        imagesState.filter((img, i) => i !== index && img.file).length === 0 &&
-        fileInputRef.current
-      ) {
+      if (imagesState.filter((img, i) => i !== index && img.file).length === 0 && fileInputRef.current) {
         fileInputRef.current.value = ""
       }
     }, 0)
@@ -159,6 +168,16 @@ export default function ProductsManagement() {
     setImagesState([])
     setEditingProduct(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    return (
+      formData.title.trim() !== "" &&
+      formData.description.trim() !== "" &&
+      formData.longDescription.trim() !== "" &&
+      formData.category.trim() !== ""
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,7 +262,7 @@ export default function ProductsManagement() {
       (product.images || []).map((img) => ({
         url: img,
         previewUrl: img,
-      }))
+      })),
     )
 
     if (product.specifications) {
@@ -289,7 +308,10 @@ export default function ProductsManagement() {
     <div className="w-full max-w-6xl mx-auto px-2 md:px-6 py-8">
       {/* Header and Create Button */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Product Management</h1>
+          <p className="text-muted-foreground">Manage your products and their details</p>
+        </div>
         <button
           type="button"
           onClick={() => {
@@ -299,8 +321,44 @@ export default function ProductsManagement() {
           className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition text-sm font-medium"
         >
           <Plus className="h-4 w-4" />
-          Add Product
+          Create Product
         </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Inactive Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.inactive}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Categories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.categories}</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Dialog for Add/Edit Product */}
@@ -316,78 +374,61 @@ export default function ProductsManagement() {
                 <X className="h-5 w-5" />
               </button>
               <div className="px-6 pt-6 pb-2">
-                <h2 className="text-xl font-semibold mb-1">
-                  {editingProduct ? "Edit Product" : "Add Product"}
-                </h2>
+                <h2 className="text-xl font-semibold mb-1">{editingProduct ? "Edit Product" : "Create New Product"}</h2>
                 <p className="text-sm text-muted-foreground mb-4">
                   {editingProduct
-                    ? "Update the product information below."
-                    : "Fill in the details to create a new product."}
+                    ? "Make changes to your product. Click save when you're done."
+                    : "Fill in the details for your new product. Click create when you're done."}
                 </p>
               </div>
               <form onSubmit={handleSubmit} className="overflow-y-auto px-6 pb-6 pt-0 max-h-[80vh]">
-                <div className="mb-4">
-                  <label htmlFor="title" className="block text-sm font-medium mb-1">
-                    Title *
-                  </label>
-                  <input
-                    id="title"
-                    className="w-full border rounded px-3 py-2 text-sm"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="category" className="block text-sm font-medium mb-1">
-                    Category *
-                  </label>
-                  <select
-                    id="category"
-                    className="w-full border rounded px-3 py-2 text-sm"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    required
-                  >
-                    <option value="">Select category</option>
-                    {productCategories.map((category) => (
-                      <option key={category.slug} value={category.slug}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="description" className="block text-sm font-medium mb-1">
-                    Short Description *
-                  </label>
-                  <textarea
-                    id="description"
-                    className="w-full border rounded px-3 py-2 text-sm resize-none"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                    rows={2}
-                    placeholder="Brief description of the product"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="longDescription" className="block text-sm font-medium mb-1">
-                    Detailed Description *
-                  </label>
-                  <textarea
-                    id="longDescription"
-                    className="w-full border rounded px-3 py-2 text-sm resize-none"
-                    value={formData.longDescription}
-                    onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                    required
-                    rows={4}
-                    placeholder="Detailed description of the product"
-                  />
-                </div>
-                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                  <div className="flex-1">
-                    <label htmlFor="price" className="block text-sm font-medium mb-1">
+                <div className="space-y-4 py-2">
+                  <div className="grid gap-2">
+                    <label htmlFor="title" className="text-sm font-medium">
+                      Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="title"
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      placeholder="Enter product title"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="slug" className="text-sm font-medium">
+                      Slug
+                    </label>
+                    <input
+                      id="slug"
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={formData.slug}
+                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      placeholder="Auto-generated from title"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="category" className="text-sm font-medium">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="category"
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      required
+                    >
+                      <option value="">Select category</option>
+                      {productCategories.map((category) => (
+                        <option key={category.slug} value={category.slug}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="price" className="text-sm font-medium">
                       Price
                     </label>
                     <input
@@ -398,137 +439,154 @@ export default function ProductsManagement() {
                       placeholder="e.g., $299.99"
                     />
                   </div>
-                  <div className="flex-1">
-                    <label htmlFor="slug" className="block text-sm font-medium mb-1">
-                      URL Slug
-                    </label>
+                  <div className="flex items-center space-x-2">
                     <input
-                      id="slug"
-                      className="w-full border rounded px-3 py-2 text-sm"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      placeholder="Auto-generated from title"
+                      id="isActive"
+                      type="checkbox"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="isActive" className="text-sm font-medium">
+                      Active
+                    </label>
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="description" className="text-sm font-medium">
+                      Short Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="description"
+                      className="w-full border rounded px-3 py-2 text-sm resize-none"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      required
+                      rows={2}
+                      placeholder="Enter a short description"
                     />
                   </div>
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="images" className="block text-sm font-medium mb-1">
-                    Product Images
-                  </label>
-                  <input
-                    id="images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    ref={fileInputRef}
-                    className="block w-full text-sm"
-                    onChange={handleImageChange}
-                  />
-                  {(imagesState.length > 0) && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {imagesState.map((img, index) => (
-                        <div key={index} className="relative w-16 h-16">
-                          <img
-                            src={img.previewUrl || "/placeholder.svg"}
-                            alt={`Preview ${index + 1}`}
-                            className="w-16 h-16 object-cover rounded border"
+                  <div className="grid gap-2">
+                    <label htmlFor="longDescription" className="text-sm font-medium">
+                      Long Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="longDescription"
+                      className="w-full border rounded px-3 py-2 text-sm resize-none"
+                      value={formData.longDescription}
+                      onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
+                      required
+                      rows={4}
+                      placeholder="Enter a detailed description"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="images" className="text-sm font-medium">
+                      Product Images
+                    </label>
+                    <input
+                      id="images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={fileInputRef}
+                      className="block w-full text-sm file:text-foreground"
+                      onChange={handleImageChange}
+                    />
+                    {imagesState.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {imagesState.map((img, index) => (
+                          <div key={index} className="relative w-16 h-16">
+                            <img
+                              src={img.previewUrl || "/placeholder.svg"}
+                              alt={`Preview ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded border"
+                            />
+                            <button
+                              type="button"
+                              className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow"
+                              onClick={() => removeImage(index)}
+                              tabIndex={-1}
+                            >
+                              <X className="h-4 w-4 text-red-500" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 5MB.</p>
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">Key Features</label>
+                    <div className="flex flex-col gap-2">
+                      {features.map((feature, index) => (
+                        <div key={index} className="flex gap-2">
+                          <input
+                            className="flex-1 border rounded px-3 py-2 text-sm"
+                            value={feature}
+                            onChange={(e) => updateFeature(index, e.target.value)}
+                            placeholder="Enter feature"
                           />
                           <button
                             type="button"
-                            className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow"
-                            onClick={() => removeImage(index)}
+                            className="text-red-500 hover:text-red-700 px-2"
+                            onClick={() => removeFeature(index)}
+                            disabled={features.length === 1}
                             tabIndex={-1}
                           >
-                            <X className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       ))}
+                      <button
+                        type="button"
+                        className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                        onClick={addFeature}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Feature
+                      </button>
                     </div>
-                  )}
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Key Features</label>
-                  <div className="flex flex-col gap-2">
-                    {features.map((feature, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 border rounded px-3 py-2 text-sm"
-                          value={feature}
-                          onChange={(e) => updateFeature(index, e.target.value)}
-                          placeholder="Enter feature"
-                        />
-                        <button
-                          type="button"
-                          className="text-red-500 hover:text-red-700 px-2"
-                          onClick={() => removeFeature(index)}
-                          disabled={features.length === 1}
-                          tabIndex={-1}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
-                      onClick={addFeature}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Feature
-                    </button>
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">Technical Specifications</label>
+                    <div className="flex flex-col gap-2">
+                      {specifications.map((spec, index) => (
+                        <div key={index} className="flex gap-2">
+                          <input
+                            className="flex-1 border rounded px-3 py-2 text-sm"
+                            value={spec.key}
+                            onChange={(e) => updateSpecification(index, "key", e.target.value)}
+                            placeholder="Specification name"
+                          />
+                          <input
+                            className="flex-1 border rounded px-3 py-2 text-sm"
+                            value={spec.value}
+                            onChange={(e) => updateSpecification(index, "value", e.target.value)}
+                            placeholder="Specification value"
+                          />
+                          <button
+                            type="button"
+                            className="text-red-500 hover:text-red-700 px-2"
+                            onClick={() => removeSpecification(index)}
+                            disabled={specifications.length === 1}
+                            tabIndex={-1}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
+                        onClick={addSpecification}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Specification
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Technical Specifications</label>
-                  <div className="flex flex-col gap-2">
-                    {specifications.map((spec, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 border rounded px-3 py-2 text-sm"
-                          value={spec.key}
-                          onChange={(e) => updateSpecification(index, "key", e.target.value)}
-                          placeholder="Specification name"
-                        />
-                        <input
-                          className="flex-1 border rounded px-3 py-2 text-sm"
-                          value={spec.value}
-                          onChange={(e) => updateSpecification(index, "value", e.target.value)}
-                          placeholder="Specification value"
-                        />
-                        <button
-                          type="button"
-                          className="text-red-500 hover:text-red-700 px-2"
-                          onClick={() => removeSpecification(index)}
-                          disabled={specifications.length === 1}
-                          tabIndex={-1}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 text-sm text-primary hover:underline mt-1"
-                      onClick={addSpecification}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Specification
-                    </button>
-                  </div>
-                </div>
-                <div className="mb-6 flex items-center gap-2">
-                  <input
-                    id="isActive"
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="h-4 w-4"
-                  />
-                  <label htmlFor="isActive" className="text-sm">
-                    Active (visible to public)
-                  </label>
-                </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 mt-6">
                   <button
                     type="button"
                     className="px-4 py-2 rounded border text-sm"
@@ -539,15 +597,17 @@ export default function ProductsManagement() {
                   <button
                     type="submit"
                     className="px-4 py-2 rounded bg-primary text-white text-sm font-medium flex items-center justify-center"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isLoading || isSubmitting || !isFormValid()}
                   >
                     {isSubmitting ? (
                       <>
                         <span className="inline-block h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        {editingProduct ? "Updating..." : "Creating..."}
+                        {editingProduct ? "Saving..." : "Creating..."}
                       </>
+                    ) : editingProduct ? (
+                      "Save Changes"
                     ) : (
-                      editingProduct ? "Update Product" : "Create Product"
+                      "Create"
                     )}
                   </button>
                 </div>
@@ -596,8 +656,7 @@ export default function ProductsManagement() {
                 <tr
                   key={product.id}
                   className={
-                    "hover:bg-muted/30 transition-colors " +
-                    (idx === filteredProducts.length - 1 ? "" : "border-b")
+                    "hover:bg-muted/30 transition-colors " + (idx === filteredProducts.length - 1 ? "" : "border-b")
                   }
                 >
                   <td className="px-4 py-4 align-middle min-w-[180px]">
@@ -618,9 +677,7 @@ export default function ProductsManagement() {
                     <span
                       className={
                         "inline-block px-2 py-1 rounded text-xs " +
-                        (product.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600")
+                        (product.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600")
                       }
                     >
                       {product.isActive ? "Active" : "Inactive"}
@@ -628,22 +685,22 @@ export default function ProductsManagement() {
                   </td>
                   <td className="px-4 py-4 align-middle min-w-[110px]">
                     <span className="text-xs text-muted-foreground">
-                      {product.updatedAt?.toDate?.()
-                        ? format(product.updatedAt.toDate(), "MMM d, yyyy")
-                        : "N/A"}
+                      {product.updatedAt?.toDate?.() ? format(product.updatedAt.toDate(), "MMM d, yyyy") : "N/A"}
                     </span>
                   </td>
                   <td className="px-4 py-4 align-middle min-w-[90px]">
                     <div className="flex -space-x-2">
                       {product.images && product.images.length > 0 ? (
-                        product.images.slice(0, 3).map((img, i) => (
-                          <img
-                            key={i}
-                            src={img || "/placeholder.svg"}
-                            alt={`Product image ${i + 1}`}
-                            className="w-8 h-8 object-cover rounded border bg-background"
-                          />
-                        ))
+                        product.images
+                          .slice(0, 3)
+                          .map((img, i) => (
+                            <img
+                              key={i}
+                              src={img || "/placeholder.svg"}
+                              alt={`Product image ${i + 1}`}
+                              className="w-8 h-8 object-cover rounded border bg-background"
+                            />
+                          ))
                       ) : (
                         <img
                           src="/placeholder.svg"
@@ -664,9 +721,7 @@ export default function ProductsManagement() {
                         type="button"
                         className="p-2 rounded hover:bg-muted"
                         title="View"
-                        onClick={() =>
-                          window.open(`/products/${product.category}/${product.slug}`, "_blank")
-                        }
+                        onClick={() => window.open(`/products/${product.category}/${product.slug}`, "_blank")}
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -685,7 +740,7 @@ export default function ProductsManagement() {
                         onClick={() => {
                           if (
                             window.confirm(
-                              `Are you sure you want to delete "${product.title}"? This action cannot be undone.`
+                              `Are you sure you want to delete "${product.title}"? This action cannot be undone.`,
                             )
                           ) {
                             handleDelete(product.id!)
