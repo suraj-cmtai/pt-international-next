@@ -1,18 +1,17 @@
 "use client"
 
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { Microscope, TestTube, Shield, Award, CheckCircle } from "lucide-react"
 import Image from "next/image"
-import { ArrowRight, Microscope, TestTube, Shield, Award, CheckCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { TestimonialsSection } from "@/components/testimonials-section"
 import { WhyChooseUsSection } from "@/components/why-choose-us-section"
-import { ServiceCard } from "@/components/service-card"
-import { ProductCard } from "@/components/product-card"
 import { getFeaturedTestimonials, whyChooseUsFeatures } from "@/lib/testimonials-data"
-import { getFeaturedServices, getFeaturedProducts } from "@/lib/data"
+import { HeroSection } from "@/components/home/hero-section"
+import { StatsSection } from "@/components/home/stats-section"
+import { GallerySection } from "@/components/home/gallery-section"
+import { ServicesSection } from "@/components/home/services-section"
+import { ProductsSection } from "@/components/home/products-section"
+import { motion } from "framer-motion"
 
 const features = [
   {
@@ -37,13 +36,6 @@ const features = [
   },
 ]
 
-const stats = [
-  { number: "500+", label: "Products" },
-  { number: "50+", label: "Countries" },
-  { number: "1000+", label: "Clients" },
-  { number: "15+", label: "Years Experience" },
-]
-
 const benefits = [
   "ISO 9001:2015 Certified Quality",
   "Global Shipping & Support",
@@ -52,172 +44,25 @@ const benefits = [
 ]
 
 export default function HomePage() {
-  // Use dynamic data, only 3 products and 3 services
-  const featuredServices = getFeaturedServices().slice(0, 3)
-  const featuredProducts = getFeaturedProducts().slice(0, 3)
-
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden hero-gradient text-white">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative max-w-7xl mx-auto container-padding section-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
-          >
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30 mb-6">
-              Leading Life Sciences Solutions
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-              Advancing Science,
-              <br />
-              <span className="text-white/90">Improving Lives</span>
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8">
-              PT International Lifesciences LLC provides cutting-edge research products, diagnostic solutions, and
-              scientific instruments to laboratories worldwide.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="default" asChild>
-                <Link href="/products">
-                  Explore Products
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-primary bg-transparent"
-                asChild
-              >
-                <Link href="/contact">Get Quote</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* Stats Section */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">{stat.number}</div>
-                <div className="text-muted-foreground text-sm">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <StatsSection />
 
       {/* Why Choose Us Section */}
       <WhyChooseUsSection features={whyChooseUsFeatures} />
 
       {/* Services Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Professional Services</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive scientific services designed to support your research, development, and quality assurance
-              needs.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {featuredServices.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <ServiceCard service={service} variant="default" />
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <Button size="lg" asChild>
-              <Link href="/services">
-                View All Services
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+      <ServicesSection />
 
       {/* Products Section */}
-      <section className="section-padding">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover our most popular life science products designed to meet your research and diagnostic needs.
-            </p>
-          </motion.div>
+      <ProductsSection />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <Button size="lg" asChild>
-              <Link href="/products">
-                Browse All Products
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+      {/* Gallery Section */}
+      <GallerySection />
 
       {/* Features Section */}
       <section className="section-padding bg-gray-50">
@@ -345,36 +190,6 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-primary/5 to-secondary/5">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Advance Your Research?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Contact our team of experts to discuss your specific requirements and discover how we can support your
-              scientific endeavors.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/contact">
-                  Get Started Today
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/about-us">Learn About Us</Link>
-              </Button>
-            </div>
-          </motion.div>
         </div>
       </section>
     </div>
