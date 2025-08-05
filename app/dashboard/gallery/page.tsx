@@ -433,7 +433,7 @@ export default function GalleryPage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => openEditModal(img)}
-                      className="flex-1 hover:bg-gray-50"
+                      className="flex-1"
                       disabled={isLoading}
                     >
                       <Edit className="w-4 h-4 mr-2" />
@@ -594,7 +594,7 @@ export default function GalleryPage() {
               <Button
                 type="submit"
                 disabled={localLoading || isLoading}
-                className="bg-black/90 hover:bg-black text-white gap-2"
+                className=" gap-2"
               >
                 {(localLoading || isLoading) && (
                   <Loader2 className="w-4 h-4 animate-spin" />

@@ -11,10 +11,10 @@ const productLinks = [
 
 const companyLinks = [
   { name: "About Us", href: "/about-us" },
-  { name: "Testimonials", href: "/testimonials" },
+  { name: "services", href: "/services" },
   { name: "Contact", href: "/contact" },
-  { name: "Careers", href: "/careers" },
-  { name: "Support", href: "/support" },
+  { name: "Gallery", href: "/gallery" },
+  { name: "Testimonials", href: "/testimonials" },
 ]
 
 export function Footer() {
