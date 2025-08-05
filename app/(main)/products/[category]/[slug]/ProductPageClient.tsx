@@ -196,13 +196,6 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                     Enquire Now
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Datasheet
-                </Button>
-                <Button size="lg" variant="outline">
-                  <Share className="h-4 w-4" />
-                </Button>
               </div>
 
               {product.features && product.features.length > 0 && (
