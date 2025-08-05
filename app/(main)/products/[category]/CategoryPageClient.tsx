@@ -4,12 +4,11 @@ import { motion } from "framer-motion"
 import { Search, Grid, List, ArrowLeft } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Product } from "@/app/api/services/productServices"
+import { ProductCard } from "@/components/product-card"
 
 // Static category data for display purposes
 const categoryInfo: Record<string, { name: string; description: string }> = {
@@ -149,58 +148,74 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           {filteredProducts.length > 0 ? (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "space-y-6"}>
-              {filteredProducts.map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className={`h-full card-hover ${viewMode === "list" ? "flex" : ""}`}>
-                    <div
-                      className={`${viewMode === "list" ? "w-48 h-32 flex-shrink-0" : "aspect-video"} relative overflow-hidden ${viewMode === "grid" ? "rounded-t-lg" : "rounded-l-lg"}`}
-                    >
-                      <Image
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <CardHeader>
-                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{product.title}</CardTitle>
-                        <CardDescription>{product.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        {product.price && (
-                          <div className="mb-4">
-                            <div className="text-lg font-bold text-primary">{product.price}</div>
+            viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProducts.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                {filteredProducts.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    {/* Custom list view using ProductCard, but with horizontal layout */}
+                    <div className="flex bg-white rounded-lg border card-hover group overflow-hidden shadow-sm">
+                      {/* Image section */}
+                      <div className="relative w-48 h-40 flex-shrink-0 overflow-hidden">
+                        <ProductCardImageGallery images={product.images} title={product.title} />
+                      </div>
+                      {/* Info section */}
+                      <div className="flex-1 flex flex-col justify-between p-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {product.category}
+                            </Badge>
+                            {product.price && (
+                              <span className="text-lg font-semibold text-primary">{product.price}</span>
+                            )}
                           </div>
-                        )}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {product.features.slice(0, 2).map((feature, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {feature}
-                            </Badge>
-                          ))}
-                          {product.features.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{product.features.length - 2} more
-                            </Badge>
-                          )}
+                          <div className="font-semibold text-lg mb-1 line-clamp-2">{product.title}</div>
+                          <div className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {product.features.slice(0, 2).map((feature, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {feature}
+                              </Badge>
+                            ))}
+                            {product.features.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{product.features.length - 2} more
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <Button asChild className="w-full">
-                          <Link href={`/products/${category}/${product.slug}`}>View Details</Link>
-                        </Button>
-                      </CardContent>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="text-xs text-muted-foreground">{product.features.length} features</div>
+                          <Button asChild size="sm">
+                            <Link href={`/products/${category}/${product.slug}`}>View Details</Link>
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
+            )
           ) : (
             <div className="text-center py-12">
               <div className="text-muted-foreground mb-4">No products found in this category</div>
@@ -238,6 +253,84 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
           </motion.div>
         </div>
       </section>
+    </div>
+  )
+}
+
+// Helper component for image gallery in list view (mimics ProductCard image logic)
+function ProductCardImageGallery({
+  images,
+  title,
+}: {
+  images: string[]
+  title: string
+}) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  if (!images || images.length === 0) {
+    images = ["/placeholder.svg"]
+  }
+
+  // Only show arrows/dots if more than one image
+  return (
+    <div className="relative w-full h-full group">
+      <img
+        src={images[currentImageIndex] || "/placeholder.svg"}
+        alt={title}
+        className="object-cover w-full h-full transition-transform group-hover:scale-105"
+        style={{ borderRadius: "0.5rem" }}
+      />
+      {images.length > 1 && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white/90"
+            onClick={e => {
+              e.preventDefault()
+              e.stopPropagation()
+              setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+            }}
+            tabIndex={-1}
+            type="button"
+          >
+            <span className="sr-only">Previous image</span>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white/90"
+            onClick={e => {
+              e.preventDefault()
+              e.stopPropagation()
+              setCurrentImageIndex((prev) => (prev + 1) % images.length)
+            }}
+            tabIndex={-1}
+            type="button"
+          >
+            <span className="sr-only">Next image</span>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
+            {images.map((_, idx) => (
+              <button
+                key={idx}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  idx === currentImageIndex ? "bg-white" : "bg-white/50"
+                }`}
+                onClick={e => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setCurrentImageIndex(idx)
+                }}
+                tabIndex={-1}
+                type="button"
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
