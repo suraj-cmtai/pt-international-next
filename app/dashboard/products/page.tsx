@@ -402,10 +402,12 @@ export default function ProductsManagement() {
                     </label>
                     <input
                       id="slug"
-                      className="w-full border rounded px-3 py-2 text-sm"
+                      className="w-full border rounded px-3 py-2 text-sm bg-muted-foreground text-muted-foreground"
+                      autoComplete="off"
                       value={formData.slug}
                       onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                       placeholder="Auto-generated from title"
+                      readOnly
                     />
                   </div>
                   <div className="grid gap-2">
