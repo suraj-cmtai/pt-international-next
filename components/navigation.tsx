@@ -189,7 +189,7 @@ export function Navigation() {
                   {/* Mobile Products Dropdown using shadcn Accordion */}
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="products" className="border-none">
-                      <AccordionTrigger className={`mobile-nav-link text-lg font-medium transition-colors px-0 hover:no-underline ${
+                      <AccordionTrigger className={`mobile-nav-link mobile-nav-link-trigger text-lg font-medium transition-colors px-0 hover:no-underline ${
                         isProductsActive() ? "mobile-nav-link-active" : ""
                       }`}>
                         Products
@@ -201,7 +201,7 @@ export function Navigation() {
                             <Link
                               key={category.slug}
                               href={`/products/${category.slug}`}
-                              className={`mobile-dropdown-link block text-sm text-muted-foreground transition-colors ${
+                              className={`mobile-dropdown-link mobile-dropdown-link-trigger block text-sm text-muted-foreground transition-colors ${
                                 isActive(`/products/${category.slug}`) ? "mobile-dropdown-link-active" : ""
                               }`}
                               onClick={() => setIsOpen(false)}

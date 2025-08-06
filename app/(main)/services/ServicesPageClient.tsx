@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Search, Grid, List, AlertCircle, RefreshCw } from "lucide-react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
@@ -19,14 +19,27 @@ interface ServicesPageClientProps {
 
 export default function ServicesPageClient({ initialServices, loading = false, error = null }: ServicesPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  const filteredServices = initialServices.filter(
-    (service) =>
+  // Extract unique categories from the data
+  const categories = useMemo(() => {
+    const set = new Set<string>()
+    initialServices.forEach((service) => {
+      if (service.category) set.add(service.category)
+    })
+    return ["All", ...Array.from(set).sort()]
+  }, [initialServices])
+
+  // Filter services by search and category
+  const filteredServices = initialServices.filter((service) => {
+    const matchesCategory = selectedCategory === "All" || service.category === selectedCategory
+    const matchesSearch =
       service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      service.category.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
 
   if (loading) {
     return (
@@ -123,7 +136,7 @@ export default function ServicesPageClient({ initialServices, loading = false, e
       {/* Filters Section */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto container-padding">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
             <div className="flex items-center gap-4 w-full md:w-auto">
               <div className="relative flex-1 md:w-80">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -133,6 +146,21 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
+              </div>
+              {/* Category Dropdown */}
+              <div className="flex-1 md:w-64">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                  aria-label="Filter by category"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -213,7 +241,13 @@ export default function ServicesPageClient({ initialServices, loading = false, e
           ) : (
             <div className="text-center py-12">
               <div className="text-muted-foreground mb-4">No services found matching your search</div>
-              <Button variant="outline" onClick={() => setSearchTerm("")}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("")
+                  setSelectedCategory("All")
+                }}
+              >
                 Clear Search
               </Button>
             </div>
