@@ -189,9 +189,9 @@ export function Navigation() {
                   {/* Mobile Products Dropdown using shadcn Accordion */}
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="products" className="border-none">
-                      <AccordionTrigger className={`nav-dropdown-link block p-2 rounded-md transition-colors col-span-2 mt-2 border-t pt-3 ${
-                          pathname === "/products" ? "nav-dropdown-link-active" : ""
-                        }`}>
+                      <AccordionTrigger className={`mobile-nav-link text-lg font-medium transition-colors px-0 hover:no-underline ${
+                        isProductsActive() ? "mobile-nav-link-active" : ""
+                      }`}>
                         Products
                       </AccordionTrigger>
                       <AccordionContent className="pl-4">
