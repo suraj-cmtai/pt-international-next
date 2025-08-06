@@ -598,10 +598,26 @@ export default function ProductsManagement() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded bg-primary text-white text-sm font-medium flex items-center justify-center"
+                    className={
+                      "px-4 py-2 rounded text-sm font-medium flex items-center justify-center " +
+                      (isLoading || isSubmitting || !isFormValid()
+                        ? "bg-muted text-muted-foreground cursor-not-allowed"
+                        : "bg-primary text-white")
+                    }
                     disabled={isLoading || isSubmitting || !isFormValid()}
                   >
-                    {isSubmitting ? (
+                    {isLoading || isSubmitting || !isFormValid() ? (
+                      isSubmitting ? (
+                        <>
+                          <span className="inline-block h-4 w-4 mr-2 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                          {editingProduct ? "Saving..." : "Creating..."}
+                        </>
+                      ) : editingProduct ? (
+                        <span className="text-muted-foreground">Save Changes</span>
+                      ) : (
+                        <span className="text-muted-foreground">Create</span>
+                      )
+                    ) : isSubmitting ? (
                       <>
                         <span className="inline-block h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         {editingProduct ? "Saving..." : "Creating..."}
