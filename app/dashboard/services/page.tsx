@@ -375,7 +375,7 @@ export default function ServicesPage() {
             value={formState.slug}
             onChange={(e) => setFormState({ ...formState, slug: e.target.value })}
             placeholder="Auto-generated from title"
-            className="text-sm bg-muted-foreground text-muted-foreground"
+            className="text-sm bg-muted-foreground/50 text-muted-foreground"
             readOnly
           />
         </div>

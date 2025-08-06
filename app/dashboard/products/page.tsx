@@ -402,7 +402,7 @@ export default function ProductsManagement() {
                     </label>
                     <input
                       id="slug"
-                      className="w-full border rounded px-3 py-2 text-sm bg-muted-foreground text-muted-foreground"
+                      className="w-full border rounded px-3 py-2 text-sm bg-muted-foreground/50 text-muted-foreground"
                       autoComplete="off"
                       value={formData.slug}
                       onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
