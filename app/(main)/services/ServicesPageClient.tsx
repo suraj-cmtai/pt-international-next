@@ -16,6 +16,13 @@ interface Service {
   image?: string
   slug: string
 }
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 
 interface ServicesPageClientProps {
   initialServices: Service[]
@@ -62,6 +69,84 @@ export default function ServicesPageClient({ initialServices, error }: ServicesP
   }
 
   return (
+    <div>
+      {/* Hero Section */}
+      <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="max-w-7xl mx-auto container-padding">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <Badge variant="secondary" className="mb-4">
+              Our Services
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Professional Life Science Services</h1>
+            <p className="text-lg text-muted-foreground">
+              Comprehensive solutions for your research, diagnostic, and analytical needs with expert consultation and
+              support.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Filters Section */}
+      <section className="py-8 bg-white border-b">
+        <div className="max-w-7xl mx-auto container-padding">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="relative flex-1 md:w-80">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search services..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              {/* Category Dropdown using shadcn select */}
+              <div className="flex-1 md:w-64">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full md:w-64">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
+              </div>
+              {/* <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div> */}
+            </div>
+          </div>
+        </div>
+      </section>
     <div className="container py-12">
       {/* Hero */}
       <div className="text-center max-w-3xl mx-auto mb-16">
