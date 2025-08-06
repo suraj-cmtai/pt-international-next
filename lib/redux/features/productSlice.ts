@@ -12,6 +12,7 @@ export interface Product {
   features: string[]
   images: string[]
   specifications?: Record<string, string>
+  brochure?: string
   isActive: boolean
   createdAt: Timestamp
   updatedAt: Timestamp

@@ -13,6 +13,7 @@ export interface Product {
   price?: string;
   features: string[];
   images: string[];
+  brochure?: string;
   specifications?: Record<string, string>;
   isActive: boolean;
   createdAt: Date;
@@ -66,6 +67,7 @@ class ProductService {
       price: data.price || "",
       features: data.features || [],
       images: data.images || [],
+      brochure: data.brochure || "",
       specifications: data.specifications || {},
       isActive: typeof data.isActive === "boolean" ? data.isActive : true,
       createdAt: this.convertTimestamp(data.createdAt),

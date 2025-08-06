@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import ProductService from "../../../services/productServices"
 import consoleManager from "../../../utils/consoleManager"
-import { UploadImage, ReplaceImage } from "../../../controller/imageController"
+import { UploadImage, ReplaceImage, UploadPDF } from "../../../controller/imageController"
 
 // Get product by ID (GET)
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -79,10 +79,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     // For new images: File, for existing: string (URL)
     // We'll process all images, upload new ones, keep URLs for existing, and remove any images not present anymore.
 
-    // Get the product's current images from DB
+    // Get the product's current images and brochure from DB
     const existingProduct = await ProductService.getProductById(id)
     const existingImages: string[] = existingProduct?.images || []
+    const existingBrochure: string | undefined = existingProduct?.brochure
 
+    // --- Images ---
     // Get all images from formData (can be File or string)
     const imagesFromForm: (File | string)[] = []
     // formData.getAll returns File or string
@@ -139,6 +141,54 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     // Instead, you may want to delete directly via Firebase if needed.
 
     updateData.images = finalImageUrls
+
+    // --- Brochure Handling Logic (similar to images) ---
+    // The dashboard sends brochure as FormData "brochure" (can be File or string URL)
+    let brochure: string | undefined = undefined
+    const brochureField = formData.get("brochure")
+    // Track if the brochure is an existing one or a new upload
+    let brochureLogId: string | undefined = undefined
+
+    if (brochureField) {
+      if (typeof brochureField === "object" && "arrayBuffer" in brochureField && "type" in brochureField) {
+        // Only upload if it's a File (Blob)
+        try {
+          const url = await UploadPDF(brochureField)
+          if (typeof url === "string") {
+            brochure = url
+            brochureLogId = "uploaded"
+          }
+        } catch (err: any) {
+          consoleManager.error("Brochure upload failed:", err)
+          brochureLogId = "upload_failed"
+          // Optionally, you can return error here or skip this brochure
+        }
+      } else if (typeof brochureField === "string" && brochureField.trim() !== "") {
+        // Already a URL (existing brochure)
+        if (existingBrochure && brochureField === existingBrochure) {
+          brochure = brochureField
+          brochureLogId = "existing"
+        } else {
+          // New string URL (shouldn't happen from dashboard, but handle gracefully)
+          brochure = brochureField
+          brochureLogId = "new_string_url"
+        }
+      }
+    } else {
+      // No brochure provided in formData, possibly means remove brochure
+      brochure = undefined
+      brochureLogId = "removed"
+    }
+
+    updateData.brochure = brochure
+
+    // Log the brochure logic for debugging/audit
+    consoleManager.log("Brochure update logic:", {
+      brochureFieldType: typeof brochureField,
+      brochure,
+      brochureLogId,
+      existingBrochure,
+    })
 
     const updatedProduct = await ProductService.updateProduct(id, updateData)
 

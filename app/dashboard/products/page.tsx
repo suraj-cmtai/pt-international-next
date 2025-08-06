@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Plus, Edit, Trash2, Search, Eye, X } from "lucide-react"
+import { Plus, Edit, Trash2, Search, Eye, X, FileText } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch } from "@/lib/redux/store"
 import {
@@ -48,6 +48,11 @@ export default function ProductsManagement() {
     isActive: true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Brochure state
+  const [brochureFile, setBrochureFile] = useState<File | null>(null)
+  const [brochureUrl, setBrochureUrl] = useState<string | null>(null)
+  const brochureInputRef = useRef<HTMLInputElement>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -130,6 +135,33 @@ export default function ProductsManagement() {
     }, 0)
   }
 
+  // --- Brochure Handling ---
+  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type === "application/pdf") {
+      setBrochureFile(file)
+      setBrochureUrl(URL.createObjectURL(file))
+    } else {
+      setBrochureFile(null)
+      setBrochureUrl(null)
+      if (file) {
+        toast({
+          title: "Invalid File",
+          description: "Please upload a PDF file for the brochure.",
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+  const removeBrochure = () => {
+    setBrochureFile(null)
+    setBrochureUrl(null)
+    if (brochureInputRef.current) {
+      brochureInputRef.current.value = ""
+    }
+  }
+
   const addFeature = () => setFeatures([...features, ""])
   const removeFeature = (index: number) => setFeatures(features.filter((_, i) => i !== index))
   const updateFeature = (index: number, value: string) => {
@@ -167,7 +199,10 @@ export default function ProductsManagement() {
     setSpecifications([{ key: "", value: "" }])
     setImagesState([])
     setEditingProduct(null)
+    setBrochureFile(null)
+    setBrochureUrl(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
+    if (brochureInputRef.current) brochureInputRef.current.value = ""
   }
 
   // Check if all required fields are filled
@@ -217,6 +252,14 @@ export default function ProductsManagement() {
         productFormData.append("images", img)
       }
     })
+
+    // Append brochure if present
+    if (brochureFile) {
+      productFormData.append("brochure", brochureFile)
+    } else if (brochureUrl && editingProduct && editingProduct.brochure) {
+      // If editing and brochure is a URL (existing), send the string
+      productFormData.append("brochure", editingProduct.brochure)
+    }
 
     try {
       if (editingProduct) {
@@ -270,6 +313,17 @@ export default function ProductsManagement() {
       setSpecifications(specs.length > 0 ? specs : [{ key: "", value: "" }])
     } else {
       setSpecifications([{ key: "", value: "" }])
+    }
+
+    // Brochure: if exists, set as URL (string), else null
+    if (product.brochure) {
+      setBrochureFile(null)
+      setBrochureUrl(product.brochure)
+      if (brochureInputRef.current) brochureInputRef.current.value = ""
+    } else {
+      setBrochureFile(null)
+      setBrochureUrl(null)
+      if (brochureInputRef.current) brochureInputRef.current.value = ""
     }
 
     if (fileInputRef.current) fileInputRef.current.value = ""
@@ -516,6 +570,46 @@ export default function ProductsManagement() {
                       </div>
                     )}
                     <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 5MB.</p>
+                  </div>
+                  {/* Brochure PDF Upload */}
+                  <div className="grid gap-2">
+                    <label htmlFor="brochure" className="text-sm font-medium">
+                      Brochure (PDF)
+                    </label>
+                    <input
+                      id="brochure"
+                      type="file"
+                      accept="application/pdf"
+                      ref={brochureInputRef}
+                      className="block w-full text-sm file:text-foreground"
+                      onChange={handleBrochureChange}
+                    />
+                    {(brochureFile || brochureUrl) && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        {brochureFile ? (
+                          <span className="text-sm">{brochureFile.name}</span>
+                        ) : brochureUrl ? (
+                          <a
+                            href={brochureUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline text-sm"
+                          >
+                            View Brochure
+                          </a>
+                        ) : null}
+                        <button
+                          type="button"
+                          className="ml-2 text-red-500 hover:text-red-700"
+                          onClick={removeBrochure}
+                          tabIndex={-1}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">Upload a PDF file. Max size: 10MB.</p>
                   </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Key Features</label>

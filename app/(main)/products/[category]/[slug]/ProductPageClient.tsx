@@ -57,6 +57,7 @@ interface ProductPageClientProps {
 
 export default function ProductPageClient({ category, product }: ProductPageClientProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showBrochure, setShowBrochure] = useState(false)
 
   const categoryData = productCategories.find((cat) => cat.slug === category)
 
@@ -196,7 +197,37 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                     Enquire Now
                   </Link>
                 </Button>
+                {product.brochure && (
+                  <>
+                    <Button size="lg" variant="outline" onClick={() => setShowBrochure((prev) => !prev)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      {showBrochure ? "Hide Datasheet" : "View Datasheet"}
+                    </Button>
+                    <Button size="lg" variant="outline" asChild>
+                      <Link href={`${product.brochure || "/placeholder.pdf"}`} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Datasheet
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </div>
+
+              {/* Inline PDF viewer for brochure */}
+              {product.brochure && showBrochure && (
+                <div className="mt-4 w-full">
+                  <div className="rounded border overflow-hidden" style={{ minHeight: 500, height: "70vh" }}>
+                    <iframe
+                      src={product.brochure}
+                      title="Product Brochure"
+                      width="100%"
+                      height="100%"
+                      style={{ border: "none", minHeight: 500 }}
+                      allow="autoplay"
+                    />
+                  </div>
+                </div>
+              )}
 
               {product.features && product.features.length > 0 && (
                 <Card>
