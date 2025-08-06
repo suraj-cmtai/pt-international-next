@@ -179,7 +179,7 @@ export default function ServicesPage() {
     try {
       const formData = new FormData()
       formData.append("title", newServiceForm.title.trim())
-      formData.append("slug", getSlugFromTitle(newServiceForm.title.trim()))
+      formData.append("slug", newServiceForm.title.trim())
       formData.append("description", newServiceForm.description.trim())
       formData.append("longDescription", newServiceForm.longDescription.trim())
       formData.append(
@@ -248,7 +248,7 @@ export default function ServicesPage() {
     try {
       const formData = new FormData()
       formData.append("title", editServiceForm.title.trim())
-      formData.append("slug", getSlugFromTitle(editServiceForm.title.trim()))
+      formData.append("slug", editServiceForm.title.trim())
       formData.append("description", editServiceForm.description.trim())
       formData.append("longDescription", editServiceForm.longDescription.trim())
       formData.append(

@@ -391,7 +391,7 @@ export default function ProductsManagement() {
                       id="title"
                       className="w-full border rounded px-3 py-2 text-sm"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value, slug: generateSlug(e.target.value) })}
                       placeholder="Enter product title"
                       required
                     />
