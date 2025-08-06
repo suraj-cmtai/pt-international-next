@@ -137,11 +137,11 @@ export default function HomePage() {
               viewport={{ once: true }}
             >
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="/lab-med.jpg"
                 alt="Laboratory Facility"
                 width={500}
                 height={400}
-                className="rounded-lg shadow-lg"
+                className="rounded-lg shadow-lg aspect-square"
               />
             </motion.div>
           </div>

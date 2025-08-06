@@ -73,7 +73,7 @@ export function AboutUsSection({ sections, variant = "default" }: AboutUsSection
                       alt={section.title}
                       width={600}
                       height={400}
-                      className="rounded-lg shadow-lg"
+                      className="rounded-lg shadow-lg aspect-square"
                     />
                   </div>
                 )}

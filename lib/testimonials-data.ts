@@ -38,7 +38,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Sarah Chen",
     title: "Research Director",
     company: "BioTech Research Institute",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "PT International has been our trusted partner for over 5 years. Their research products are consistently high-quality, and their technical support team is exceptional. The Advanced PCR Kit has significantly improved our research efficiency.",
     rating: 5,
@@ -50,7 +50,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Michael Rodriguez",
     title: "Laboratory Manager",
     company: "City General Hospital",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "The diagnostic solutions from PT International have transformed our testing capabilities. Their COVID-19 rapid tests provided accurate results when we needed them most during the pandemic. Outstanding reliability and customer service.",
     rating: 5,
@@ -62,7 +62,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Emily Watson",
     title: "Quality Assurance Director",
     company: "PharmaCorp Ltd",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "PT International's consulting services helped us navigate complex FDA regulations seamlessly. Their expertise in regulatory affairs saved us months of preparation time and ensured our successful product launch.",
     rating: 5,
@@ -74,7 +74,7 @@ export const testimonials: Testimonial[] = [
     name: "Prof. James Thompson",
     title: "Department Head",
     company: "University Medical Center",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "We've been using PT International's instruments for our teaching labs. The laboratory centrifuge is robust, reliable, and perfect for our educational needs. Great value for money and excellent after-sales support.",
     rating: 5,
@@ -85,7 +85,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Lisa Park",
     title: "Clinical Laboratory Director",
     company: "Regional Medical Labs",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "The quality control services from PT International ensure our lab maintains the highest standards. Their method validation expertise and comprehensive testing protocols have been invaluable to our operations.",
     rating: 5,
@@ -96,7 +96,7 @@ export const testimonials: Testimonial[] = [
     name: "Dr. Robert Kim",
     title: "Research Scientist",
     company: "Genomics Research Center",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/logo.png",
     content:
       "PT International's reagents and chemicals are of exceptional purity. The HPLC grade acetonitrile consistently delivers reliable results in our analytical work. Their technical documentation is also very thorough.",
     rating: 5,
@@ -175,10 +175,10 @@ export const aboutUsSections: AboutUsSection[] = [
     id: "company-overview",
     title: "Company Overview",
     content:
-      "Founded in 2008, PT International Lifesciences LLC has grown from a small startup to a leading global provider of life science solutions. Our journey began with a simple mission: to make high-quality research products and diagnostic solutions accessible to laboratories worldwide. Today, we serve over 1,000 customers across 50+ countries, maintaining our commitment to excellence, innovation, and customer satisfaction.",
-    image: "/placeholder.svg?height=400&width=600",
+      "PT International Lifesciences LLC has grown from a small startup to a leading global provider of life science solutions. Our journey began with a simple mission: to make high-quality research products and diagnostic solutions accessible to laboratories worldwide. Today, we serve over 1,000 customers across 50+ countries, maintaining our commitment to excellence, innovation, and customer satisfaction.",
+    image: "/business-center.jpg",
     stats: [
-      { number: "2008", label: "Founded" },
+      // { number: "2008", label: "Founded" },
       { number: "1000+", label: "Customers" },
       { number: "50+", label: "Countries" },
       { number: "500+", label: "Products" },
@@ -189,7 +189,7 @@ export const aboutUsSections: AboutUsSection[] = [
     title: "Our Expertise",
     content:
       "With over 15 years of experience in the life sciences industry, we have developed deep expertise across multiple domains. Our team includes PhD scientists, regulatory affairs specialists, quality assurance experts, and technical support professionals. This diverse expertise allows us to provide comprehensive solutions that meet the evolving needs of modern laboratories and research institutions.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "/front-building.jpg",
     stats: [
       { number: "15+", label: "Years Experience" },
       { number: "25+", label: "PhD Scientists" },
@@ -202,7 +202,7 @@ export const aboutUsSections: AboutUsSection[] = [
     title: "Innovation & Technology",
     content:
       "Innovation is at the heart of everything we do. We continuously invest in research and development to bring cutting-edge solutions to market. Our state-of-the-art facilities and partnerships with leading research institutions enable us to stay at the forefront of scientific advancement. We're committed to developing products that not only meet current needs but anticipate future challenges in life sciences.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "/burj-khalifa.jpg",
     stats: [
       { number: "20%", label: "Revenue in R&D" },
       { number: "50+", label: "New Products/Year" },

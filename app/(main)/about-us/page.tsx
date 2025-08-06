@@ -32,7 +32,7 @@ const values = [
 ]
 
 const milestones = [
-  { year: "2008", title: "Company Founded", description: "PT International Lifesciences LLC was established" },
+  // { year: "2008", title: "Company Founded", description: "PT International Lifesciences LLC was established" },
   { year: "2012", title: "Global Expansion", description: "Expanded operations to serve 25+ countries" },
   { year: "2016", title: "Product Innovation", description: "Launched advanced diagnostic solutions" },
   { year: "2020", title: "Digital Transformation", description: "Implemented cutting-edge digital platforms" },
