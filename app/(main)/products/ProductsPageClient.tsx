@@ -181,7 +181,7 @@ export default function ProductsPageClient({ initialProducts, loading = false, e
               <div className="text-sm text-muted-foreground">
                 {filteredCategories.length} categor{filteredCategories.length !== 1 ? "ies" : "y"} found
               </div>
-              <div className="flex border rounded-md">
+              {/* <div className="flex border rounded-md">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
@@ -198,7 +198,7 @@ export default function ProductsPageClient({ initialProducts, loading = false, e
                 >
                   <List className="h-4 w-4" />
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

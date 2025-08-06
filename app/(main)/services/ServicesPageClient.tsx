@@ -139,7 +139,7 @@ export default function ServicesPageClient({ initialServices, loading = false, e
               <div className="text-sm text-muted-foreground">
                 {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
               </div>
-              <div className="flex border rounded-md">
+              {/* <div className="flex border rounded-md">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
@@ -156,7 +156,7 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                 >
                   <List className="h-4 w-4" />
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

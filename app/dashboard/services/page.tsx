@@ -573,14 +573,14 @@ export default function ServicesPage() {
             ))}
           </SelectContent>
         </Select>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Button variant={viewMode === "table" ? "default" : "outline"} size="sm" onClick={() => setViewMode("table")}>
             <List className="h-4 w-4" />
           </Button>
           <Button variant={viewMode === "grid" ? "default" : "outline"} size="sm" onClick={() => setViewMode("grid")}>
             <Grid className="h-4 w-4" />
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Services Table */}
