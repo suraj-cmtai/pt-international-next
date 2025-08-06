@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Service } from "@/lib/data"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 
 interface ServicesPageClientProps {
   initialServices: Service[]
@@ -147,20 +154,20 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                   className="pl-10"
                 />
               </div>
-              {/* Category Dropdown */}
+              {/* Category Dropdown using shadcn select */}
               <div className="flex-1 md:w-64">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-                  aria-label="Filter by category"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full md:w-64">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex items-center gap-2">
