@@ -16,8 +16,10 @@ import {
   type GalleryItem,
 } from "@/lib/redux/features/gallerySlice"
 import type { AppDispatch, RootState } from "@/lib/redux/store"
+import { useLanguage } from "@/context/language-context"
 
 export function GallerySection() {
+  const { t } = useLanguage()
   const dispatch = useDispatch<AppDispatch>()
   const galleryItems: GalleryItem[] = useSelector((state: RootState) => selectActiveGalleryList(state))
   const loading = useSelector((state: RootState) => selectIsLoading(state))
@@ -127,7 +129,7 @@ export function GallerySection() {
         {/* Lightbox Modal */}
         <Dialog open={!!selectedImage} onOpenChange={closeLightbox}>
           <DialogContent className="max-w-3xl w-full p-0 bg-black/95 border-0" showCloseButton={false}>
-          <DialogTitle hidden className="sr-only">Image Lighthouse</DialogTitle>
+            <DialogTitle hidden className="sr-only">{t("gallery.lightbox.title")}</DialogTitle>
             <AnimatePresence>
               {selectedImage && (
                 <motion.div
@@ -215,7 +217,7 @@ export function GallerySection() {
         >
           <Button size="lg" asChild>
             <Link href="/gallery">
-              View Full Gallery
+              {t("gallery.button")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

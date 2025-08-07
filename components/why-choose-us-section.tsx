@@ -5,6 +5,7 @@ import { Award, Globe, Users, Clock, Shield, Headphones, CheckCircle, TrendingUp
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { WhyChooseUsFeature } from "@/lib/testimonials-data"
+import { useLanguage } from "@/context/language-context"
 
 interface WhyChooseUsSectionProps {
   features: WhyChooseUsFeature[]
@@ -21,15 +22,15 @@ const iconMap = {
   Shield,
   HeadphonesIcon: Headphones,
   CheckCircle,
-  TrendingUp,
+  TrendingUp
 }
 
-export function WhyChooseUsSection({
-  features,
-  title = "Why Choose PT International?",
-  subtitle = "We combine scientific expertise with innovative solutions to deliver exceptional value",
-  variant = "default",
-}: WhyChooseUsSectionProps) {
+export function WhyChooseUsSection({ features, variant = "default" }: WhyChooseUsSectionProps) {
+  const { t } = useLanguage()
+
+  const title = t("whyChoose.title")
+  const subtitle = t("whyChoose.subtitle")
+
   return (
     <section className={`${variant === "default" ? "section-padding" : "py-12"}`}>
       <div className="max-w-7xl mx-auto container-padding">
@@ -53,6 +54,11 @@ export function WhyChooseUsSection({
         >
           {features.map((feature, index) => {
             const IconComponent = iconMap[feature.icon as keyof typeof iconMap] || CheckCircle
+            const translatedTitle = t(`whyChoose.features.${feature.id}.title`)
+            const translatedDescription = t(`whyChoose.features.${feature.id}.description`)
+            const translatedLabel = feature.stats?.label
+              ? t(`whyChoose.features.${feature.id}.label`)
+              : undefined
 
             return (
               <motion.div
@@ -68,19 +74,21 @@ export function WhyChooseUsSection({
                       <IconComponent className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle className={`${variant === "default" ? "text-xl" : "text-lg"} mb-2`}>
-                      {feature.title}
+                      {translatedTitle}
                     </CardTitle>
                     {feature.stats && (
                       <div className="mb-3">
                         <div className="text-2xl font-bold text-primary">{feature.stats.number}</div>
                         <Badge variant="secondary" className="text-xs">
-                          {feature.stats.label}
+                          {translatedLabel}
                         </Badge>
                       </div>
                     )}
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {translatedDescription}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
