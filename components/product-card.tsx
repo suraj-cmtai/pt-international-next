@@ -49,7 +49,6 @@ export function ProductCard({ product }: ProductCardProps) {
           className="object-cover transition-transform group-hover:scale-105"
         />
 
-        {/* Navigation arrows - only show if multiple images */}
         {product.images.length > 1 && (
           <>
             <Button
@@ -71,7 +70,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </>
         )}
 
-        {/* Dot indicators */}
         {product.images.length > 1 && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
             {product.images.map((_, index) => (

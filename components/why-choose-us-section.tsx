@@ -1,7 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Award, Globe, Users, Clock, Shield, Headphones, CheckCircle, TrendingUp } from "lucide-react"
+import { useLanguage } from "@/context/language-context"
+import {
+  Award,
+  Globe,
+  Users,
+  Clock,
+  Shield,
+  Headphones,
+  CheckCircle,
+  TrendingUp
+} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { WhyChooseUsFeature } from "@/lib/testimonials-data"
@@ -9,8 +19,6 @@ import { useLanguage } from "@/context/language-context"
 
 interface WhyChooseUsSectionProps {
   features: WhyChooseUsFeature[]
-  title?: string
-  subtitle?: string
   variant?: "default" | "compact"
 }
 
@@ -50,7 +58,8 @@ export function WhyChooseUsSection({ features, variant = "default" }: WhyChooseU
         </motion.div>
 
         <div
-          className={`grid grid-cols-1 ${variant === "default" ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2"} gap-6`}
+          className={`grid grid-cols-1 ${variant === "default" ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2"
+            } gap-6`}
         >
           {features.map((feature, index) => {
             const IconComponent = iconMap[feature.icon as keyof typeof iconMap] || CheckCircle

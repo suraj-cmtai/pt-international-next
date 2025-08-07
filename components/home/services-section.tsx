@@ -25,7 +25,6 @@ export function ServicesSection() {
     dispatch(fetchActiveServices())
   }, [dispatch])
 
-  // Only show first 3 active services
   const activeServices = useMemo(
     () => (Array.isArray(services) ? services.filter((s) => s.isActive).slice(0, 3) : []),
     [services]

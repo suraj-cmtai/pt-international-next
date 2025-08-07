@@ -24,7 +24,6 @@ export function GallerySection() {
   const galleryItems: GalleryItem[] = useSelector((state: RootState) => selectActiveGalleryList(state))
   const loading = useSelector((state: RootState) => selectIsLoading(state))
 
-  // For lightbox modal
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -32,10 +31,8 @@ export function GallerySection() {
     dispatch(fetchActiveGallery())
   }, [dispatch])
 
-  // Only show first 4 items from the active gallery slice
   const visibleItems = Array.isArray(galleryItems) ? galleryItems.slice(0, 4) : []
 
-  // Lightbox navigation
   const openLightbox = (item: GalleryItem, idx: number) => {
     setSelectedImage(item)
     setCurrentIndex(idx)
@@ -69,9 +66,7 @@ export function GallerySection() {
     )
   }
 
-  if (!visibleItems.length) {
-    return null
-  }
+  if (!visibleItems.length) return null
 
   return (
     <section className="section-padding bg-gray-50">
@@ -83,10 +78,8 @@ export function GallerySection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Gallery</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Explore our state-of-the-art facilities, products, and scientific achievements through our image gallery.
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("gallery.title")}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("gallery.description")}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -139,7 +132,6 @@ export function GallerySection() {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="relative h-[60vh] md:h-[70vh]"
                 >
-                  {/* Close Button */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -148,7 +140,7 @@ export function GallerySection() {
                   >
                     <X className="h-6 w-6" />
                   </Button>
-                  {/* Navigation Buttons */}
+
                   {visibleItems.length > 1 && (
                     <>
                       <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20">
@@ -173,7 +165,7 @@ export function GallerySection() {
                       </div>
                     </>
                   )}
-                  {/* Image */}
+
                   <div
                     className="relative h-full w-full flex items-center justify-center"
                     style={{
@@ -192,7 +184,7 @@ export function GallerySection() {
                       priority
                     />
                   </div>
-                  {/* Image Info */}
+
                   <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent text-center text-white">
                     <h3 className="text-xl font-medium">{selectedImage.title}</h3>
                     {selectedImage.category && <p className="text-sm text-gray-300 mt-1">{selectedImage.category}</p>}

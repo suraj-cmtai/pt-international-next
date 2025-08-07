@@ -35,9 +35,7 @@ export function ProductsSection() {
         const response = await fetch("/api/routes/products/active")
         if (response.ok) {
           const data = await response.json()
-          // Defensive: ensure we get an array, then slice
           const arr = Array.isArray(data?.data) ? data.data : []
-          // Map to ensure id is always a string (for ProductCard)
           const normalized = arr
             .filter((p: any) => p && p.isActive)
             .map((p: any) => ({
@@ -78,9 +76,7 @@ export function ProductsSection() {
     )
   }
 
-  if (products.length === 0) {
-    return null
-  }
+  if (products.length === 0) return null
 
   return (
     <section className="section-padding">

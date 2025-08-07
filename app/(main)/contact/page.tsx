@@ -112,7 +112,6 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
-                className="lg:col-span-2 lg:sticky lg:top-20"
               >
                 <Card>
                   <CardHeader>
