@@ -15,7 +15,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { WhyChooseUsFeature } from "@/lib/testimonials-data"
-import { useLanguage } from "@/context/language-context"
 
 interface WhyChooseUsSectionProps {
   features: WhyChooseUsFeature[]
