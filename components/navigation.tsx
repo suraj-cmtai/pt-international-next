@@ -166,22 +166,27 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu Toggle */}
+   
+           
+
+            {/* You can also apply language switcher in mobile here if needed */}
+
+                  {/* Language Switcher (Mobile) */}
+                 
+                
+
+                {/* Rest of mobile nav remains same */}
+                {/* ... */}
+                      {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="lg:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-
-            {/* You can also apply language switcher in mobile here if needed */}
             <SheetContent side="right" className="w-80 p-0">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <div className="flex flex-col h-full">
-                <div className="p-6 border-b flex justify-between items-center">
-                  <Image src="/logo-bg-2.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
-
-                  {/* Language Switcher (Mobile) */}
-                  <DropdownMenu>
+               <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="w-8 h-8 p-1">
                         <Globe className="h-5 w-5" />
@@ -202,19 +207,6 @@ export function Navigation() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-
-                {/* Rest of mobile nav remains same */}
-                {/* ... */}
-                      {/* Mobile Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80 p-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 <div className="p-6 border-b">
                   <Image src="/logo-bg-2.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
@@ -316,9 +308,7 @@ export function Navigation() {
               </div>
             </SheetContent>
           </Sheet>
-              </div>
-            </SheetContent>
-          </Sheet>
+             
         </div>
       </div>
     </header>
