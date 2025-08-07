@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useLanguage } from "@/context/language-context"
 import type { Service } from "@/lib/data"
 import {
   Select,
@@ -24,12 +25,16 @@ interface ServicesPageClientProps {
   error?: string | null
 }
 
-export default function ServicesPageClient({ initialServices, loading = false, error = null }: ServicesPageClientProps) {
+export default function ServicesPageClient({
+  initialServices,
+  loading = false,
+  error = null,
+}: ServicesPageClientProps) {
+  const { t } = useLanguage()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  // Extract unique categories from the data
   const categories = useMemo(() => {
     const set = new Set<string>()
     initialServices.forEach((service) => {
@@ -38,7 +43,6 @@ export default function ServicesPageClient({ initialServices, loading = false, e
     return ["All", ...Array.from(set).sort()]
   }, [initialServices])
 
-  // Filter services by search and category
   const filteredServices = initialServices.filter((service) => {
     const matchesCategory = selectedCategory === "All" || service.category === selectedCategory
     const matchesSearch =
@@ -51,7 +55,6 @@ export default function ServicesPageClient({ initialServices, loading = false, e
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Hero Section Skeleton */}
         <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
           <div className="max-w-7xl mx-auto container-padding">
             <div className="max-w-3xl mx-auto text-center">
@@ -62,7 +65,6 @@ export default function ServicesPageClient({ initialServices, loading = false, e
           </div>
         </section>
 
-        {/* Services Grid Skeleton */}
         <section className="section-padding">
           <div className="max-w-7xl mx-auto container-padding">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -96,10 +98,10 @@ export default function ServicesPageClient({ initialServices, loading = false, e
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-6">We couldn't load the services. Please try again.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t("services.error.title")}</h2>
+            <p className="text-gray-600 mb-6">{t("services.error.description")}</p>
             <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-3 mb-6">
-              <strong>Error:</strong> {error}
+              <strong>{t("services.error.label")}</strong> {error}
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -108,7 +110,7 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                 className="border-primary text-primary hover:bg-primary hover:text-white"
               >
                 <RefreshCw className="h-4 w-4" />
-                Refresh Page
+                {t("services.error.button")}
               </Button>
             </div>
           </motion.div>
@@ -129,18 +131,15 @@ export default function ServicesPageClient({ initialServices, loading = false, e
             className="max-w-3xl mx-auto text-center"
           >
             <Badge variant="secondary" className="mb-4">
-              Our Services
+              {t("services.hero.badge")}
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Professional Life Science Services</h1>
-            <p className="text-lg text-muted-foreground">
-              Comprehensive solutions for your research, diagnostic, and analytical needs with expert consultation and
-              support.
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t("services.hero.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("services.hero.description")}</p>
           </motion.div>
         </div>
       </section>
 
-      {/* Filters Section */}
+      {/* Filters */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto container-padding">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
@@ -148,17 +147,16 @@ export default function ServicesPageClient({ initialServices, loading = false, e
               <div className="relative flex-1 md:w-80">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search services..."
+                  placeholder={t("services.search.placeholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              {/* Category Dropdown using shadcn select */}
               <div className="flex-1 md:w-64">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-full md:w-64">
-                    <SelectValue placeholder="Category" />
+                    <SelectValue placeholder={t("services.category.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -172,32 +170,14 @@ export default function ServicesPageClient({ initialServices, loading = false, e
             </div>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
-                {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
+                {filteredServices.length} {t("services.count.label")}
               </div>
-              {/* <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="rounded-r-none"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="rounded-l-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div> */}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Grid/List */}
+      {/* Services */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           {filteredServices.length > 0 ? (
@@ -226,18 +206,20 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                     </div>
                     <div className="flex-1">
                       <CardHeader>
-                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{service.title}</CardTitle>
+                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>
+                          {service.title}
+                        </CardTitle>
                         <CardDescription>{service.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="pt-0">
                         {service.price && (
                           <div className="mb-4">
-                            <div className="text-sm text-muted-foreground">Starting at</div>
+                            <div className="text-sm text-muted-foreground">{t("services.price.startingAt")}</div>
                             <div className="text-lg font-bold text-primary">{service.price}</div>
                           </div>
                         )}
                         <Button asChild className="w-full">
-                          <Link href={`/services/${service.slug}`}>Learn More</Link>
+                          <Link href={`/services/${service.slug}`}>{t("services.button.learnMore")}</Link>
                         </Button>
                       </CardContent>
                     </div>
@@ -247,7 +229,7 @@ export default function ServicesPageClient({ initialServices, loading = false, e
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No services found matching your search</div>
+              <div className="text-muted-foreground mb-4">{t("services.noResults")}</div>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -255,14 +237,14 @@ export default function ServicesPageClient({ initialServices, loading = false, e
                   setSelectedCategory("All")
                 }}
               >
-                Clear Search
+                {t("services.button.clearSearch")}
               </Button>
             </div>
           )}
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto container-padding">
           <motion.div
@@ -272,17 +254,14 @@ export default function ServicesPageClient({ initialServices, loading = false, e
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl font-bold mb-4">Need Custom Solutions?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Our team of experts can develop tailored solutions to meet your specific requirements. Contact us to
-              discuss your project.
-            </p>
+            <h2 className="text-3xl font-bold mb-4">{t("services.cta.title")}</h2>
+            <p className="text-lg text-muted-foreground mb-8">{t("services.cta.description")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
-                <Link href="/contact?message=Custom Service Inquiry">Request Consultation</Link>
+                <Link href="/contact?message=Custom Service Inquiry">{t("services.cta.primary")}</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/products">View Products</Link>
+                <Link href="/products">{t("services.cta.secondary")}</Link>
               </Button>
             </div>
           </motion.div>

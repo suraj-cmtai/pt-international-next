@@ -1,77 +1,36 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #22c55e;
+  --primary-foreground: #ffffff;
+  --secondary: #3b82f6;
+  --secondary-foreground: #ffffff;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #22c55e;
+  --radius: 0.5rem;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #1a1a1a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #22c55e;
 }
 
 @theme inline {
@@ -94,14 +53,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -115,9 +69,176 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
+}
+
+/* Custom Navigation Link Styles */
+.nav-link {
+  @apply relative text-sm font-medium text-foreground/80 transition-colors duration-200;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link:focus::after {
+  width: 100%;
+}
+
+/* Combined styles for active links and open triggers */
+.nav-link-active,
+.nav-trigger[data-state="open"] {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* Remove default background from shadcn/ui NavigationMenuTrigger when used as nav-trigger, but only in default state */
+.nav-trigger:not(:hover):not(:focus):not([data-state="open"]):not(.nav-link-active) {
+  background: transparent !important;
+}
+
+.nav-link-active::after,
+.nav-trigger[data-state="open"]::after {
+  width: 100% !important;
+}
+
+.nav-trigger:hover > svg,
+.nav-trigger:focus > svg,
+.nav-trigger[data-state="open"] > svg,
+.nav-link-active.nav-trigger > svg {
+  color: var(--primary) !important;
+}
+
+/* Dropdown Link Styles */
+.nav-dropdown-link {
+  @apply text-foreground/80;
+}
+
+.nav-dropdown-link:hover,
+.nav-dropdown-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Dropdown Link Styles */
+.nav-dropdown-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* Mobile Navigation Styles */
+.mobile-nav-link {
+  @apply text-foreground/80;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Mobile Navigation Link Styles */
+.mobile-nav-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+.mobile-dropdown-link {
+  @apply text-muted-foreground;
+}
+
+.mobile-dropdown-link:hover,
+.mobile-dropdown-link:focus {
+  color: transparent;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Active Mobile Dropdown Link Styles */
+.mobile-dropdown-link-active {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* Mobile Dropdown Link Trigger Styles (like nav-trigger) */
+.mobile-nav-link-trigger,
+.mobile-nav-link-trigger[data-state="open"] {
+  color: transparent !important;
+  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+
+/* Remove default background from mobile-nav-link-trigger when not active/open */
+.mobile-nav-link-trigger:not(:hover):not(:focus):not([data-state="open"]):not(.mobile-dropdown-link-active) {
+  background: transparent !important;
+}
+
+/* If you want to add an underline effect like nav-link, you can add this: */
+.mobile-nav-link-trigger::after,
+.mobile-dropdown-link-active.mobile-nav-link-trigger::after,
+.mobile-nav-link-trigger[data-state="open"]::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 0.3s ease;
+}
+
+/* CORRECTED: Make this rule specific to the navigation menu */
+[data-radix-navigation-menu-viewport] [data-radix-collection-item]:hover {
+  background-color: transparent !important;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Other existing styles */
+.hero-gradient {
+  background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
+}
+
+.section-padding {
+  @apply py-16 lg:py-20;
+}
+
+.container-padding {
+  @apply px-4 sm:px-6 lg:px-8;
 }

@@ -23,13 +23,21 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 // ✅ English Translations
 const enTranslations: Record<string, string> = {
     "header.home": "Home",
-    "header.about": "About",
+    "header.about": "About Us",
     "header.services": "Services",
     "header.products": "Products",
     "header.gallery": "Gallery",
     "header.contact": "Contact",
-    "header.getQuote": "Get Quote",
+    "header.getQuote": "Get a Quote",
     "header.viewAllProducts": "View All Products",
+    "header.testimonials": "Testimonials",
+    "products.categories.research-products": "Research Products",
+    "products.categories.diagnostics-products": "Diagnostics Products",
+    "products.categories.instruments-consumables": "Instruments & Consumables",
+    "products.categories.reagents-chemicals": "Reagents and Chemicals",
+    "products.categories.plasticwaresfiltrationunits": "Plastic Wares & Filtration Units",
+    "products.categories.food-testing-kits": "Food Testing Kits",
+    "products.categories.disinfectant-and-sanitizers": "Disinfectant and Sanitizers",
 
     //home hero
     "hero.badge": "Leading Life Sciences Solutions",
@@ -46,12 +54,13 @@ const enTranslations: Record<string, string> = {
     "about.intro.statClients": "Happy Clients",
 
     //product 
-    "products.title": "Featured Products",
-    "products.description": "Discover our most popular life science products designed to meet your research and diagnostic needs.",
+    "products.title": "Comprehensive Product Catalog",
+    "products.description": "Explore our extensive range of life science products designed to meet your research and diagnostic needs.",
     "products.cta": "Browse All Products",
     //product card
     "products.features": "features",
     "products.details": "View Details",
+    "products.cta1":"view Details",
 
     //service card
     "services.startingAt": "Starting at",
@@ -151,8 +160,31 @@ const enTranslations: Record<string, string> = {
     "whyChoose.title1": "Our Competitive Advantages",
     "whyChoose.subtitle1": "What sets us apart in the life sciences industry",
 
-    "testimonials.title": "Trusted by Industry Leaders",
-    "testimonials.subtitle": "See what our customers say about working with us",
+    "testimonials.title": "What Our Customers Say",
+    "testimonials.subtitle": "Trusted by leading institutions and researchers worldwide",
+
+    "home.setsApart.title": "What Sets Us Apart",
+    "home.setsApart.description": "We combine scientific expertise with innovative solutions to deliver exceptional products and services.",
+    "home.features.0.title": "Research Excellence",
+    "home.features.0.description": "Cutting-edge research products and solutions for scientific advancement",
+    "home.features.1.title": "Diagnostic Solutions",
+    "home.features.1.description": "Comprehensive diagnostic tools and testing kits for accurate results",
+    "home.features.2.title": "Quality Assurance",
+    "home.features.2.description": "Rigorous quality control processes ensuring reliable products",
+    "home.features.3.title": "Industry Recognition",
+    "home.features.3.description": "Trusted by leading institutions and research facilities worldwide",
+    "home.benefits.title": "Trusted by Scientists Worldwide",
+    "home.benefits.description": "With over 15 years of experience, we've built a reputation for excellence in the life sciences industry. Our commitment to quality and innovation has made us a preferred partner for researchers globally.",
+    "home.benefits.0": "ISO 9001:2015 Certified Quality",
+    "home.benefits.1": "Global Shipping & Support",
+    "home.benefits.2": "Expert Technical Assistance",
+    "home.benefits.3": "Competitive Pricing",
+    "home.recognition.title": "Industry Recognition",
+    "home.recognition.description": "Our commitment to excellence has earned us recognition from leading industry organizations.",
+    "home.recognition.iso": "Quality Management",
+    "home.recognition.fda": "Medical Devices",
+    "home.recognition.ce": "European Conformity",
+    "home.recognition.gmp": "Good Manufacturing",
 
     //product
     "products.badge": "Our Products",
@@ -168,7 +200,7 @@ const enTranslations: Record<string, string> = {
     "products.empty": "No categories found matching your search",
     "products.cta.title": "Can't Find What You're Looking For?",
     "products.cta.description": "Our product catalog is constantly expanding. Contact us for custom products or special requests.",
-    "products.cta.request": "Request Product",
+    "products.cta.request": "Browse Product",
     "products.cta.services": "View Services",
     "products.search.resultLabel.single": "category found",
     "products.search.resultLabel.plural": "categories found",
@@ -230,27 +262,33 @@ const enTranslations: Record<string, string> = {
 
     //services
     "services.hero.badge": "Our Services",
-    "services.hero.title": "Explore Our Professional Services",
-    "services.hero.description": "We offer a wide range of services tailored to meet your needs. Discover how we can support your business goals.",
-
+    "services.hero.title": "Professional Life Science Services",
+    "services.hero.description": "Comprehensive solutions for your research, diagnostic, and analytical needs with expert consultation and support.",
     "services.search.placeholder": "Search services...",
-    "services.search.results": "{{count}} result{{plural}} found",
-    "services.search.clear": "Clear Search",
-
+    "services.category.placeholder": "Category",
+    "services.count.label": "service(s) found",
     "services.error.title": "Something went wrong",
-    "services.error.message": "We couldn’t load the services right now. Please try again.",
-    "services.error.details": "Error:",
-    "services.error.button": "Reload Page",
-
-    "services.empty": "No services matched your search.",
-
-    "services.card.startingAt": "Starting at",
-    "services.card.button": "Learn More",
-
-    "services.cta.title": "Need a Custom Service?",
-    "services.cta.description": "Let’s talk about how we can tailor our solutions to your unique requirements.",
+    "services.error.description": "We couldn't load the services. Please try again.",
+    "services.error.label": "Error:",
+    "services.error.button": "Refresh Page",
+    "services.noResults": "No services found matching your search",
+    "services.button.clearSearch": "Clear Search",
+    "services.button.learnMore": "Learn More",
+    "services.price.startingAt": "Starting at",
+    "services.cta.title": "Ready to Get Started?",
+    "services.cta.description": "Contact our team to discuss your specific requirements and learn how we can help you achieve your goals.",
+    "services.cta.primary": "Request Quote",
+    "services.cta.secondary": "Call Now",
     "services.cta.button.primary": "Contact Us",
     "services.cta.button.secondary": "Explore Products",
+    "breadcrumb.home": "Home",
+    "breadcrumb.services": "Services",
+    "services.hero.back": "Back to Services",
+    "services.hero.quoteButton": "Get Quote",
+    "services.hero.callUs": "Call Us",
+    "services.detail.overviewTitle": "Service Overview",
+    "services.detail.featuresTitle": "Key Features",
+    "services.detail.featuresDescription": "What's included in this service",
     //testimonials
 
     "testimonials.filter.label": "Filter by Category",
@@ -270,6 +308,16 @@ const enTranslations: Record<string, string> = {
     "testimonials.filter.diagnostics": "Diagnostics",
     "testimonials.filter.consulting": "Consulting",
     "testimonials.filter.quality": "Quality",
+    "testimonials.category.research": "Research",
+    "testimonials.category.diagnostics": "Diagnostics",
+    "testimonials.category.consulting": "Consulting",
+    "testimonials.category.quality": "Quality",
+    "testimonials.content.1": "PT International has been our trusted partner for over 5 years. Their research products are consistently high-quality, and their technical support team is exceptional. The Advanced PCR Kit has significantly improved our research efficiency.",
+    "testimonials.content.2": "The diagnostic solutions from PT International have transformed our testing capabilities. Their COVID-19 rapid tests provided accurate results when we needed them most during the pandemic. Outstanding reliability and customer service.",
+    "testimonials.content.3": "PT International's consulting services helped us navigate complex FDA regulations seamlessly. Their expertise in regulatory affairs saved us months of preparation time and ensured our successful product launch.",
+    "testimonials.content.4": "We've been using PT International's instruments for our teaching labs. The laboratory centrifuge is robust, reliable, and perfect for our educational needs. Great value for money and excellent after-sales support.",
+    "testimonials.content.5": "The quality control services from PT International ensure our lab maintains the highest standards. Their method validation expertise and comprehensive testing protocols have been invaluable to our operations.",
+    "testimonials.content.6": "PT International's reagents and chemicals are of exceptional purity. The HPLC grade acetonitrile consistently delivers reliable results in our analytical work. Their technical documentation is also very thorough.",
 
 
     //gallery
@@ -355,9 +403,17 @@ const arTranslations: Record<string, string> = {
     "header.services": "الخدمات",
     "header.products": "المنتجات",
     "header.gallery": "المعرض",
-    "header.contact": "تواصل معنا",
-    "header.getQuote": "احصل على عرض",
-    "header.viewAllProducts": "عرض كل المنتجات",
+    "header.contact": "اتصل بنا",
+    "header.getQuote": "احصل على عرض سعر",
+    "header.viewAllProducts": "عرض جميع المنتجات",
+    "header.testimonials": "آراء العملاء",
+    "products.categories.research-products": "منتجات البحث",
+    "products.categories.diagnostics-products": "منتجات التشخيص",
+    "products.categories.instruments-consumables": "الأدوات والمواد الاستهلاكية",
+    "products.categories.reagents-chemicals": "الكواشف والمواد الكيميائية",
+    "products.categories.plasticwaresfiltrationunits": "العبوات البلاستيكية ووحدات الترشيح",
+    "products.categories.food-testing-kits": "أطقم اختبار الأغذية",
+    "products.categories.disinfectant-and-sanitizers": "المطهرات والمعقمات",
 
     //home hero
     "hero.badge": "حلول رائدة في علوم الحياة",
@@ -367,6 +423,38 @@ const arTranslations: Record<string, string> = {
         "تقدم شركة PT International Lifesciences LLC منتجات بحثية مبتكرة وحلول تشخيصية وأجهزة علمية للمختبرات في جميع أنحاء العالم.",
     "hero.cta.explore": "استعرض المنتجات",
     "hero.cta.quote": "طلب عرض سعر",
+
+    "home.setsApart.title": "ما يميزنا",
+    "home.setsApart.description": "نحن نمزج بين الخبرة العلمية والحلول المبتكرة لتقديم منتجات وخدمات استثنائية.",
+
+    "home.features.0.title": "التميز في البحث",
+    "home.features.0.description": "منتجات وحلول بحثية متطورة لتعزيز التقدم العلمي",
+
+    "home.features.1.title": "حلول التشخيص",
+    "home.features.1.description": "أدوات تشخيصية شاملة ومجموعات اختبار لنتائج دقيقة",
+
+    "home.features.2.title": "ضمان الجودة",
+    "home.features.2.description": "عمليات مراقبة جودة صارمة لضمان منتجات موثوقة",
+
+    "home.features.3.title": "الاعتراف الصناعي",
+    "home.features.3.description": "موثوق به من قبل المؤسسات والمراكز البحثية الرائدة عالميًا",
+
+    "home.benefits.title": "موثوق به من قبل العلماء حول العالم",
+    "home.benefits.description": "مع أكثر من 15 عامًا من الخبرة، بنينا سمعة متميزة في صناعة علوم الحياة. التزامنا بالجودة والابتكار جعلنا شريكًا مفضلًا للباحثين عالميًا.",
+
+    "home.benefits.0": "شهادة جودة ISO 9001:2015",
+    "home.benefits.1": "شحن ودعم عالمي",
+    "home.benefits.2": "مساعدة فنية من الخبراء",
+    "home.benefits.3": "أسعار تنافسية",
+
+    "home.recognition.title": "الاعتراف الصناعي",
+    "home.recognition.description": "لقد أكسبنا التزامنا بالتميز اعترافًا من منظمات صناعية رائدة.",
+
+    "home.recognition.iso": "إدارة الجودة",
+    "home.recognition.fda": "الأجهزة الطبية",
+    "home.recognition.ce": "المطابقة الأوروبية",
+    "home.recognition.gmp": "ممارسات التصنيع الجيد",
+    
 
     //about
     "about.intro.title": "من نحن",
@@ -378,6 +466,7 @@ const arTranslations: Record<string, string> = {
     "products.title": "المنتجات المميزة",
     "products.description": "اكتشف أكثر منتجات علوم الحياة شهرة لدينا المصممة لتلبية احتياجاتك البحثية والتشخيصية.",
     "products.cta": "عرض جميع المنتجات",
+    "products.cta1": "عرض التفاصيل",
 
     //product card
     "products.features": "ميزات",
@@ -463,8 +552,15 @@ const arTranslations: Record<string, string> = {
     "whyChoose.title1": "مزايا تنافسية",
     "whyChoose.subtitle1": "ما الذي يميزنا في صناعة علوم الحياة",
 
-    "testimonials.title": "موثوق من قبل قادة الصناعة",
-    "testimonials.subtitle": "اطلع على آراء عملائنا حول العمل معنا",
+    "testimonials.title": "ماذا يقول عملاؤنا",
+    "testimonials.subtitle": "موثوق من قبل المؤسسات الرائدة والباحثين حول العالم",
+    "testimonials.content.1": "كانت شركة PT International شريكنا الموثوق لأكثر من 5 سنوات. منتجاتهم البحثية عالية الجودة باستمرار، وفريق الدعم الفني لديهم استثنائي. لقد حسّن طقم PCR المتقدم بشكل كبير من كفاءة أبحاثنا.",
+    "testimonials.content.2": "لقد غيّرت حلول التشخيص من PT International قدراتنا في الاختبارات. قدمت اختبارات COVID-19 السريعة نتائج دقيقة عندما كنا في أمسّ الحاجة إليها خلال الجائحة. موثوقية رائعة وخدمة عملاء متميزة.",
+    "testimonials.content.3": "ساعدتنا خدمات الاستشارات من PT International في تجاوز تعقيدات لوائح إدارة الغذاء والدواء (FDA) بسلاسة. أنقذتنا خبرتهم في الشؤون التنظيمية من شهور من التحضير وضمنت إطلاق منتجنا بنجاح.",
+    "testimonials.content.4": "نستخدم أجهزة PT International في مختبرات التعليم لدينا. جهاز الطرد المركزي المختبري قوي وموثوق ومثالي لاحتياجاتنا التعليمية. قيمة رائعة مقابل المال ودعم ما بعد البيع ممتاز.",
+    "testimonials.content.5": "تضمن خدمات مراقبة الجودة من PT International أن يحافظ مختبرنا على أعلى المعايير. كانت خبرتهم في التحقق من صحة الأساليب وبروتوكولات الاختبار الشاملة لا تقدر بثمن لعملياتنا.",
+    "testimonials.content.6": "المواد الكيميائية والكواشف من PT International نقية بشكل استثنائي. يوفر الأسيتونتريل بدرجة HPLC نتائج موثوقة باستمرار في عملنا التحليلي. كما أن الوثائق الفنية الخاصة بهم شاملة للغاية.",
+
 
     //service
     "services.title": "خدماتنا المهنية",
@@ -472,27 +568,34 @@ const arTranslations: Record<string, string> = {
     "services.button": "عرض جميع الخدمات",
 
     "services.hero.badge": "خدماتنا",
-    "services.hero.title": "استكشف خدماتنا المهنية",
-    "services.hero.description": "نقدم مجموعة واسعة من الخدمات المصممة لتلبية احتياجاتك. اكتشف كيف يمكننا دعم أهداف عملك.",
-
-    "services.search.placeholder": "ابحث في الخدمات...",
-    "services.search.results": "{{count}} نتيجة{{plural}} تم العثور عليها",
-    "services.search.clear": "مسح البحث",
-
+    "services.hero.title": "خدمات علوم الحياة الاحترافية",
+    "services.hero.description": "حلول شاملة لاحتياجاتك البحثية والتشخيصية والتحليلية مع استشارات ودعم من خبراء.",
+    "services.search.placeholder": "ابحث عن الخدمات...",
+    "services.category.placeholder": "الفئة",
+    "services.count.label": "خدمة/خدمات تم العثور عليها",
     "services.error.title": "حدث خطأ ما",
-    "services.error.message": "تعذر تحميل الخدمات حالياً. يرجى المحاولة لاحقاً.",
-    "services.error.details": "تفاصيل الخطأ:",
+    "services.error.description": "تعذر تحميل الخدمات. يرجى المحاولة مرة أخرى.",
+    "services.error.label": "خطأ:",
     "services.error.button": "إعادة تحميل الصفحة",
-
-    "services.empty": "لم يتم العثور على خدمات تطابق بحثك.",
-
-    "services.card.startingAt": "ابتداءً من",
-    "services.card.button": "عرض المزيد",
-
-    "services.cta.title": "تحتاج إلى خدمة مخصصة؟",
-    "services.cta.description": "دعنا نتحدث عن كيفية تخصيص حلولنا لتناسب متطلباتك.",
+    "services.noResults": "لم يتم العثور على خدمات مطابقة لبحثك",
+    "services.button.clearSearch": "مسح البحث",
+    "services.button.learnMore": "اعرف المزيد",
+    "services.price.startingAt": "تبدأ من",
+    "services.cta.title": "هل أنت مستعد للبدء؟",
+    "services.cta.description": "تواصل مع فريقنا لمناقشة متطلباتك الخاصة ومعرفة كيف يمكننا مساعدتك في تحقيق أهدافك.",
+    "services.cta.primary": "اطلب عرض سعر",
+    "services.cta.secondary": "اتصل الآن",
     "services.cta.button.primary": "تواصل معنا",
-    "services.cta.button.secondary": "استكشف المنتجات",
+    "services.cta.button.secondary": "استعرض المنتجات",
+    "breadcrumb.home": "الرئيسية",
+    "breadcrumb.services": "الخدمات",
+    "services.hero.back": "العودة إلى الخدمات",
+    "services.hero.quoteButton": "احصل على عرض سعر",
+    "services.hero.callUs": "اتصل بنا",
+    "services.detail.overviewTitle": "نظرة عامة على الخدمة",
+    "services.detail.featuresTitle": "الميزات الرئيسية",
+    "services.detail.featuresDescription": "ما الذي تتضمنه هذه الخدمة",
+
 
     //why choose us 
     "whyChoose.title": "لماذا تختار بي تي إنترناشيونال؟",

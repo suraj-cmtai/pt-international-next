@@ -14,39 +14,39 @@ import type { Product } from "@/lib/redux/features/productSlice"
 const productCategories = [
   {
     slug: "research-products",
-    nameKey: "products.categories.research-products.name",
-    descriptionKey: "products.categories.research-products.description"
+    name: "Research Products",
+    description: "Advanced tools and kits for cutting-edge research applications",
   },
   {
     slug: "diagnostics-products",
-    nameKey: "products.categories.diagnostics-products.name",
-    descriptionKey: "products.categories.diagnostics-products.description"
+    name: "Diagnostics Products",
+    description: "Reliable diagnostic solutions for clinical and laboratory use",
   },
   {
     slug: "instruments-consumables",
-    nameKey: "products.categories.instruments-consumables.name",
-    descriptionKey: "products.categories.instruments-consumables.description"
+    name: "Instruments & Consumables",
+    description: "High-quality laboratory instruments and consumable supplies",
   },
   {
     slug: "reagents-chemicals",
-    nameKey: "products.categories.reagents-chemicals.name",
-    descriptionKey: "products.categories.reagents-chemicals.description"
+    name: "Reagents & Chemicals",
+    description: "Pure reagents and chemicals for various applications",
   },
   {
     slug: "plasticwaresfiltrationunits",
-    nameKey: "products.categories.plasticwaresfiltrationunits.name",
-    descriptionKey: "products.categories.plasticwaresfiltrationunits.description"
+    name: "Plasticwares & Filtration Units",
+    description: "Laboratory plasticware and filtration solutions",
   },
   {
     slug: "food-testing-kits",
-    nameKey: "products.categories.food-testing-kits.name",
-    descriptionKey: "products.categories.food-testing-kits.description"
+    name: "Food Testing Kits",
+    description: "Comprehensive kits for food safety and quality testing",
   },
   {
     slug: "disinfectant-and-sanitizers",
-    nameKey: "products.categories.disinfectant-and-sanitizers.name",
-    descriptionKey: "products.categories.disinfectant-and-sanitizers.description"
-  }
+    name: "Disinfectant & Sanitizers",
+    description: "Professional-grade disinfection and sanitization products",
+  },
 ]
 
 interface ProductsPageClientProps {
@@ -60,10 +60,9 @@ export default function ProductsPageClient({ initialProducts, loading = false, e
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode] = useState<"grid" | "list">("grid")
 
+  // Group products by category and count them
   const productsByCategory = productCategories.map((category) => ({
     ...category,
-    name: t(category.nameKey),
-    description: t(category.descriptionKey),
     productCount: initialProducts.filter((product) => product.category === category.slug).length,
   }))
 
