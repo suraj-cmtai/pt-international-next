@@ -1,15 +1,18 @@
 "use client"
 
 import { motion } from "framer-motion"
-
-const stats = [
-  { number: "500+", label: "Products" },
-  { number: "50+", label: "Countries" },
-  { number: "1000+", label: "Clients" },
-  { number: "15+", label: "Years Experience" },
-]
+import { useLanguage } from "@/context/language-context"
 
 export function StatsSection() {
+  const { t } = useLanguage()
+
+  const stats = [
+    { number: "500+", label: t("stats.products") },
+    { number: "50+", label: t("stats.countries") },
+    { number: "1000+", label: t("stats.clients") },
+    { number: "15+", label: t("stats.experience") },
+  ]
+
   return (
     <section className="py-12 bg-white">
       <div className="max-w-7xl mx-auto container-padding">

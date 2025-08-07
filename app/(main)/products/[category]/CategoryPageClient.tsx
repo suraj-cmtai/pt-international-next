@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/app/api/services/productServices"
 import { ProductCard } from "@/components/product-card"
+import { useLanguage } from "@/context/language-context"
 
 // Static category data for display purposes
 const categoryInfo: Record<string, { name: string; description: string }> = {
@@ -50,8 +51,9 @@ interface CategoryPageClientProps {
 export default function CategoryPageClient({ category, initialProducts }: CategoryPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const { t } = useLanguage()
 
-  const categoryData = categoryInfo[category] || { name: "Products", description: "Product category" }
+  const categoryData = categoryInfo[category] || { name: t("Products"), description: t("Product category") }
 
   const filteredProducts = initialProducts.filter(
     (product) =>
@@ -66,14 +68,14 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
         <div className="max-w-7xl mx-auto container-padding">
           <div className="flex items-center space-x-2 text-sm">
             <Link href="/" className="text-muted-foreground hover:text-primary">
-              Home
+              {t("Home")}
             </Link>
             <span className="text-muted-foreground">/</span>
             <Link href="/products" className="text-muted-foreground hover:text-primary">
-              Products
+              {t("Products")}
             </Link>
             <span className="text-muted-foreground">/</span>
-            <span className="text-foreground">{categoryData.name}</span>
+            <span className="text-foreground">{t(categoryData.name)}</span>
           </div>
         </div>
       </section>
@@ -84,7 +86,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
           <Button variant="ghost" asChild className="mb-6 -ml-4">
             <Link href="/products">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Products
+              {t("Back to Products")}
             </Link>
           </Button>
           <motion.div
@@ -94,10 +96,10 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             className="max-w-3xl"
           >
             <Badge variant="secondary" className="mb-4">
-              {categoryData.name}
+              {t(categoryData.name)}
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{categoryData.name}</h1>
-            <p className="text-lg text-muted-foreground">{categoryData.description}</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t(categoryData.name)}</h1>
+            <p className="text-lg text-muted-foreground">{t(categoryData.description)}</p>
           </motion.div>
         </div>
       </section>
@@ -110,7 +112,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
               <div className="relative flex-1 md:w-80">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products..."
+                  placeholder={t("Search products...")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -119,7 +121,8 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             </div>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""} found
+                {filteredProducts.length} {t("product")}
+                {filteredProducts.length !== 1 ? t("s") : ""} {t("found")}
               </div>
               {/* <div className="flex border rounded-md">
                 <Button
@@ -183,7 +186,7 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <Badge variant="secondary" className="text-xs">
-                              {product.category}
+                              {t(product.category)}
                             </Badge>
                             {product.price && (
                               <span className="text-lg font-semibold text-primary">{product.price}</span>
@@ -194,20 +197,22 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
                           <div className="flex flex-wrap gap-2 mb-2">
                             {product.features.slice(0, 2).map((feature, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
-                                {feature}
+                                {t(feature)}
                               </Badge>
                             ))}
                             {product.features.length > 2 && (
                               <Badge variant="outline" className="text-xs">
-                                +{product.features.length - 2} more
+                                +{product.features.length - 2} {t("more")}
                               </Badge>
                             )}
                           </div>
                         </div>
                         <div className="flex items-center justify-between mt-2">
-                          <div className="text-xs text-muted-foreground">{product.features.length} features</div>
+                          <div className="text-xs text-muted-foreground">
+                            {product.features.length} {t("features")}
+                          </div>
                           <Button asChild size="sm">
-                            <Link href={`/products/${category}/${product.slug}`}>View Details</Link>
+                            <Link href={`/products/${category}/${product.slug}`}>{t("View Details")}</Link>
                           </Button>
                         </div>
                       </div>
@@ -218,9 +223,9 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             )
           ) : (
             <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No products found in this category</div>
+              <div className="text-muted-foreground mb-4">{t("No products found in this category")}</div>
               <Button variant="outline" onClick={() => setSearchTerm("")}>
-                Clear Search
+                {t("Clear Search")}
               </Button>
             </div>
           )}
@@ -237,17 +242,16 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl font-bold mb-4">Need Help Choosing?</h2>
+            <h2 className="text-3xl font-bold mb-4">{t("Need Help Choosing?")}</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Our experts can help you select the right products for your specific needs. Contact us for personalized
-              recommendations.
+              {t("Our experts can help you select the right products for your specific needs. Contact us for personalized recommendations.")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
-                <Link href="/contact?message=Product Selection Help">Get Expert Advice</Link>
+                <Link href="/contact?message=Product Selection Help">{t("Get Expert Advice")}</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/services">View Services</Link>
+                <Link href="/services">{t("View Services")}</Link>
               </Button>
             </div>
           </motion.div>
@@ -266,6 +270,7 @@ function ProductCardImageGallery({
   title: string
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const { t } = useLanguage()
 
   if (!images || images.length === 0) {
     images = ["/placeholder.svg"]
@@ -294,7 +299,7 @@ function ProductCardImageGallery({
             tabIndex={-1}
             type="button"
           >
-            <span className="sr-only">Previous image</span>
+            <span className="sr-only">{t("Previous image")}</span>
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/></svg>
           </Button>
           <Button
@@ -309,7 +314,7 @@ function ProductCardImageGallery({
             tabIndex={-1}
             type="button"
           >
-            <span className="sr-only">Next image</span>
+            <span className="sr-only">{t("Next image")}</span>
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/></svg>
           </Button>
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
@@ -326,6 +331,7 @@ function ProductCardImageGallery({
                 }}
                 tabIndex={-1}
                 type="button"
+                aria-label={t("Go to image {{idx}}", { idx: idx + 1 })}
               />
             ))}
           </div>

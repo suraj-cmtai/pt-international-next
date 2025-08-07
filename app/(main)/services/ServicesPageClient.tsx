@@ -1,293 +1,145 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Search, Grid, List, AlertCircle, RefreshCw } from "lucide-react"
-import { useState, useMemo } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import { useEffect, useMemo, useState } from "react"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Service } from "@/lib/data"
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { RefreshCw, Search, LayoutGrid, List } from "lucide-react"
+import Link from "next/link"
+import { useLanguage } from "@/context/language-context"
+
+interface Service {
+  id: string
+  name: string
+  description: string
+  price?: string
+  image?: string
+  slug: string
+}
 
 interface ServicesPageClientProps {
   initialServices: Service[]
-  loading?: boolean
   error?: string | null
 }
 
-export default function ServicesPageClient({ initialServices, loading = false, error = null }: ServicesPageClientProps) {
+export default function ServicesPageClient({ initialServices, error }: ServicesPageClientProps) {
+  const { t } = useLanguage()
+  const [services, setServices] = useState<Service[]>(initialServices)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("All")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [isGridView, setIsGridView] = useState(true)
 
-  // Extract unique categories from the data
-  const categories = useMemo(() => {
-    const set = new Set<string>()
-    initialServices.forEach((service) => {
-      if (service.category) set.add(service.category)
-    })
-    return ["All", ...Array.from(set).sort()]
+  useEffect(() => {
+    setServices(initialServices)
   }, [initialServices])
 
-  // Filter services by search and category
-  const filteredServices = initialServices.filter((service) => {
-    const matchesCategory = selectedCategory === "All" || service.category === selectedCategory
-    const matchesSearch =
-      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section Skeleton */}
-        <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
-          <div className="max-w-7xl mx-auto container-padding">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="h-6 w-32 bg-gray-200 rounded mx-auto mb-4 animate-pulse" />
-              <div className="h-12 w-96 bg-gray-200 rounded mx-auto mb-6 animate-pulse" />
-              <div className="h-6 w-80 bg-gray-200 rounded mx-auto animate-pulse" />
-            </div>
-          </div>
-        </section>
-
-        {/* Services Grid Skeleton */}
-        <section className="section-padding">
-          <div className="max-w-7xl mx-auto container-padding">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="space-y-3">
-                  <div className="h-48 bg-gray-200 rounded-lg animate-pulse" />
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
+  const filteredServices = useMemo(() => {
+    if (!searchTerm.trim()) return services
+    const lower = searchTerm.toLowerCase()
+    return services.filter((service) =>
+      service.name.toLowerCase().includes(lower) ||
+      service.description.toLowerCase().includes(lower)
     )
-  }
+  }, [searchTerm, services])
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white rounded-lg shadow-lg p-8 text-center"
-          >
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="h-8 w-8 text-red-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-6">We couldn't load the services. Please try again.</p>
-            <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-3 mb-6">
-              <strong>Error:</strong> {error}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                variant="outline"
-                onClick={() => window.location.reload()}
-                className="border-primary text-primary hover:bg-primary hover:text-white"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh Page
-              </Button>
-            </div>
-          </motion.div>
+      <div className="container py-20 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t("services.error.title")}</h2>
+        <p className="text-gray-600 mb-6">{t("services.error.message")}</p>
+        <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-3 mb-6">
+          <strong>{t("services.error.details")}</strong> {error}
         </div>
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="border-primary text-primary hover:bg-primary hover:text-white"
+        >
+          <RefreshCw className="h-4 w-4 mr-2" />
+          {t("services.error.button")}
+        </Button>
       </div>
     )
   }
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="section-padding bg-gradient-to-br from-primary/5 to-secondary/5">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <Badge variant="secondary" className="mb-4">
-              Our Services
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Professional Life Science Services</h1>
-            <p className="text-lg text-muted-foreground">
-              Comprehensive solutions for your research, diagnostic, and analytical needs with expert consultation and
-              support.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+    <div className="container py-12">
+      {/* Hero */}
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <Badge variant="secondary" className="mb-4">{t("services.hero.badge")}</Badge>
+        <h1 className="text-4xl md:text-5xl font-bold mb-6">{t("services.hero.title")}</h1>
+        <p className="text-lg text-muted-foreground">{t("services.hero.description")}</p>
+      </div>
 
-      {/* Filters Section */}
-      <section className="py-8 bg-white border-b">
-        <div className="max-w-7xl mx-auto container-padding">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="relative flex-1 md:w-80">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search services..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              {/* Category Dropdown using shadcn select */}
-              <div className="flex-1 md:w-64">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-full md:w-64">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground">
-                {filteredServices.length} service{filteredServices.length !== 1 ? "s" : ""} found
-              </div>
-              {/* <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="rounded-r-none"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="rounded-l-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div> */}
-            </div>
-          </div>
+      {/* Search + Toggle */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div className="relative w-full md:w-1/2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+          <Input
+            placeholder={t("services.search.placeholder")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-      </section>
+        <div className="flex gap-2">
+          <Button variant={isGridView ? "default" : "outline"} onClick={() => setIsGridView(true)}>
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button variant={!isGridView ? "default" : "outline"} onClick={() => setIsGridView(false)}>
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
-      {/* Services Grid/List */}
-      <section className="section-padding">
-        <div className="max-w-7xl mx-auto container-padding">
-          {filteredServices.length > 0 ? (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "space-y-6"}>
-              {filteredServices.map((service, index) => (
-                <motion.div
-                  key={service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className={`h-full card-hover ${viewMode === "list" ? "flex" : ""}`}>
-                    <div
-                      className={`${viewMode === "list" ? "w-48 h-32 flex-shrink-0" : "aspect-video"} relative overflow-hidden ${viewMode === "grid" ? "rounded-t-lg" : "rounded-l-lg"}`}
-                    >
-                      <Image
-                        src={service.image || "/placeholder.svg"}
-                        alt={service.title}
-                        fill
-                        className="object-cover"
-                      />
-                      <Badge className="absolute top-2 right-2" variant="secondary">
-                        {service.category}
-                      </Badge>
-                    </div>
-                    <div className="flex-1">
-                      <CardHeader>
-                        <CardTitle className={viewMode === "list" ? "text-lg" : "text-xl"}>{service.title}</CardTitle>
-                        <CardDescription>{service.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        {service.price && (
-                          <div className="mb-4">
-                            <div className="text-sm text-muted-foreground">Starting at</div>
-                            <div className="text-lg font-bold text-primary">{service.price}</div>
-                          </div>
-                        )}
-                        <Button asChild className="w-full">
-                          <Link href={`/services/${service.slug}`}>Learn More</Link>
-                        </Button>
-                      </CardContent>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No services found matching your search</div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm("")
-                  setSelectedCategory("All")
-                }}
-              >
-                Clear Search
+      {/* Result Count */}
+      <div className="text-sm text-muted-foreground mb-4">
+        {t("services.search.results")
+          .replace("{{count}}", String(filteredServices.length))
+          .replace("{{plural}}", filteredServices.length !== 1 ? "s" : "")
+        }
+      </div>
+
+      {/* Services List */}
+      {filteredServices.length > 0 ? (
+        <div className={`grid gap-6 ${isGridView ? "md:grid-cols-3" : "grid-cols-1"}`}>
+          {filteredServices.map((service) => (
+            <div key={service.id} className="border rounded-lg p-6 hover:shadow-md transition">
+              <h3 className="text-xl font-semibold mb-2">{service.name}</h3>
+              <p className="text-muted-foreground mb-4">{service.description}</p>
+              {service.price && (
+                <div className="mb-4">
+                  <div className="text-sm text-muted-foreground">{t("services.card.startingAt")}</div>
+                  <div className="text-lg font-bold text-primary">{service.price}</div>
+                </div>
+              )}
+              <Button asChild className="w-full">
+                <Link href={`/services/${service.slug}`}>{t("services.card.button")}</Link>
               </Button>
             </div>
-          )}
+          ))}
         </div>
-      </section>
+      ) : (
+        <div className="text-center mt-20">
+          <div className="text-muted-foreground mb-4">{t("services.empty")}</div>
+          <Button variant="outline" onClick={() => setSearchTerm("")}>
+            {t("services.search.clear")}
+          </Button>
+        </div>
+      )}
 
       {/* CTA Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="max-w-7xl mx-auto container-padding">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl font-bold mb-4">Need Custom Solutions?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Our team of experts can develop tailored solutions to meet your specific requirements. Contact us to
-              discuss your project.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/contact?message=Custom Service Inquiry">Request Consultation</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/products">View Products</Link>
-              </Button>
-            </div>
-          </motion.div>
+      <div className="mt-20 text-center bg-muted rounded-xl p-10 space-y-4">
+        <h2 className="text-3xl font-bold mb-4">{t("services.cta.title")}</h2>
+        <p className="text-lg text-muted-foreground mb-8">{t("services.cta.description")}</p>
+        <div className="flex justify-center gap-4">
+          <Button size="lg" asChild>
+            <Link href="/contact?message=Custom Service Inquiry">{t("services.cta.button.primary")}</Link>
+          </Button>
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/products">{t("services.cta.button.secondary")}</Link>
+          </Button>
         </div>
-      </section>
+      </div>
     </div>
   )
 }
