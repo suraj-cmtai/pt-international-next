@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/product-card"
+import { useLanguage } from "@/context/language-context"
 
 // Use the canonical Product type from lib/data to match ProductCard prop expectations
 interface Product {
@@ -23,6 +24,8 @@ interface Product {
 }
 
 export function ProductsSection() {
+  const { t } = useLanguage()
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -32,9 +35,7 @@ export function ProductsSection() {
         const response = await fetch("/api/routes/products/active")
         if (response.ok) {
           const data = await response.json()
-          // Defensive: ensure we get an array, then slice
           const arr = Array.isArray(data?.data) ? data.data : []
-          // Map to ensure id is always a string (for ProductCard)
           const normalized = arr
             .filter((p: any) => p && p.isActive)
             .map((p: any) => ({
@@ -75,9 +76,7 @@ export function ProductsSection() {
     )
   }
 
-  if (products.length === 0) {
-    return null
-  }
+  if (products.length === 0) return null
 
   return (
     <section className="section-padding">
@@ -89,10 +88,8 @@ export function ProductsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover our most popular life science products designed to meet your research and diagnostic needs.
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("products.title")}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("products.description")}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -118,8 +115,7 @@ export function ProductsSection() {
         >
           <Button size="lg" asChild>
             <Link href="/products">
-              Browse All Products
-              <ArrowRight className="ml-2 h-4 w-4" />
+              {t("products.cta")} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </motion.div>

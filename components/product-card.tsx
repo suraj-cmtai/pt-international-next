@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { type Product, getCategoryBySlug } from "@/lib/data"
+import { useLanguage } from "@/context/language-context" // adjust the path if needed
 
 interface ProductCardProps {
   product: Product
@@ -18,6 +19,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const category = getCategoryBySlug(product.category)
+  const { t } = useLanguage()
 
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -47,7 +49,6 @@ export function ProductCard({ product }: ProductCardProps) {
           className="object-cover transition-transform group-hover:scale-105"
         />
 
-        {/* Navigation arrows - only show if multiple images */}
         {product.images.length > 1 && (
           <>
             <Button
@@ -69,15 +70,13 @@ export function ProductCard({ product }: ProductCardProps) {
           </>
         )}
 
-        {/* Dot indicators */}
         {product.images.length > 1 && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
             {product.images.map((_, index) => (
               <button
                 key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentImageIndex ? "bg-white" : "bg-white/50"
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentImageIndex ? "bg-white" : "bg-white/50"
+                  }`}
                 onClick={(e) => goToImage(index, e)}
               />
             ))}
@@ -98,9 +97,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <CardContent className="pt-0">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">{product.features.length} features</div>
+          <div className="text-sm text-muted-foreground">
+            {product.features.length} {t("products.features")}
+          </div>
           <Button asChild size="sm">
-            <Link href={`/products/${product.category}/${product.slug}`}>View Details</Link>
+            <Link href={`/products/${product.category}/${product.slug}`}>
+              {t("products.cta1")}
+            </Link>
           </Button>
         </div>
       </CardContent>

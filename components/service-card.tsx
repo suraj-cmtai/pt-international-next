@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
@@ -5,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Service } from "@/lib/data"
+import { useLanguage } from "@/context/language-context" // Ensure this is the correct path
 
 interface ServiceCardProps {
   service: Service
@@ -12,6 +15,8 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, variant = "default" }: ServiceCardProps) {
+  const { t } = useLanguage()
+
   return (
     <Card className={`h-full card-hover ${variant === "featured" ? "border-primary" : ""}`}>
       <div className="aspect-video relative overflow-hidden rounded-t-lg">
@@ -32,7 +37,7 @@ export function ServiceCard({ service, variant = "default" }: ServiceCardProps) 
           </div>
           {service.price && (
             <div className="text-right">
-              <div className="text-sm text-muted-foreground">Starting at</div>
+              <div className="text-sm text-muted-foreground">{t("services.startingAt")}</div>
               <div className="font-semibold text-primary">{service.price}</div>
             </div>
           )}
@@ -42,7 +47,7 @@ export function ServiceCard({ service, variant = "default" }: ServiceCardProps) 
       <CardContent className="pt-0">
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium mb-2">Key Features:</h4>
+            <h4 className="font-medium mb-2">{t("services.keyFeatures")}</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               {service.features.slice(0, 3).map((feature, index) => (
                 <li key={index} className="flex items-center">
@@ -55,12 +60,12 @@ export function ServiceCard({ service, variant = "default" }: ServiceCardProps) 
           <div className="flex gap-2">
             <Button asChild className="flex-1">
               <Link href={`/services/${service.slug}`}>
-                Learn More
+                {t("services.learnMore")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href={`/contact?message=Service: ${service.title}`}>Get Quote</Link>
+              <Link href={`/contact?message=Service: ${service.title}`}>{t("services.getQuote")}</Link>
             </Button>
           </div>
         </div>

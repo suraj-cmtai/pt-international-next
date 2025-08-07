@@ -13,7 +13,7 @@ export interface Testimonial {
 export interface WhyChooseUsFeature {
   id: string
   icon: string
-  title: string
+  title?: string
   description: string
   stats?: {
     number: string
@@ -173,44 +173,41 @@ export const whyChooseUsFeatures: WhyChooseUsFeature[] = [
 export const aboutUsSections: AboutUsSection[] = [
   {
     id: "company-overview",
-    title: "Company Overview",
-    content:
-      "PT International Lifesciences LLC has grown from a small startup to a leading global provider of life science solutions. Our journey began with a simple mission: to make high-quality research products and diagnostic solutions accessible to laboratories worldwide. Today, we serve over 1,000 customers across 50+ countries, maintaining our commitment to excellence, innovation, and customer satisfaction.",
+    title: "about.company-overview.title",
+    content: "about.company-overview.content",
     image: "/business-center.jpg",
     stats: [
-      // { number: "2008", label: "Founded" },
-      { number: "1000+", label: "Customers" },
-      { number: "50+", label: "Countries" },
-      { number: "500+", label: "Products" },
+      { number: "1000+", label: "about.company-overview.stats.customers" },
+      { number: "50+", label: "about.company-overview.stats.countries" },
+      { number: "500+", label: "about.company-overview.stats.products" },
     ],
   },
   {
     id: "our-expertise",
-    title: "Our Expertise",
-    content:
-      "With over 15 years of experience in the life sciences industry, we have developed deep expertise across multiple domains. Our team includes PhD scientists, regulatory affairs specialists, quality assurance experts, and technical support professionals. This diverse expertise allows us to provide comprehensive solutions that meet the evolving needs of modern laboratories and research institutions.",
+    title: "about.our-expertise.title",
+    content: "about.our-expertise.content",
     image: "/front-building.jpg",
     stats: [
-      { number: "15+", label: "Years Experience" },
-      { number: "25+", label: "PhD Scientists" },
-      { number: "10+", label: "Regulatory Experts" },
-      { number: "99.5%", label: "Customer Satisfaction" },
+      { number: "15+", label: "about.our-expertise.stats.years" },
+      { number: "25+", label: "about.our-expertise.stats.scientists" },
+      { number: "10+", label: "about.our-expertise.stats.regulatory" },
+      { number: "99.5%", label: "about.our-expertise.stats.satisfaction" },
     ],
   },
   {
     id: "innovation-commitment",
-    title: "Innovation & Technology",
-    content:
-      "Innovation is at the heart of everything we do. We continuously invest in research and development to bring cutting-edge solutions to market. Our state-of-the-art facilities and partnerships with leading research institutions enable us to stay at the forefront of scientific advancement. We're committed to developing products that not only meet current needs but anticipate future challenges in life sciences.",
+    title: "about.innovation-commitment.title",
+    content: "about.innovation-commitment.content",
     image: "/burj-khalifa.jpg",
     stats: [
-      { number: "20%", label: "Revenue in R&D" },
-      { number: "50+", label: "New Products/Year" },
-      { number: "5", label: "Research Partnerships" },
-      { number: "100+", label: "Patents & IP" },
+      { number: "20%", label: "about.innovation-commitment.stats.rnd" },
+      { number: "50+", label: "about.innovation-commitment.stats.new-products" },
+      { number: "5", label: "about.innovation-commitment.stats.partnerships" },
+      { number: "100+", label: "about.innovation-commitment.stats.patents" },
     ],
   },
 ]
+
 
 export function getFeaturedTestimonials(): Testimonial[] {
   return testimonials.filter((testimonial) => testimonial.featured)
