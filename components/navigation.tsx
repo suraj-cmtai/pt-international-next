@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, Globe } from "lucide-react"
+import { Menu, Globe, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -14,7 +14,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import {
   DropdownMenu,
@@ -165,150 +165,159 @@ export function Navigation() {
             </DropdownMenu>
           </div>
 
-          {/* Mobile Menu Toggle */}
-   
-           
+          {/* Mobile Menu Toggle & Language Switcher */}
+          <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="w-9 h-9 p-2 hover:bg-accent">
+                  <Globe className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32">
+                {[
+                  { code: "en", label: "English" },
+                  { code: "ar", label: "العربية" },
+                ].map(({ code, label }) => (
+                  <DropdownMenuItem
+                    key={code}
+                    onClick={() => setLanguage(code as Language)}
+                    className={language === code ? "font-semibold text-gray-600" : ""}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* You can also apply language switcher in mobile here if needed */}
-
-                  {/* Language Switcher (Mobile) */}
-                 
+            {/* Mobile Menu Trigger */}
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="w-9 h-9 p-2">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 p-0 flex flex-col">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 
-
-                {/* Rest of mobile nav remains same */}
-                {/* ... */}
-                      {/* Mobile Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80 p-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-               <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="w-8 h-8 p-1">
-                        <Globe className="h-5 w-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                      {[
-                        { code: "en", label: "English" },
-                        { code: "ar", label: "العربية" },
-                      ].map(({ code, label }) => (
-                        <DropdownMenuItem
-                          key={code}
-                          onClick={() => setLanguage(code as Language)}
-                          className={language === code ? "font-semibold text-gray-600" : ""}
-                        >
-                          {label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              <div className="flex flex-col h-full">
-                <div className="p-6 border-b">
-                  <Image src="/logo-bg-2.png" alt="PT International" width={120} height={40} className="h-8 w-auto" />
+                {/* Mobile Header with Close Button */}
+                <div className="flex items-center justify-between p-4 border-b bg-white">
+                  <Image 
+                    src="/logo-bg-2.png" 
+                    alt="PT International" 
+                    width={120} 
+                    height={40} 
+                    className="h-8 w-auto" 
+                  />
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="w-8 h-8 p-1.5 hover:bg-gray-100">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </SheetClose>
                 </div>
-                <nav className="flex-1 p-6 space-y-6">
-                  <Link
-                    href="/"
-                    className={`mobile-nav-link block text-lg font-medium transition-colors ${
-                      isActive("/") ? "mobile-nav-link-active" : ""
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href="/about-us"
-                    className={`mobile-nav-link block text-lg font-medium transition-colors ${
-                      isActive("/about-us") ? "mobile-nav-link-active" : ""
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    About
-                  </Link>
 
-                  <Link
-                    href="/services"
-                    className={`mobile-nav-link block text-lg font-medium transition-colors ${
-                      isActive("/services") ? "mobile-nav-link-active" : ""
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Services
-                  </Link>
+                {/* Mobile Navigation Content */}
+                <div className="flex-1 overflow-y-auto">
+                  <nav className="p-6 space-y-6">
+                    <Link
+                      href="/"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${
+                        isActive("/") ? "mobile-nav-link-active" : ""
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("header.home")}
+                    </Link>
+                    
+                    <Link
+                      href="/about-us"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${
+                        isActive("/about-us") ? "mobile-nav-link-active" : ""
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("header.about")}
+                    </Link>
 
-                  {/* Mobile Products Dropdown using shadcn Accordion */}
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="products" className="border-none">
-                      <AccordionTrigger className={`mobile-nav-link mobile-nav-link-trigger text-lg font-medium transition-colors px-0 hover:no-underline ${
-                        isProductsActive() ? "mobile-nav-link-active" : ""
-                      }`}>
-                        Products
-                      </AccordionTrigger>
-                      <AccordionContent className="pl-4">
-                        <h3 className="text-base font-semibold px-1 py-2 sr-only">Products</h3>
-                        <div className="space-y-2">
-                          {productCategories.map((category) => (
+                    <Link
+                      href="/services"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${
+                        isActive("/services") ? "mobile-nav-link-active" : ""
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("header.services")}
+                    </Link>
+
+                    {/* Mobile Products Dropdown */}
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="products" className="border-none">
+                        <AccordionTrigger className={`mobile-nav-link mobile-nav-link-trigger text-lg font-medium transition-colors px-0 hover:no-underline ${
+                          isProductsActive() ? "mobile-nav-link-active" : ""
+                        }`}>
+                          {t("header.products")}
+                        </AccordionTrigger>
+                        <AccordionContent className="pl-4 pb-2">
+                          <div className="space-y-2">
+                            {productCategories.map((category) => (
+                              <Link
+                                key={category.slug}
+                                href={`/products/${category.slug}`}
+                                className={`mobile-dropdown-link block text-sm py-2 px-2 rounded transition-colors ${
+                                  isActive(`/products/${category.slug}`) ? "mobile-dropdown-link-active bg-gray-50" : "text-muted-foreground hover:text-foreground hover:bg-gray-50"
+                                }`}
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {category.name}
+                              </Link>
+                            ))}
                             <Link
-                              key={category.slug}
-                              href={`/products/${category.slug}`}
-                              className={`mobile-dropdown-link mobile-dropdown-link-trigger block text-sm text-muted-foreground transition-colors ${
-                                isActive(`/products/${category.slug}`) ? "mobile-dropdown-link-active" : ""
+                              href="/products"
+                              className={`mobile-dropdown-link block text-sm py-2 px-2 rounded font-medium transition-colors border-t mt-2 pt-3 ${
+                                pathname === "/products" ? "mobile-dropdown-link-active bg-gray-50" : "hover:bg-gray-50"
                               }`}
                               onClick={() => setIsOpen(false)}
                             >
-                              {category.name}
+                              {t("header.viewAllProducts")} →
                             </Link>
-                          ))}
-                          <Link
-                            href="/products"
-                            className={`mobile-dropdown-link block text-sm font-medium transition-colors ${
-                              pathname === "/products" ? "mobile-dropdown-link-active" : ""
-                            }`}
-                            onClick={() => setIsOpen(false)}
-                          >
-                            View All Products →
-                          </Link>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
 
-                  <Link
-                    href="/testimonials"
-                    className={`mobile-nav-link block text-lg font-medium transition-colors ${
-                      isActive("/testimonials") ? "mobile-nav-link-active" : ""
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Testimonials
-                  </Link>
+                    <Link
+                      href="/gallery"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${
+                        isActive("/gallery") ? "mobile-nav-link-active" : ""
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("header.gallery")}
+                    </Link>
 
-                  <Link
-                    href="/contact"
-                    className={`mobile-nav-link block text-lg font-medium transition-colors ${
-                      isActive("/contact") ? "mobile-nav-link-active" : ""
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Contact
-                  </Link>
-                </nav>
-                <div className="p-6 border-t">
-                  <Button asChild className="w-full">
+                    <Link
+                      href="/contact"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${
+                        isActive("/contact") ? "mobile-nav-link-active" : ""
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("header.contact")}
+                    </Link>
+                  </nav>
+                </div>
+
+                {/* Mobile Footer CTA */}
+                <div className="p-6 border-t bg-white">
+                  <Button asChild className="w-full bg-primary hover:bg-primary/90">
                     <Link href="/contact" onClick={() => setIsOpen(false)}>
-                      Get Quote
+                      {t("header.getQuote")}
                     </Link>
                   </Button>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-             
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
