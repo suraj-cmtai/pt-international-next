@@ -60,7 +60,7 @@ const enTranslations: Record<string, string> = {
     //product card
     "products.features": "features",
     "products.details": "View Details",
-    "products.cta1":"view Details",
+    "products.cta1": "view Details",
 
     //service card
     "services.startingAt": "Starting at",
@@ -186,31 +186,32 @@ const enTranslations: Record<string, string> = {
     "home.recognition.ce": "European Conformity",
     "home.recognition.gmp": "Good Manufacturing",
 
-    "products.detail.backToCategory":"Back to category",
-    "products.detail.priceLabel":"Product Price",
-    "products.detail.featuresTitle":"Product Features",
-    "products.detail.enquireButton":"Enquiry Now",
-    "products.categories.research-products.title":"Research Products",
+    "products.detail.backToCategory": "Back to category",
+    "products.detail.priceLabel": "Product Price",
+    "products.detail.featuresTitle": "Product Features",
+    "products.detail.enquireButton": "Enquiry Now",
+    "products.categories.research-products.title": "Research Products",
     "products.categories.research-products.description": "Advanced tools and kits for cutting-edge research applications",
-    "products.categories.diagnostics-products.title":"Diagonastics Products",
+    "products.categories.diagnostics-products.title": "Diagonastics Products",
     "products.categories.diagnostics-products.description": "Reliable diagnostic solutions for clinical and laboratory use",
-    "products.categories.instruments-consumables.title":"Instruments Consumables",
+    "products.categories.instruments-consumables.title": "Instruments Consumables",
     "products.categories.instruments-consumables.description": "High-quality laboratory instruments and consumable supplies",
-    "products.categories.reagents-chemicals.title":"Reagents Chemicals",
+    "products.categories.reagents-chemicals.title": "Reagents Chemicals",
     "products.categories.reagents-chemicals.description": "Pure reagents and chemicals for various applications",
-    "products.categories.plasticwaresfiltrationunits.title":"Plastic Wares Filtration Units",
+    "products.categories.plasticwaresfiltrationunits.title": "Plastic Wares Filtration Units",
     "products.categories.plasticwaresfiltrationunits.description": "Laboratory plasticware and filtration solutions",
-    "products.categories.food - testing - kits.title":"Food Testing Kits ",
+    "products.categories.food - testing - kits.title": "Food Testing Kits ",
     "products.categories.food - testing - kits.description": "Comprehensive kits for food safety and quality testing ",
-    "products.categories.disinfectant-and-sanitizers.title":"Disinfectant And Sanitizers",
+    "products.categories.disinfectant-and-sanitizers.title": "Disinfectant And Sanitizers",
     "products.categories.disinfectant-and-sanitizers.description": "Professional-grade disinfection and sanitization products",
-    "products.detail.descriptionTitle":"Product Description",
-    "products.detail.tabs.description":"Product Detail Description",
+    "products.detail.descriptionTitle": "Product Description",
+    "products.detail.tabs.description": "Product Detail Description",
     "products.detail.tabs.specifications": "Product Specifications",
-    "products.detail.tabs.support":"Support",
-    "products.detail.viewBrochure":"Product Browcher view",
+    "products.detail.tabs.support": "Support",
+    "products.detail.viewBrochure": "Product Browcher view",
     "products.detail.downloadBrochure": "Product Browcher Download",
-    "common.home":"home",
+    "common.home": "home",
+    "products.detail.supportButton": "",
 
 
 
@@ -232,6 +233,16 @@ const enTranslations: Record<string, string> = {
     "products.cta.services": "View Services",
     "products.search.resultLabel.single": "category found",
     "products.search.resultLabel.plural": "categories found",
+
+    "products.detail.specificationsTitle": "Product Specifications",
+    "products.detail.supportTitle": "Support & Resources",
+    "products.detail.resourcesTitle": "Available Resources",
+    "products.detail.resources.datasheet": "Product Datasheet and technical specifications",
+    "products.detail.resources.manual": "User Manual and installation guide",
+    "products.detail.resources.sds ": "Safety data sheet (SDS)",
+    "products.detail.resources.coa": "Certificate of analysis (COA)",
+    "products.detail.resources.documentation": "Techical Support documentaion",
+    "products.detail.techsupportButton": "Contact Technical Support",
 
     "product.breadcrumb.home": "Home",
     "product.breadcrumb.products": "Products",
@@ -487,7 +498,7 @@ const arTranslations: Record<string, string> = {
     "home.recognition.fda": "الأجهزة الطبية",
     "home.recognition.ce": "المطابقة الأوروبية",
     "home.recognition.gmp": "ممارسات التصنيع الجيد",
-    
+
 
     //about
     "about.intro.title": "من نحن",
@@ -544,7 +555,17 @@ const arTranslations: Record<string, string> = {
     "products.detail.descriptionTitle": "وصف المنتج",
     "products.detail.tabs.description": "وصف تفصيلي للمنتج",
     "products.detail.tabs.specifications": "مواصفات المنتج",
-    "products.detail.tabs.support": "الدعم",
+   
+    "products.detail.specificationsTitle": "مواصفات المنتج",
+    "products.detail.supportTitle": "الدعم والموارد",
+    "products.detail.resourcesTitle": "الموارد المتاحة",
+    "products.detail.resources.datasheet": "ورقة بيانات المنتج والمواصفات الفنية",
+    "products.detail.resources.manual": "دليل المستخدم ودليل التثبيت",
+    "products.detail.resources.sds ": "ورقة بيانات السلامة (SDS)",
+    "products.detail.resources.coa": "شهادة التحليل (COA)",
+    "products.detail.resources.documentation": "وثائق الدعم الفني",
+    "products.detail.techsupportButton": "اتصل بالدعم الفني",
+
 
     //service card
     "services.startingAt": "البدء من",

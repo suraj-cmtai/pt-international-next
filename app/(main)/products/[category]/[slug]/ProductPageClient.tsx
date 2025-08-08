@@ -318,7 +318,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                     <div className="pt-4">
                       <Button asChild>
                         <Link href="/contact?message=Technical Support Request">
-                          {t("products.detail.supportButton")}
+                          {t("products.detail.techsupportButton")}
                         </Link>
                       </Button>
                     </div>
