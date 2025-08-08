@@ -239,7 +239,7 @@ const enTranslations: Record<string, string> = {
     "products.detail.resourcesTitle": "Available Resources",
     "products.detail.resources.datasheet": "Product Datasheet and technical specifications",
     "products.detail.resources.manual": "User Manual and installation guide",
-    "products.detail.resources.sds ": "Safety data sheet (SDS)",
+    "products.detail.resources.sds": "Safety data sheet (SDS)",
     "products.detail.resources.coa": "Certificate of analysis (COA)",
     "products.detail.resources.documentation": "Techical Support documentaion",
     "products.detail.techsupportButton": "Contact Technical Support",
@@ -561,10 +561,11 @@ const arTranslations: Record<string, string> = {
     "products.detail.resourcesTitle": "الموارد المتاحة",
     "products.detail.resources.datasheet": "ورقة بيانات المنتج والمواصفات الفنية",
     "products.detail.resources.manual": "دليل المستخدم ودليل التثبيت",
-    "products.detail.resources.sds ": "ورقة بيانات السلامة (SDS)",
+    "products.detail.resources.sds": "ورقة بيانات السلامة (SDS)",
     "products.detail.resources.coa": "شهادة التحليل (COA)",
     "products.detail.resources.documentation": "وثائق الدعم الفني",
     "products.detail.techsupportButton": "اتصل بالدعم الفني",
+  
 
 
     //service card
