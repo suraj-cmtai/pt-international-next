@@ -24,30 +24,37 @@ const productCategories = [
   {
     slug: "research-products",
     nameKey: "products.categories.research-products.title",
+    description: "products.categories.research-products.description",
   },
   {
     slug: "diagnostics-products",
     nameKey: "products.categories.diagnostics-products.title",
+    description: "products.categories.diagnostics-products.description",
   },
   {
     slug: "instruments-consumables",
     nameKey: "products.categories.instruments-consumables.title",
+    description: "products.categories.instruments-consumables.description",
   },
   {
     slug: "reagents-chemicals",
     nameKey: "products.categories.reagents-chemicals.title",
+    description: "products.categories.reagents - chemicals.description",
   },
   {
     slug: "plasticwaresfiltrationunits",
     nameKey: "products.categories.plasticwaresfiltrationunits.title",
+    description: "products.categories.plasticwaresfiltrationunits.description",
   },
   {
     slug: "food-testing-kits",
     nameKey: "products.categories.food-testing-kits.title",
+    description: "products.categories.food - testing - kits.description",
   },
   {
     slug: "disinfectant-and-sanitizers",
     nameKey: "products.categories.disinfectant-and-sanitizers.title",
+    description: "products.categories.disinfectant-and-sanitizers.description",
   },
 ]
 
