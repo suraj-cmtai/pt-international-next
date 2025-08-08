@@ -210,6 +210,7 @@ const enTranslations: Record<string, string> = {
     "products.detail.tabs.support":"Support",
     "products.detail.viewBrochure":"Product Browcher view",
     "products.detail.downloadBrochure": "Product Browcher Download",
+    "common.home":"home",
 
 
 
@@ -441,6 +442,11 @@ const arTranslations: Record<string, string> = {
     "products.categories.plasticwaresfiltrationunits": "العبوات البلاستيكية ووحدات الترشيح",
     "products.categories.food-testing-kits": "أطقم اختبار الأغذية",
     "products.categories.disinfectant-and-sanitizers": "المطهرات والمعقمات",
+    "products.detail.tabs.support": "الدعم",
+    "products.detail.viewBrochure": "عرض كتيب المنتج",
+    "products.detail.downloadBrochure": "تنزيل كتيب المنتج",
+    "common.home": "الرئيسية",
+
 
     //home hero
     "hero.badge": "حلول رائدة في علوم الحياة",
