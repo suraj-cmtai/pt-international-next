@@ -191,7 +191,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
               )}
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="flex-1" asChild>
+                <Button size="lg" className="flex-1 p-2" asChild>
                   <Link href={`/contact?message=Product: ${product.title}`}>
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     {t("products.detail.enquireButton")}
