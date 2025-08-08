@@ -271,12 +271,12 @@ export function Navigation() {
                     </Accordion>
 
                     <Link
-                      href="/testimonials"
-                      className={`mobile-nav-link block text-lg font-medium transition-colors ${isActive("/testimonials") ? "mobile-nav-link-active" : ""
+                      href="/gallery"
+                      className={`mobile-nav-link block text-lg font-medium transition-colors ${isActive("/gallery") ? "mobile-nav-link-active" : ""
                         }`}
                       onClick={() => setIsOpen(false)}
                     >
-                      {t("header.testimonials")}
+                      {t("header.gallery")}
                     </Link>
 
                     <Link
