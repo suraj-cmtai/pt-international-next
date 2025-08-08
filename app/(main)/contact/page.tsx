@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
+import { useLanguage } from "@/context/language-context"
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -25,6 +26,7 @@ export default function ContactPage() {
 
   const searchParams = useSearchParams()
   const { toast } = useToast()
+  const { t } = useLanguage()
 
   useEffect(() => {
     const messageParam = searchParams.get("message")
@@ -38,7 +40,6 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
-      // Prepare FormData as required by the API route
       const formDataToSend = new FormData()
       formDataToSend.append("name", formData.name)
       formDataToSend.append("email", formData.email)
@@ -55,18 +56,17 @@ export default function ContactPage() {
 
       if (response.ok && result.success) {
         toast({
-          title: "Message Sent Successfully!",
-          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+          title: t("contact.toast.successTitle"),
+          description: t("contact.toast.successDescription"),
         })
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
       } else {
-        // The API returns { error: ... } on error
-        throw new Error(result.error || "Failed to send message")
+        throw new Error(result.error || t("contact.toast.errorDefault"))
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send message. Please try again.",
+        title: t("contact.toast.errorTitle"),
+        description: error instanceof Error ? error.message : t("contact.toast.errorDefault"),
         variant: "destructive",
       })
     } finally {
@@ -93,13 +93,10 @@ export default function ContactPage() {
             className="max-w-3xl mx-auto text-center"
           >
             <Badge variant="secondary" className="mb-4">
-              Get In Touch
+              {t("contact.hero.badge")}
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Our Expert Team</h1>
-            <p className="text-lg text-muted-foreground">
-              Have questions about our products or services? We're here to help. Reach out to our team of life science
-              experts.
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t("contact.hero.title")}</h1>
+            <p className="text-lg text-muted-foreground">{t("contact.hero.description")}</p>
           </motion.div>
         </div>
       </section>
@@ -119,28 +116,26 @@ export default function ContactPage() {
               >
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl">Send us a Message</CardTitle>
-                    <CardDescription>
-                      Fill out the form below and we'll get back to you as soon as possible.
-                    </CardDescription>
+                    <CardTitle className="text-2xl">{t("contact.form.title")}</CardTitle>
+                    <CardDescription>{t("contact.form.description")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Full Name *</Label>
+                          <Label htmlFor="name">{t("contact.form.name")} *</Label>
                           <Input
                             id="name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            placeholder="Your full name"
+                            placeholder={t("contact.form.namePlaceholder")}
                             autoComplete="name"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email Address *</Label>
+                          <Label htmlFor="email">{t("contact.form.email")} *</Label>
                           <Input
                             id="email"
                             name="email"
@@ -148,14 +143,14 @@ export default function ContactPage() {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            placeholder="your.email@example.com"
+                            placeholder={t("contact.form.emailPlaceholder")}
                             autoComplete="email"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Label htmlFor="phone">{t("contact.form.phone")} *</Label>
                         <Input
                           id="phone"
                           name="phone"
@@ -163,25 +158,25 @@ export default function ContactPage() {
                           value={formData.phone}
                           onChange={handleChange}
                           required
-                          placeholder="+1 (555) 123-4567"
+                          placeholder={t("contact.form.phonePlaceholder")}
                           autoComplete="tel"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Subject *</Label>
+                        <Label htmlFor="subject">{t("contact.form.subject")} *</Label>
                         <Input
                           id="subject"
                           name="subject"
                           value={formData.subject}
                           onChange={handleChange}
                           required
-                          placeholder="What is this regarding?"
+                          placeholder={t("contact.form.subjectPlaceholder")}
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message *</Label>
+                        <Label htmlFor="message">{t("contact.form.message")} *</Label>
                         <Textarea
                           id="message"
                           name="message"
@@ -189,16 +184,14 @@ export default function ContactPage() {
                           onChange={handleChange}
                           required
                           rows={6}
-                          placeholder="Tell us about your inquiry, product needs, or any questions you have..."
+                          placeholder={t("contact.form.messagePlaceholder")}
                         />
                       </div>
 
                       <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? (
-                          "Sending..."
-                        ) : (
+                        {isSubmitting ? t("contact.form.sending") : (
                           <>
-                            Send Message
+                            {t("contact.form.send")}
                             <Send className="ml-2 h-4 w-4" />
                           </>
                         )}
@@ -218,74 +211,47 @@ export default function ContactPage() {
               className="space-y-6"
             >
               <div>
-                <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
-                <p className="text-muted-foreground mb-6">
-                  Our team is ready to assist you with any questions about our products, services, or partnership
-                  opportunities.
-                </p>
+                <h2 className="text-2xl font-bold mb-4">{t("contact.info.title")}</h2>
+                <p className="text-muted-foreground mb-6">{t("contact.info.description")}</p>
               </div>
 
-              <div className="space-y-4">
-                <Card>
+              {[
+                {
+                  icon: Mail,
+                  title: t("contact.info.email"),
+                  value: "ptinternationallifescience@gmail.com",
+                },
+                {
+                  icon: Phone,
+                  title: t("contact.info.phone"),
+                  value: "+971562647649",
+                },
+                {
+                  icon: MapPin,
+                  title: t("contact.info.address"),
+                  value: `PT INTERNATIONAL LIFESCIENCES LLC\nSharjah Media City, Sharjah, UAE\nP.O Box 839- Sharjah`,
+                },
+                {
+                  icon: Clock,
+                  title: t("contact.info.hours"),
+                  value: `${t("contact.info.weekdays")}\n${t("contact.info.saturday")}`,
+                },
+              ].map((item, index) => (
+                <Card key={index}>
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
-                      <Mail className="h-5 w-5 text-primary mt-0.5" />
+                      <item.icon className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <h3 className="font-medium mb-1">Email Us</h3>
-                        <p className="text-sm text-muted-foreground">ptinternationallifescience@gmail.com</p>
+                        <h3 className="font-medium mb-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">{item.value}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <Phone className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-1">Call Us</h3>
-                        <p className="text-sm text-muted-foreground">+971562647649</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-1">Visit Us</h3>
-                        <p className="text-sm text-muted-foreground">
-                          PT INTERNATIONAL LIFESCIENCES LLC
-                          <br />
-                          Sharjah Media City, Sharjah, UAE
-                          <br />
-                          P.O Box 839- Sharjah
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <Clock className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-1">Business Hours</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Mon-Fri: 8:00 AM - 6:00 PM EST
-                          <br />
-                          Sat: 9:00 AM - 2:00 PM EST
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              ))}
             </motion.div>
           </div>
+
           {/* Map Section */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -297,7 +263,7 @@ export default function ContactPage() {
               <CardContent className="p-0">
                 <div className="relative w-full h-64">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.62164634621!2d77.24580388885497!3d28.551090000000016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3bbb01984e1%3A0x9ec3ec938b4ba853!2sLeverage%20Edu%20-%20Study%20Abroad%20Consultant%20in%20Nehru%20Place%2C%20New%20Delhi!5e0!3m2!1sen!2sin!4v1750497828940!5m2!1sen!2sin"
+                    src="https://www.google.com/maps/embed?pb=!1m18..."
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}

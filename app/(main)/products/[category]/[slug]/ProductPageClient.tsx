@@ -4,49 +4,57 @@ import { useState } from "react"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle, ShoppingCart, Download, Share, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  ArrowLeft,
+  CheckCircle,
+  ShoppingCart,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Product } from "@/app/api/services/productServices"
+import { useLanguage } from "@/context/language-context"
 
-// Static category data for display purposes
+// Static category data (with translation keys)
 const productCategories = [
   {
     slug: "research-products",
-    name: "Research Products",
-    description: "Advanced tools and kits for cutting-edge research applications",
+    nameKey: "products.categories.research-products.title",
+    description: "products.categories.research-products.description",
   },
   {
     slug: "diagnostics-products",
-    name: "Diagnostics Products",
-    description: "Reliable diagnostic solutions for clinical and laboratory use",
+    nameKey: "products.categories.diagnostics-products.title",
+    description: "products.categories.diagnostics-products.description",
   },
   {
     slug: "instruments-consumables",
-    name: "Instruments & Consumables",
-    description: "High-quality laboratory instruments and consumable supplies",
+    nameKey: "products.categories.instruments-consumables.title",
+    description: "products.categories.instruments-consumables.description",
   },
   {
     slug: "reagents-chemicals",
-    name: "Reagents & Chemicals",
-    description: "Pure reagents and chemicals for various applications",
+    nameKey: "products.categories.reagents-chemicals.title",
+    description: "products.categories.reagents - chemicals.description",
   },
   {
     slug: "plasticwaresfiltrationunits",
-    name: "Plasticwares & Filtration Units",
-    description: "Laboratory plasticware and filtration solutions",
+    nameKey: "products.categories.plasticwaresfiltrationunits.title",
+    description: "products.categories.plasticwaresfiltrationunits.description",
   },
   {
     slug: "food-testing-kits",
-    name: "Food Testing Kits",
-    description: "Comprehensive kits for food safety and quality testing",
+    nameKey: "products.categories.food-testing-kits.title",
+    description: "products.categories.food - testing - kits.description",
   },
   {
     slug: "disinfectant-and-sanitizers",
-    name: "Disinfectant & Sanitizers",
-    description: "Professional-grade disinfection and sanitization products",
+    nameKey: "products.categories.disinfectant-and-sanitizers.title",
+    description: "products.categories.disinfectant-and-sanitizers.description",
   },
 ]
 
@@ -56,10 +64,12 @@ interface ProductPageClientProps {
 }
 
 export default function ProductPageClient({ category, product }: ProductPageClientProps) {
+  const { t } = useLanguage()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showBrochure, setShowBrochure] = useState(false)
 
   const categoryData = productCategories.find((cat) => cat.slug === category)
+  const categoryName = categoryData ? t(categoryData.nameKey) : ""
 
   if (!product || !categoryData || product.category !== category) {
     notFound()
@@ -86,15 +96,15 @@ export default function ProductPageClient({ category, product }: ProductPageClie
         <div className="max-w-7xl mx-auto container-padding">
           <div className="flex items-center space-x-2 text-sm">
             <Link href="/" className="text-muted-foreground hover:text-primary">
-              Home
+              {t("common.home")}
             </Link>
             <span className="text-muted-foreground">/</span>
             <Link href="/products" className="text-muted-foreground hover:text-primary">
-              Products
+              {t("products.title")}
             </Link>
             <span className="text-muted-foreground">/</span>
             <Link href={`/products/${category}`} className="text-muted-foreground hover:text-primary">
-              {categoryData.name}
+              {categoryName}
             </Link>
             <span className="text-muted-foreground">/</span>
             <span className="text-foreground">{product.title}</span>
@@ -102,32 +112,27 @@ export default function ProductPageClient({ category, product }: ProductPageClie
         </div>
       </section>
 
-      {/* Product Details */}
+      {/* Product Section */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
           <Button variant="ghost" asChild className="mb-6 -ml-4">
             <Link href={`/products/${category}`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to {categoryData.name}
+              {t("products.detail.backToCategory").replace("{{category}}", categoryName)}
             </Link>
+
           </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Product Images */}
+            {/* Images */}
             <div className="space-y-4">
-              {/* Main Image Display */}
               <div className="aspect-square relative overflow-hidden rounded-lg border group">
                 <Image
-                  src={images[currentImageIndex] || "/placeholder.svg"}
+                  src={images[currentImageIndex]}
                   alt={product.title}
                   fill
                   className="object-cover cursor-pointer"
-                  onClick={() => {
-                    // Optional: Add lightbox functionality here
-                  }}
                 />
-
-                {/* Navigation arrows - only show if multiple images */}
                 {images.length > 1 && (
                   <>
                     <Button
@@ -150,19 +155,18 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                 )}
               </div>
 
-              {/* Thumbnail Images */}
+              {/* Thumbnails */}
               {images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
                   {images.map((image, index) => (
                     <div
                       key={index}
-                      className={`aspect-square relative overflow-hidden rounded border cursor-pointer transition-all ${
-                        index === currentImageIndex ? "ring-2 ring-primary border-primary" : "hover:border-primary/50"
-                      }`}
+                      className={`aspect-square relative overflow-hidden rounded border cursor-pointer transition-all ${index === currentImageIndex ? "ring-2 ring-primary border-primary" : "hover:border-primary/50"
+                        }`}
                       onClick={() => selectImage(index)}
                     >
                       <Image
-                        src={image || "/placeholder.svg"}
+                        src={image}
                         alt={`${product.title} ${index + 1}`}
                         fill
                         className="object-cover"
@@ -177,7 +181,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
             <div className="space-y-6">
               <div>
                 <Badge variant="secondary" className="mb-3">
-                  {categoryData.name}
+                  {categoryName}
                 </Badge>
                 <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.title}</h1>
                 <p className="text-lg text-muted-foreground">{product.description}</p>
@@ -185,7 +189,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
 
               {product.price && (
                 <div className="p-4 bg-primary/5 rounded-lg">
-                  <div className="text-sm text-muted-foreground">Price</div>
+                  <div className="text-sm text-muted-foreground">{t("products.detail.priceLabel")}</div>
                   <div className="text-3xl font-bold text-primary">{product.price}</div>
                 </div>
               )}
@@ -194,26 +198,27 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                 <Button size="lg" className="flex-1" asChild>
                   <Link href={`/contact?message=Product: ${product.title}`}>
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Enquire Now
+                    {t("products.detail.enquireButton")}
                   </Link>
                 </Button>
+
                 {product.brochure && (
                   <>
-                    <Button size="lg" variant="outline" onClick={() => setShowBrochure((prev) => !prev)}>
+                    <Button size="lg" variant="outline" onClick={() => setShowBrochure(!showBrochure)}>
                       <Download className="h-4 w-4 mr-2" />
-                      {showBrochure ? "Hide Datasheet" : "View Datasheet"}
+                      {showBrochure ? t("products.detail.hideBrochure") : t("products.detail.viewBrochure")}
                     </Button>
                     <Button size="lg" variant="outline" asChild>
-                      <Link href={`${product.brochure || "/placeholder.pdf"}`} target="_blank" rel="noopener noreferrer">
+                      <Link href={product.brochure} target="_blank" rel="noopener noreferrer">
                         <Download className="h-4 w-4 mr-2" />
-                        Download Datasheet
+                        {t("products.detail.downloadBrochure")}
                       </Link>
                     </Button>
                   </>
                 )}
               </div>
 
-              {/* Inline PDF viewer for brochure */}
+              {/* Inline PDF */}
               {product.brochure && showBrochure && (
                 <div className="mt-4 w-full">
                   <div className="rounded border overflow-hidden" style={{ minHeight: 500, height: "70vh" }}>
@@ -222,17 +227,16 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                       title="Product Brochure"
                       width="100%"
                       height="100%"
-                      style={{ border: "none", minHeight: 500 }}
-                      allow="autoplay"
+                      style={{ border: "none" }}
                     />
                   </div>
                 </div>
               )}
 
-              {product.features && product.features.length > 0 && (
+              {product.features?.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Key Features</CardTitle>
+                    <CardTitle className="text-lg">{t("products.detail.featuresTitle")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
@@ -251,25 +255,23 @@ export default function ProductPageClient({ category, product }: ProductPageClie
         </div>
       </section>
 
-      {/* Product Details Tabs */}
+      {/* Tabs */}
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto container-padding">
-          <Tabs defaultValue="description" className="w-full">
+          <Tabs defaultValue="description">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="support">Support</TabsTrigger>
+              <TabsTrigger value="description">{t("products.detail.tabs.description")}</TabsTrigger>
+              <TabsTrigger value="specifications">{t("products.detail.tabs.specifications")}</TabsTrigger>
+              <TabsTrigger value="support">{t("products.detail.tabs.support")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="description" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Product Description</CardTitle>
+                  <CardTitle>{t("products.detail.descriptionTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose max-w-none">
-                    <p className="text-muted-foreground leading-relaxed">{product.longDescription}</p>
-                  </div>
+                  <p className="text-muted-foreground leading-relaxed">{product.longDescription}</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -277,7 +279,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
             <TabsContent value="specifications" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Technical Specifications</CardTitle>
+                  <CardTitle>{t("products.detail.specificationsTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {product.specifications ? (
@@ -290,10 +292,7 @@ export default function ProductPageClient({ category, product }: ProductPageClie
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">
-                      Detailed specifications are available upon request. Contact our technical team for more
-                      information.
-                    </p>
+                    <p className="text-muted-foreground">{t("products.detail.noSpecifications")}</p>
                   )}
                 </CardContent>
               </Card>
@@ -302,23 +301,25 @@ export default function ProductPageClient({ category, product }: ProductPageClie
             <TabsContent value="support" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Support & Resources</CardTitle>
+                  <CardTitle>{t("products.detail.supportTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2">Available Resources:</h4>
+                      <h4 className="font-medium mb-2">{t("products.detail.resourcesTitle")}</h4>
                       <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li>• Product datasheet and technical specifications</li>
-                        <li>• User manual and installation guide</li>
-                        <li>• Safety data sheet (SDS)</li>
-                        <li>• Certificate of analysis (COA)</li>
-                        <li>• Technical support documentation</li>
+                        <li>• {t("products.detail.resources.datasheet")}</li>
+                        <li>• {t("products.detail.resources.manual")}</li>
+                        <li>• {t("products.detail.resources.sds")}</li>
+                        <li>• {t("products.detail.resources.coa")}</li>
+                        <li>• {t("products.detail.resources.documentation")}</li>
                       </ul>
                     </div>
                     <div className="pt-4">
                       <Button asChild>
-                        <Link href="/contact?message=Technical Support Request">Contact Technical Support</Link>
+                        <Link href="/contact?message=Technical Support Request">
+                          {t("products.detail.techsupportButton")}
+                        </Link>
                       </Button>
                     </div>
                   </div>

@@ -13,7 +13,11 @@ import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "@/lib/redux/store"
 import { fetchActiveServices } from "@/lib/redux/features/serviceSlice"
 
+// i18n
+import { useLanguage } from "@/context/language-context"
+
 export function ServicesSection() {
+  const { t } = useLanguage()
   const dispatch = useDispatch<AppDispatch>()
   const { services, loading } = useSelector((state: RootState) => state.services)
 
@@ -21,7 +25,6 @@ export function ServicesSection() {
     dispatch(fetchActiveServices())
   }, [dispatch])
 
-  // Only show first 3 active services
   const activeServices = useMemo(
     () => (Array.isArray(services) ? services.filter((s) => s.isActive).slice(0, 3) : []),
     [services]
@@ -59,10 +62,9 @@ export function ServicesSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Professional Services</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("services.title")}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive scientific services designed to support your research, development, and quality assurance
-            needs.
+            {t("services.description")}
           </p>
         </motion.div>
 
@@ -89,7 +91,7 @@ export function ServicesSection() {
         >
           <Button size="lg" asChild>
             <Link href="/services">
-              View All Services
+              {t("services.button")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

@@ -193,34 +193,6 @@
   -webkit-background-clip: text !important;
 }
 
-/* Mobile Dropdown Link Trigger Styles (like nav-trigger) */
-.mobile-nav-link-trigger,
-.mobile-nav-link-trigger[data-state="open"] {
-  color: transparent !important;
-  background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
-  background-clip: text !important;
-  -webkit-background-clip: text !important;
-}
-
-/* Remove default background from mobile-nav-link-trigger when not active/open */
-.mobile-nav-link-trigger:not(:hover):not(:focus):not([data-state="open"]):not(.mobile-dropdown-link-active) {
-  background: transparent !important;
-}
-
-/* If you want to add an underline effect like nav-link, you can add this: */
-.mobile-nav-link-trigger::after,
-.mobile-dropdown-link-active.mobile-nav-link-trigger::after,
-.mobile-nav-link-trigger[data-state="open"]::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  transition: width 0.3s ease;
-}
-
 /* CORRECTED: Make this rule specific to the navigation menu */
 [data-radix-navigation-menu-viewport] [data-radix-collection-item]:hover {
   background-color: transparent !important;

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { ReduxProvider } from "@/lib/redux/provider"
+import { LanguageProvider } from "@/context/language-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <LanguageProvider>
       <ReduxProvider>{children}</ReduxProvider>
+        </LanguageProvider>
         <Toaster />
       </body>
     </html>

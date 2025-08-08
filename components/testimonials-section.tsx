@@ -6,6 +6,7 @@ import { Star, Quote } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Testimonial } from "@/lib/testimonials-data"
+import { useLanguage } from "@/context/language-context"
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[]
@@ -17,11 +18,13 @@ interface TestimonialsSectionProps {
 
 export function TestimonialsSection({
   testimonials,
-  title = "What Our Customers Say",
-  subtitle = "Trusted by leading institutions and researchers worldwide",
+  title,
+  subtitle,
   showCategory = false,
   variant = "default",
 }: TestimonialsSectionProps) {
+  const { t } = useLanguage()
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star key={i} className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`} />
@@ -39,10 +42,10 @@ export function TestimonialsSection({
           className="text-center mb-12"
         >
           <h2 className={`${variant === "default" ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"} font-bold mb-4`}>
-            {title}
+            {title || t("testimonials.title")}
           </h2>
           <p className={`${variant === "default" ? "text-lg" : "text-base"} text-muted-foreground max-w-2xl mx-auto`}>
-            {subtitle}
+            {subtitle || t("testimonials.subtitle")}
           </p>
         </motion.div>
 
@@ -73,9 +76,9 @@ export function TestimonialsSection({
                       <h4 className="font-semibold text-sm">{testimonial.name}</h4>
                       <p className="text-xs text-muted-foreground">{testimonial.title}</p>
                       <p className="text-xs text-muted-foreground font-medium">{testimonial.company}</p>
-                      {showCategory && (
+                      {showCategory && testimonial.category && (
                         <Badge variant="outline" className="mt-1 text-xs">
-                          {testimonial.category}
+                          {t(`testimonials.categories.${testimonial.category}`, testimonial.category)}
                         </Badge>
                       )}
                     </div>
@@ -85,13 +88,16 @@ export function TestimonialsSection({
 
                   <div className="relative">
                     <Quote className="absolute -top-2 -left-2 h-6 w-6 text-primary/20" />
-                    <p className="text-sm text-muted-foreground leading-relaxed pl-4">{testimonial.content}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed pl-4">
+                      {t(`testimonials.content.${testimonial.id}`, testimonial.content)}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   )

@@ -1,23 +1,28 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook } from "lucide-react"
+import { useLanguage } from "@/context/language-context" // adjust path if needed
 
 const productLinks = [
-  { name: "Research Products", href: "/products/research-products" },
-  { name: "Diagnostics", href: "/products/diagnostics-products" },
-  { name: "Instruments", href: "/products/instruments-consumables" },
-  { name: "Reagents", href: "/products/reagents-chemicals" },
+  { nameKey: "footer.researchProducts", href: "/products/research-products" },
+  { nameKey: "footer.diagnostics", href: "/products/diagnostics-products" },
+  { nameKey: "footer.instruments", href: "/products/instruments-consumables" },
+  { nameKey: "footer.reagents", href: "/products/reagents-chemicals" },
 ]
 
 const companyLinks = [
-  { name: "About Us", href: "/about-us" },
-  { name: "services", href: "/services" },
-  { name: "Contact", href: "/contact" },
-  { name: "Gallery", href: "/gallery" },
-  { name: "Testimonials", href: "/testimonials" },
+  { nameKey: "footer.aboutUs", href: "/about-us" },
+  { nameKey: "footer.services", href: "/services" },
+  { nameKey: "footer.contact", href: "/contact" },
+  { nameKey: "footer.gallery", href: "/gallery" },
+  { nameKey: "footer.testimonials", href: "/testimonials" },
 ]
 
 export function Footer() {
+  const { t } = useLanguage()
+
   return (
     <footer className="bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto container-padding">
@@ -34,13 +39,14 @@ export function Footer() {
                 className="h-12 w-auto mb-4"
               />
               <p className="text-muted-foreground text-sm mb-6 max-w-md">
-                Leading provider of research products, diagnostics, and life science solutions to laboratories
-                worldwide.
+                {t("footer.description")}
               </p>
               <div className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 mr-2 text-primary" />
-                  PT INTERNATIONAL LIFESCIENCES LLC <br /> Sharjah Media City, Sharjah,<br /> UAE P.O Box 839- Sharjah
+                  {t("footer.addressLine1")} <br />
+                  {t("footer.addressLine2")} <br />
+                  {t("footer.addressLine3")}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Phone className="h-4 w-4 mr-2 text-primary" />
@@ -55,15 +61,15 @@ export function Footer() {
 
             {/* Products */}
             <div>
-              <h3 className="font-semibold mb-4">Products</h3>
+              <h3 className="font-semibold mb-4">{t("footer.products")}</h3>
               <ul className="space-y-2">
                 {productLinks.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.nameKey}>
                     <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
-                      {link.name}
+                      {t(link.nameKey)}
                     </Link>
                   </li>
                 ))}
@@ -72,15 +78,15 @@ export function Footer() {
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">{t("footer.company")}</h3>
               <ul className="space-y-2">
                 {companyLinks.map((link) => (
-                  <li key={link.name}>
+                  <li key={link.nameKey}>
                     <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
-                      {link.name}
+                      {t(link.nameKey)}
                     </Link>
                   </li>
                 ))}
@@ -93,7 +99,7 @@ export function Footer() {
         <div className="py-6 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} PT International Lifesciences LLC. All rights reserved.
+              © {new Date().getFullYear()} PT International Lifesciences LLC. {t("footer.rightsReserved")}
             </p>
             <div className="flex space-x-4">
               <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
