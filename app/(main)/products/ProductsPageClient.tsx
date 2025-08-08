@@ -13,40 +13,40 @@ import type { Product } from "@/lib/redux/features/productSlice"
 
 const productCategories = [
   {
-    slug: "research-products",
-    name: "Research Products",
-    description: "Advanced tools and kits for cutting-edge research applications",
+    "slug": "research-products",
+    "name": "products.categories.research-products.title",
+    "description": "products.categories.research-products.description"
   },
   {
-    slug: "diagnostics-products",
-    name: "Diagnostics Products",
-    description: "Reliable diagnostic solutions for clinical and laboratory use",
+    "slug": "diagnostics-products",
+    "name": "products.categories.diagnostics-products.title",
+    "description": "products.categories.diagnostics-products.description"
   },
   {
-    slug: "instruments-consumables",
-    name: "Instruments & Consumables",
-    description: "High-quality laboratory instruments and consumable supplies",
+    "slug": "instruments-consumables",
+    "name": "products.categories.instruments-consumables.title",
+    "description": "products.categories.instruments-consumables.description"
   },
   {
-    slug: "reagents-chemicals",
-    name: "Reagents & Chemicals",
-    description: "Pure reagents and chemicals for various applications",
+    "slug": "reagents-chemicals",
+    "name": "products.categories.reagents-chemicals.title",
+    "description": "products.categories.reagents-chemicals.description"
   },
   {
-    slug: "plasticwaresfiltrationunits",
-    name: "Plasticwares & Filtration Units",
-    description: "Laboratory plasticware and filtration solutions",
+    "slug": "plasticwaresfiltrationunits",
+    "name": "products.categories.plasticwaresfiltrationunits.title",
+    "description": "products.categories.plasticwaresfiltrationunits.description"
   },
   {
-    slug: "food-testing-kits",
-    name: "Food Testing Kits",
-    description: "Comprehensive kits for food safety and quality testing",
+    "slug": "food-testing-kits",
+    "name": "products.categories.food-testing-kits.title",
+    "description": "products.categories.food-testing-kits.description"
   },
   {
-    slug: "disinfectant-and-sanitizers",
-    name: "Disinfectant & Sanitizers",
-    description: "Professional-grade disinfection and sanitization products",
-  },
+    "slug": "disinfectant-and-sanitizers",
+    "name": "products.categories.disinfectant-and-sanitizers.title",
+    "description": "products.categories.disinfectant-and-sanitizers.description"
+  }
 ]
 
 interface ProductsPageClientProps {
@@ -63,6 +63,8 @@ export default function ProductsPageClient({ initialProducts, loading = false, e
   // Group products by category and count them
   const productsByCategory = productCategories.map((category) => ({
     ...category,
+    name: t(category.name),
+    description: t(category.description),
     productCount: initialProducts.filter((product) => product.category === category.slug).length,
   }))
 

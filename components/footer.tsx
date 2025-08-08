@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook } from "lucide-react"
+import { Mail, Phone, MapPin, Linkedin, Facebook, Instagram } from "lucide-react"
 import { useLanguage } from "@/context/language-context" // adjust path if needed
 
 const productLinks = [
@@ -52,10 +52,17 @@ export function Footer() {
                   <Phone className="h-4 w-4 mr-2 text-primary" />
                   +971562647649
                 </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4 mr-2 text-primary" />
-                  ptinternationallifescience@gmail.com
+                <div className="flex flex-col text-sm text-muted-foreground">
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-primary" />
+                    ptinternationallifescience@gmail.com,
+                  </div>
+                  <div className="flex items-center ml-6"> 
+                    info@ptilifesciences.com
+                  </div>
                 </div>
+
+
               </div>
             </div>
 
@@ -102,13 +109,13 @@ export function Footer() {
               © {new Date().getFullYear()} PT International Lifesciences LLC. {t("footer.rightsReserved")}
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="https://www.linkedin.com/in/pt-international-6995b7379/" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
+              <Link href="https://www.instagram.com/ptinternationallifesciences/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="https://www.facebook.com/profile.php?id=61579373332041" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
               </Link>
             </div>

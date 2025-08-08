@@ -219,7 +219,7 @@ export default function ContactPage() {
                 {
                   icon: Mail,
                   title: t("contact.info.email"),
-                  value: "ptinternationallifescience@gmail.com",
+                  value: "ptinternationallifescience@gmail.com info@ptilifesciences.com sales@ptilifesciences.com account@ptilifesciences.com  inquiry@ptilifesciences.com",
                 },
                 {
                   icon: Phone,
@@ -263,7 +263,7 @@ export default function ContactPage() {
               <CardContent className="p-0">
                 <div className="relative w-full h-64">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18..."
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2785.684059294189!2d55.67378368898734!3d25.2784456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ef5929a229f1c75%3A0xb28ae30eb6bb813a!2sSharjah%20Media%20City%20(Shams%20Free%20Zone)!5e1!3m2!1sen!2sin!4v1754639494643!5m2!1sen!2sin"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}
