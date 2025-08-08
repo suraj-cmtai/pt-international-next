@@ -145,7 +145,7 @@ export default function HomePage() {
                 alt="Laboratory Facility"
                 width={500}
                 height={400}
-                className="rounded-lg shadow-lg aspect-square"
+                className="rounded-lg shadow-lg"
               />
             </motion.div>
           </div>
