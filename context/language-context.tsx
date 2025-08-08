@@ -208,6 +208,9 @@ const enTranslations: Record<string, string> = {
     "products.detail.tabs.description":"Product Detail Description",
     "products.detail.tabs.specifications": "Product Specifications",
     "products.detail.tabs.support":"Support",
+    "products.detail.viewBrochure":"Product Browcher view",
+    "products.detail.downloadBrochure": "Product Browcher Download",
+
 
 
     //product
