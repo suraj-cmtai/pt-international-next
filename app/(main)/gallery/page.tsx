@@ -323,10 +323,8 @@ export default function GalleryPage() {
                   )}
                   {filteredItems.length > 1 && (
                     <p className="text-xs text-gray-400 mt-2">
-                      {t("gallery.lightbox.index", {
-                        current: currentImageIndex + 1,
-                        total: filteredItems.length,
-                      })}
+                      {/* Do not use t() for current/total, just show "current of total" */}
+                      {`${currentImageIndex + 1} of ${filteredItems.length}`}
                     </p>
                   )}
                 </div>

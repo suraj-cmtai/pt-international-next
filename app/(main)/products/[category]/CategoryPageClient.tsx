@@ -331,7 +331,7 @@ function ProductCardImageGallery({
                 }}
                 tabIndex={-1}
                 type="button"
-                aria-label={t("Go to image {{idx}}", { idx: idx + 1 })}
+                aria-label={t("Go to image {{idx}}")}
               />
             ))}
           </div>

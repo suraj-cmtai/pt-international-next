@@ -209,8 +209,9 @@ const enTranslations: Record<string, string> = {
     "products.detail.tabs.description": "Product Detail Description",
     "products.detail.tabs.specifications": "Product Specifications",
     "products.detail.tabs.support": "Support",
-    "products.detail.viewBrochure": "Product Browcher view",
-    "products.detail.downloadBrochure": "Product Browcher Download",
+    "products.detail.viewBrochure": "View Brochure",
+    "products.detail.downloadBrochure": "Download",
+    "products.detail.hideBrochure": "Hide Brochure",
     "common.home": "home",
     "products.detail.supportButton": "",
   
@@ -460,6 +461,7 @@ const arTranslations: Record<string, string> = {
     "products.detail.tabs.support": "الدعم",
     "products.detail.viewBrochure": "عرض كتيب المنتج",
     "products.detail.downloadBrochure": "تنزيل كتيب المنتج",
+    "products.detail.hideBrochure": "إخفاء الكتيب",
     "common.home": "الرئيسية",
 
 

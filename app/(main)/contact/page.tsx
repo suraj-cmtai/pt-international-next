@@ -219,7 +219,7 @@ export default function ContactPage() {
                 {
                   icon: Mail,
                   title: t("contact.info.email"),
-                  value: "ptinternationallifescience@gmail.com info@ptilifesciences.com sales@ptilifesciences.com account@ptilifesciences.com  inquiry@ptilifesciences.com",
+                  value: "info@ptilifesciences.com sales@ptilifesciences.com account@ptilifesciences.com  inquiry@ptilifesciences.com",
                 },
                 {
                   icon: Phone,

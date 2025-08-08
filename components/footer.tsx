@@ -32,7 +32,7 @@ export function Footer() {
             {/* Company Info */}
             <div className="lg:col-span-2">
               <Image
-                src="/logo.png"
+                src="/logo-bg-2.png"
                 alt="PT International Lifesciences LLC"
                 width={160}
                 height={50}
@@ -55,9 +55,6 @@ export function Footer() {
                 <div className="flex flex-col text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-primary" />
-                    ptinternationallifescience@gmail.com,
-                  </div>
-                  <div className="flex items-center ml-6"> 
                     info@ptilifesciences.com
                   </div>
                 </div>
