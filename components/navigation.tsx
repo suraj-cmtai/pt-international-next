@@ -13,13 +13,13 @@ import {  DropdownMenu,  DropdownMenuContent,  DropdownMenuItem,  DropdownMenuTr
 import { Language, useLanguage } from "@/context/language-context"
 
 const productCategories = [
-  { name: "Research Products", slug: "research-products" },
-  { name: "Diagnostics Products", slug: "diagnostics-products" },
-  { name: "Instruments & Consumables", slug: "instruments-consumables" },
-  { name: "Reagents and Chemicals", slug: "reagents-chemicals" },
-  { name: "Plastic Wares & Filtration Units", slug: "plasticwaresfiltrationunits" },
-  { name: "Food Testing Kits", slug: "food-testing-kits" },
-  { name: "Disinfectant and Sanitizers", slug: "disinfectant-and-sanitizers" },
+  { "name": "products.categories.research-products.title", slug: "research-products" },
+  { "name": "products.categories.diagnostics-products.title", slug: "diagnostics-products" },
+  { "name": "products.categories.instruments-consumables.title", slug: "instruments-consumables" },
+  { "name": "products.categories.reagents-chemicals.title", slug: "reagents-chemicals" },
+  { "name": "products.categories.plasticwaresfiltrationunits.title", slug: "plasticwaresfiltrationunits" },
+  { "name": "products.categories.food-testing-kits.title", slug: "food-testing-kits" },
+  { "name": "products.categories.disinfectant-and-sanitizers.title", slug: "disinfectant-and-sanitizers" },
 ]
 
 export function Navigation() {
@@ -87,16 +87,22 @@ export function Navigation() {
                         <Link
                           key={category.slug}
                           href={`/products/${category.slug}`}
-                          className={`nav-dropdown-link block p-2 rounded-md transition-colors hover:text-black ${isActive(`/products/${category.slug}`) ? "nav-dropdown-link-active" : ""}`}
+                          className={`nav-dropdown-link block p-2 rounded-md transition-colors hover:text-black ${isActive(`/products/${category.slug}`) ? "nav-dropdown-link-active" : ""
+                            }`}
                         >
-                          <div className="text-sm font-medium">{category.name}</div>
+                          <div className="text-sm font-medium">{t(category.name)}</div>
                         </Link>
                       ))}
+
+                      {/* View All Products Link */}
                       <Link
                         href="/products"
-                        className={`nav-dropdown-link block p-2 rounded-md transition-colors col-span-2 mt-2 border-t pt-3 ${pathname === "/products" ? "nav-dropdown-link-active" : ""}`}
+                        className={`nav-dropdown-link block p-2 rounded-md transition-colors col-span-2 mt-2 border-t pt-3 ${pathname === "/products" ? "nav-dropdown-link-active" : ""
+                          }`}
                       >
-                        <div className="text-sm font-medium text-center">{t("header.viewAllProducts")}</div>
+                        <div className="text-sm font-medium text-center">
+                          {t("header.viewAllProducts")}
+                        </div>
                       </Link>
                     </div>
                   </div>

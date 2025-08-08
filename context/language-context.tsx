@@ -39,6 +39,7 @@ const enTranslations: Record<string, string> = {
     "products.categories.food-testing-kits": "Food Testing Kits",
     "products.categories.disinfectant-and-sanitizers": "Disinfectant and Sanitizers",
 
+
     //home hero
     "hero.badge": "Leading Life Sciences Solutions",
     "hero.title.line1": "Advancing Science,",
@@ -200,8 +201,8 @@ const enTranslations: Record<string, string> = {
     "products.categories.reagents-chemicals.description": "Pure reagents and chemicals for various applications",
     "products.categories.plasticwaresfiltrationunits.title": "Plastic Wares Filtration Units",
     "products.categories.plasticwaresfiltrationunits.description": "Laboratory plasticware and filtration solutions",
-    "products.categories.food - testing - kits.title": "Food Testing Kits ",
-    "products.categories.food - testing - kits.description": "Comprehensive kits for food safety and quality testing ",
+    "products.categories.food-testing-kits.title": "Food Testing Kits ",
+    "products.categories.food-testing-kits.description": "Comprehensive kits for food safety and quality testing ",
     "products.categories.disinfectant-and-sanitizers.title": "Disinfectant And Sanitizers",
     "products.categories.disinfectant-and-sanitizers.description": "Professional-grade disinfection and sanitization products",
     "products.detail.descriptionTitle": "Product Description",
@@ -212,6 +213,7 @@ const enTranslations: Record<string, string> = {
     "products.detail.downloadBrochure": "Product Browcher Download",
     "common.home": "home",
     "products.detail.supportButton": "",
+  
 
 
 
@@ -243,6 +245,8 @@ const enTranslations: Record<string, string> = {
     "products.detail.resources.coa": "Certificate of analysis (COA)",
     "products.detail.resources.documentation": "Techical Support documentaion",
     "products.detail.techsupportButton": "Contact Technical Support",
+
+   
 
     "product.breadcrumb.home": "Home",
     "product.breadcrumb.products": "Products",
@@ -548,14 +552,14 @@ const arTranslations: Record<string, string> = {
     "products.categories.reagents-chemicals.description": "كواشف ومواد كيميائية نقية لمختلف التطبيقات",
     "products.categories.plasticwaresfiltrationunits.title": "الأدوات البلاستيكية ووحدات الترشيح",
     "products.categories.plasticwaresfiltrationunits.description": "أدوات بلاستيكية مخبرية وحلول ترشيح",
-    "products.categories.food - testing - kits.title": "مجموعات اختبار الغذاء",
-    "products.categories.food - testing - kits.description": "مجموعات شاملة لفحص سلامة وجودة الغذاء",
+    "products.categories.food-testing-kits.title": "مجموعات اختبار الغذاء",
+    "products.categories.food-testing-kits.description": "مجموعات شاملة لفحص سلامة وجودة الغذاء",
     "products.categories.disinfectant-and-sanitizers.title": "المطهرات والمعقمات",
     "products.categories.disinfectant-and-sanitizers.description": "منتجات تعقيم وتطهير عالية الجودة للاستخدام المهني",
     "products.detail.descriptionTitle": "وصف المنتج",
     "products.detail.tabs.description": "وصف تفصيلي للمنتج",
     "products.detail.tabs.specifications": "مواصفات المنتج",
-   
+
     "products.detail.specificationsTitle": "مواصفات المنتج",
     "products.detail.supportTitle": "الدعم والموارد",
     "products.detail.resourcesTitle": "الموارد المتاحة",
@@ -565,7 +569,6 @@ const arTranslations: Record<string, string> = {
     "products.detail.resources.coa": "شهادة التحليل (COA)",
     "products.detail.resources.documentation": "وثائق الدعم الفني",
     "products.detail.techsupportButton": "اتصل بالدعم الفني",
-  
 
 
     //service card
