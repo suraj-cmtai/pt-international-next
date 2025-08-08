@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, Globe, X } from "lucide-react"
+import { Menu, Globe, X, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {  NavigationMenu,  NavigationMenuContent,  NavigationMenuItem,  NavigationMenuLink,  NavigationMenuList,  NavigationMenuTrigger,} from "@/components/ui/navigation-menu"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
@@ -136,8 +136,8 @@ export function Navigation() {
             {/* Language Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-10 h-10 p-2 hover:bg-accent">
-                  <Globe className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="w-10 h-10 p-2 hover:bg-accent cursor-pointer">
+                  <Languages className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-32">
@@ -148,7 +148,7 @@ export function Navigation() {
                   <DropdownMenuItem
                     key={code}
                     onClick={() => setLanguage(code as Language)}
-                    className={language === code ? "font-semibold text-gray-600" : ""}
+                    className={language === code ? "font-semibold text-gray-600 cursor-pointer" : "cursor-pointer"}
                   >
                     {label}
                   </DropdownMenuItem>
@@ -162,8 +162,8 @@ export function Navigation() {
             {/* Mobile Language Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-9 h-9 p-2 hover:bg-accent">
-                  <Globe className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="w-9 h-9 p-2 hover:bg-accent cursor-pointer">
+                  <Languages className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-32">
@@ -174,7 +174,7 @@ export function Navigation() {
                   <DropdownMenuItem
                     key={code}
                     onClick={() => setLanguage(code as Language)}
-                    className={language === code ? "font-semibold text-gray-600" : ""}
+                    className={language === code ? "font-semibold text-gray-600 cursor-pointer" : "cursor-pointer"}
                   >
                     {label}
                   </DropdownMenuItem>
