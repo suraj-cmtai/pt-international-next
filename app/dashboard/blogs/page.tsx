@@ -254,9 +254,9 @@ export default function BlogsPage() {
         return
       }
 
-      // Validate file size (5MB limit)
+      // Validate file size (1MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size must be less than 5MB')
+        toast.error('Image size must be less than 1MB')
         e.target.value = '' // Reset input
         return
       }

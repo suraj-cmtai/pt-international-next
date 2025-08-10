@@ -329,9 +329,9 @@ export default function ServicesPage() {
         return
       }
 
-      // Validate file size (5MB limit)
+      // Validate file size (1MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size must be less than 5MB")
+        toast.error("Image size must be less than 1MB")
         e.target.value = "" // Reset input
         return
       }
@@ -483,7 +483,7 @@ export default function ServicesPage() {
           {formState.imageFile && (
             <p className="text-sm text-muted-foreground mt-1">New image selected: {formState.imageFile.name}</p>
           )}
-          <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 5MB.</p>
+          <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 1MB.</p>
         </div>
       </div>
     </div>

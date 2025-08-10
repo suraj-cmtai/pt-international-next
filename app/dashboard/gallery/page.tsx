@@ -134,9 +134,9 @@ export default function GalleryPage() {
         return;
       }
       
-      // Validate file size (e.g., max 5MB)
+      // Validate file size (e.g., max 1MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
+        toast.error("Image size should be less than 1MB");
         return;
       }
       
@@ -585,7 +585,7 @@ export default function GalleryPage() {
                   </p>
                 )}
                 <p className="text-xs text-gray-500">
-                  Max file size: 5MB. Accepted formats: JPG, PNG, GIF, WebP
+                  Max file size: 1MB. Accepted formats: JPG, PNG, GIF, WebP
                 </p>
               </div>
             </motion.div>

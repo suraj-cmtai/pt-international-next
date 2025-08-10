@@ -569,7 +569,7 @@ export default function ProductsManagement() {
                         ))}
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 5MB.</p>
+                    <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, GIF. Max size: 1MB.</p>
                   </div>
                   {/* Brochure PDF Upload */}
                   <div className="grid gap-2">
