@@ -147,7 +147,7 @@ export const services: Service[] = [
 export const productCategories = [
   {
     slug: "research-products",
-    name: "Research Productss",
+    name: "Research Products",
     description: "Advanced tools and reagents for cutting-edge research",
   },
   {
