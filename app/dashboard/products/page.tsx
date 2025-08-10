@@ -609,7 +609,7 @@ export default function ProductsManagement() {
                         </button>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">Upload a PDF file. Max size: 10MB.</p>
+                    <p className="text-xs text-muted-foreground">Upload a PDF file. Max size: 2MB.</p>
                   </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Key Features</label>
