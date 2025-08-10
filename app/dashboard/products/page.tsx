@@ -280,7 +280,7 @@ export default function ProductsManagement() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Something went wrong",
+        description: error.errorMessage || "Something went wrong",
         variant: "destructive",
       })
     } finally {
