@@ -144,7 +144,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     // --- Brochure Handling Logic (similar to images) ---
     // The dashboard sends brochure as FormData "brochure" (can be File or string URL)
-    let brochure: string | undefined = undefined
+    let brochure: string | null = null
     const brochureField = formData.get("brochure")
     // Track if the brochure is an existing one or a new upload
     let brochureLogId: string | undefined = undefined
@@ -176,11 +176,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     } else {
       // No brochure provided in formData, possibly means remove brochure
-      brochure = undefined
+      // Do not include brochure in updateData at all (let Firestore unset if needed)
+      brochure = null
       brochureLogId = "removed"
     }
 
-    updateData.brochure = brochure
+    // Only include brochure in updateData if it's a string (not undefined or null)
+    if (typeof brochure === "string" && brochure.trim() !== "") {
+      updateData.brochure = brochure
+    } else if (brochure === null && "brochure" in updateData) {
+      // Explicitly remove brochure from updateData if null
+      delete updateData.brochure
+    }
 
     // Log the brochure logic for debugging/audit
     consoleManager.log("Brochure update logic:", {
