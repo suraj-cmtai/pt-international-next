@@ -5,6 +5,13 @@ export const metadata = {
   title: "Product Category",
 }
 
+// Revalidate the page every 60 seconds (adjust as needed)
+export const revalidate = 60
+
+// Set to 'force-dynamic' to always render on the server for each request
+// Other options: 'auto' (default), 'force-static', 'error'
+export const dynamic = 'force-dynamic'
+
 export default async function CategoryPage({
   params,
 }: {
