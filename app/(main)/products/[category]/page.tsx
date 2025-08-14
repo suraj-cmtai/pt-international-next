@@ -1,21 +1,17 @@
-import CategoryPageClient from "./CategoryPageClient"
-import ProductService from "@/app/api/services/productServices"
+import CategoryPageClient from "./CategoryPageClient";
+import ProductService from "@/app/api/services/productServices";
 
 export const metadata = {
   title: "Product Category",
-}
+};
 
-export default async function CategoryPage({
-  params,
-}: {
-  params: Promise<{ category: string }>
-}) {
-  const resolvedParams = await params
+// Dynamic in dev, ISR in prod
+export const revalidate = process.env.NODE_ENV === "production" ? 60 : 0; // 60 sec in prod
+export const dynamic = process.env.NODE_ENV === "production" ? "auto" : "force-dynamic";
 
-  // Fetch products by category using ProductService (server-side)
-  const products = await ProductService.getProductsByCategory(resolvedParams.category)
-
-  return <CategoryPageClient category={resolvedParams.category} initialProducts={products} />
+export default async function CategoryPage({ params }: { params: { category: string } }) {
+  const products = await ProductService.getProductsByCategory(params.category);
+  return <CategoryPageClient category={params.category} initialProducts={products} />;
 }
 
 export async function generateStaticParams() {
@@ -27,5 +23,5 @@ export async function generateStaticParams() {
     { category: "plasticwaresfiltrationunits" },
     { category: "food-testing-kits" },
     { category: "disinfectant-and-sanitizers" },
-  ]
+  ];
 }
