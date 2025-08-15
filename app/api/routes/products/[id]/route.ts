@@ -75,127 +75,24 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (isActive !== null) updateData.isActive = isActive === "true"
 
     // --- Image Handling Logic ---
-    // The dashboard sends images as an array of File and/or string (URL) under the "images" field.
-    // For new images: File, for existing: string (URL)
-    // We'll process all images, upload new ones, keep URLs for existing, and remove any images not present anymore.
-
-    // Get the product's current images and brochure from DB
-    const existingProduct = await ProductService.getProductById(id)
-    const existingImages: string[] = existingProduct?.images || []
-    const existingBrochure: string | undefined = existingProduct?.brochure
-
-    // --- Images ---
-    // Get all images from formData (can be File or string)
-    const imagesFromForm: (File | string)[] = []
-    // formData.getAll returns File or string
-    for (const img of formData.getAll("images")) {
-      if (typeof img === "string") {
-        if (img.trim() !== "") imagesFromForm.push(img)
-      } else if (img && typeof img === "object" && "arrayBuffer" in img) {
-        // File
-        imagesFromForm.push(img)
-      }
+    // The dashboard now sends only image URLs (already uploaded)
+    const images = formData.getAll("images")
+      .filter((img): img is string => typeof img === "string" && img.trim() !== "")
+    
+    if (images.length > 0) {
+      updateData.images = images
     }
 
-    // Prepare new images array for DB
-    const finalImageUrls: string[] = []
-
-    // For each image in imagesFromForm:
-    // - If it's a string and exists in existingImages, keep it.
-    // - If it's a File, upload it and get the URL.
-    // - If it's a string but not in existingImages, treat as new (shouldn't happen, but skip).
-    // - Any image in existingImages not in imagesFromForm should be deleted (handled by not including in finalImageUrls).
-
-    // For image upload, use a default size (e.g., 800x800)
-    const IMAGE_WIDTH = 800
-    const IMAGE_HEIGHT = 800
-
-    // Track which existing images are still used
-    const usedExistingImages = new Set<string>()
-
-    for (const img of imagesFromForm) {
-      if (typeof img === "string") {
-        // If the string is an existing image URL, keep it
-        if (existingImages.includes(img)) {
-          finalImageUrls.push(img)
-          usedExistingImages.add(img)
-        }
-        // else: skip (should not happen)
-      } else if (img && typeof img === "object" && "arrayBuffer" in img) {
-        // New file, upload
-        try {
-          const url = await UploadImage(img, IMAGE_WIDTH, IMAGE_HEIGHT)
-          if (typeof url === "string") {
-            finalImageUrls.push(url)
-          }
-        } catch (uploadErr: any) {
-          consoleManager.error("Failed to upload image:", uploadErr)
-        }
-      }
-    }
-
-    // Optionally, delete images that are no longer used (not in usedExistingImages)
-    // This is not strictly required if you want to keep old images in storage, but for cleanup:
-    const imagesToDelete = existingImages.filter((img) => !usedExistingImages.has(img))
-    // You could call ReplaceImage for each removed image with file = null, but imageController expects a file to replace.
-    // Instead, you may want to delete directly via Firebase if needed.
-
-    updateData.images = finalImageUrls
-
-    // --- Brochure Handling Logic (similar to images) ---
-    // The dashboard sends brochure as FormData "brochure" (can be File or string URL)
-    let brochure: string | null = null
+    // --- Brochure Handling Logic ---
+    // The dashboard now sends only brochure URL (already uploaded)
     const brochureField = formData.get("brochure")
-    // Track if the brochure is an existing one or a new upload
-    let brochureLogId: string | undefined = undefined
-
-    if (brochureField) {
-      if (typeof brochureField === "object" && "arrayBuffer" in brochureField && "type" in brochureField) {
-        // Only upload if it's a File (Blob)
-        try {
-          const url = await UploadPDF(brochureField)
-          if (typeof url === "string") {
-            brochure = url
-            brochureLogId = "uploaded"
-          }
-        } catch (err: any) {
-          consoleManager.error("Brochure upload failed:", err)
-          brochureLogId = "upload_failed"
-          // Optionally, you can return error here or skip this brochure
-        }
-      } else if (typeof brochureField === "string" && brochureField.trim() !== "") {
-        // Already a URL (existing brochure)
-        if (existingBrochure && brochureField === existingBrochure) {
-          brochure = brochureField
-          brochureLogId = "existing"
-        } else {
-          // New string URL (shouldn't happen from dashboard, but handle gracefully)
-          brochure = brochureField
-          brochureLogId = "new_string_url"
-        }
-      }
-    } else {
-      // No brochure provided in formData, possibly means remove brochure
-      // Do not include brochure in updateData at all (let Firestore unset if needed)
-      brochure = null
-      brochureLogId = "removed"
-    }
-
-    // Only include brochure in updateData if it's a string (not undefined or null)
-    if (typeof brochure === "string" && brochure.trim() !== "") {
-      updateData.brochure = brochure
-    } else if (brochure === null && "brochure" in updateData) {
-      // Explicitly remove brochure from updateData if null
+    
+    if (typeof brochureField === "string" && brochureField.trim() !== "") {
+      updateData.brochure = brochureField
+    } else if (brochureField === null) {
+      // If explicitly set to null, remove the brochure
       delete updateData.brochure
     }
-
-    // Log the brochure logic for debugging/audit
-    consoleManager.log("Brochure update logic:", {
-      brochureFieldType: typeof brochureField,
-      brochure,
-      brochureLogId,
-      existingBrochure,
-    })
 
     const updatedProduct = await ProductService.updateProduct(id, updateData)
 

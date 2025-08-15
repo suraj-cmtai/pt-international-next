@@ -4,8 +4,8 @@ export interface User {
 }
 
 const ADMIN_CREDENTIALS: User = {
-  email: "admin@example.com",
-  password: "admin123",
+  email: process.env.USERNAME || "",
+  password: process.env.PASSWORD || "",
 }
 
 export function validateCredentials(email: string, password: string): boolean {

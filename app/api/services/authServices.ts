@@ -60,7 +60,7 @@ class AuthService {
     static async loginUser(email: string, password: string) {
         try {
 
-            if(email === "admin@example.com" && password === "admin123") {
+            if(email === process.env.USERNAME && password === process.env.PASSWORD) {
                 consoleManager.log("🔍 Admin login detected for email:", email);
                 // Admin login bypass
                 const adminToken = jwt.sign(

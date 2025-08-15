@@ -100,53 +100,20 @@ export async function POST(req: Request) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-    // Handle images: dashboard sends images as FormData "images" (can be File or string URL)
-    // We'll collect all images, upload new files, and keep URLs for existing
-    const images: string[] = [];
-    const imageFields = formData.getAll("images");
-    for (const img of imageFields) {
-      // If it's a File (Blob), upload it
-      if (typeof img === "object" && "arrayBuffer" in img && "type" in img) {
-        try {
-          const url = await UploadImage(img, 300, 300);
-          if (typeof url === "string") {
-            images.push(url);
-          }
-        } catch (err: any) {
-          consoleManager.error("Image upload failed:", err);
-          // Optionally, you can return error here or skip this image
-        }
-      } else if (typeof img === "string" && img.trim() !== "") {
-        // Already a URL (existing image)
-        images.push(img);
-      }
-    }
+    // Handle images: dashboard now sends only image URLs
+    const images = formData.getAll("images")
+      .filter((img): img is string => typeof img === "string" && img.trim() !== "");
 
     // If no images, use placeholder
     if (images.length === 0) {
       images.push("/placeholder.svg?height=300&width=300");
     }
 
-    // Handle brochure: dashboard sends brochure as FormData "brochure" (can be File or string URL)
-    let brochure: string | null = null;
+    // Handle brochure: dashboard now sends only brochure URL
     const brochureField = formData.get("brochure");
-    if (brochureField) {
-      if (typeof brochureField === "object" && "arrayBuffer" in brochureField && "type" in brochureField) {
-        // Only upload if it's a File (Blob)
-        try {
-          const url = await UploadPDF(brochureField);
-          if (typeof url === "string") {
-            brochure = url;
-          }
-        } catch (err: any) {
-          consoleManager.error("Brochure upload failed:", err);
-          // Optionally, you can return error here or skip this brochure
-        }
-      } else if (typeof brochureField === "string" && brochureField.trim() !== "") {
-        // Already a URL (existing brochure)
-        brochure = brochureField;
-      }
-    }
+    const brochure = typeof brochureField === "string" && brochureField.trim() !== "" 
+      ? brochureField 
+      : null;
 
     // Firestore does not allow undefined, so remove undefined fields
     // Also, Firestore does not allow null for fields that are not nullable, so only include brochure if it's a string
