@@ -70,21 +70,15 @@ export default function middleware(request: NextRequest) {
     const isTestOtherMethod =
       isTestRoute && (request.method === "GET" || request.method === "PUT" || request.method === "DELETE");
 
-    // Make products and services GET endpoints public
-    const isProductsGet =
-      (pathname.startsWith("/api/routes/products") ||
-        pathname.startsWith("/api/routes/product") ||
-        pathname.startsWith("/api/routes/services") ||
-        pathname.startsWith("/api/routes/service")) &&
-      request.method === "GET";
-
-    // Also allow GET for product categories, slugs, etc.
-    const isProductsCategoriesGet =
-      (pathname.startsWith("/api/routes/products/category") ||
-        pathname.startsWith("/api/routes/products/") ||
-        pathname.startsWith("/api/routes/services/") ||
-        pathname.startsWith("/api/routes/services/category")) &&
-      request.method === "GET";
+    // Only allow these GET routes as public:
+    // - /api/routes/products/active
+    // - /api/routes/services?isActive=true
+    // - /api/routes/products/category*
+    // - /api/routes/services/category*
+    const isProductsActiveGet = pathname === "/api/routes/products/active" && request.method === "GET";
+    const isServicesIsActiveGet = pathname === "/api/routes/services" && request.method === "GET" && request.nextUrl.searchParams.get("isActive") === "true";
+    const isProductsCategoryGet = pathname.startsWith("/api/routes/products/category") && request.method === "GET";
+    const isServicesCategoryGet = pathname.startsWith("/api/routes/services/category") && request.method === "GET";
 
     if (
       pathname.includes("/published") ||
@@ -97,8 +91,10 @@ export default function middleware(request: NextRequest) {
       isBlogsSlug ||
       isCourseIdGet ||
       isTestPost ||
-      isProductsGet ||
-      isProductsCategoriesGet
+      isProductsActiveGet ||
+      isServicesIsActiveGet ||
+      isProductsCategoryGet ||
+      isServicesCategoryGet
     ) {
       // Public, do nothing
     } else if (isContactOrSubscribers && request.method === "POST") {
